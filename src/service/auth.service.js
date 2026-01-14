@@ -96,7 +96,7 @@ class AuthService {
             throw new UnauthorizedError("Invalid credentials");
         }
         if (user.password_required === 0 && (guard.isNullishValue(password) || password === "")) {
-            return { userType: "user" };
+            return { userType: "guest" };
         }
         if (typeof password !== "string") {
             throw new UnauthorizedError("Invalid credentials");
