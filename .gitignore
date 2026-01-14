@@ -1,0 +1,126 @@
+# Dependencies
+node_modules/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Debug
+debug.log
+*.log
+
+# Coverage directory used by tools like istanbul
+coverage/
+.nyc_output/
+
+# Grunt intermediate storage (used during the build process)
+.grunt
+
+# Bower dependency directory (for bower projects)
+bower_components/
+
+# JSHint configuration files
+.jshintrc
+
+# PostgreSQL data directory
+pgdata/
+
+# Built application files
+/dist
+/build
+
+# Testing
+/coverage
+/.nyc_output
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# Database files
+*.db
+*.db-journal
+
+# Process files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Temporary files
+tmp/
+temp/
+
+# Logs
+logs/
+*.log
+
+# Sensitive info
+config/secrets.json
+secrets.json
+private/
+keys/
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+
+# Local development environment
+local/
+dev/
+
+# Test files
+test/reports/
+reports/
+
+# Lock files
+package-lock.json
+yarn.lock
+
+# System files
+.DS_Store
+desktop.ini
+
+# Configuration files that might contain sensitive data
+config.json
+settings.json
+
+# npm cache
+node_modules/.cache
+
+# Output of running tests
+test-results/
+
+# Fresh runtime files
+.fresh
+*.fresh
+
+# SQLite files
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+
+# test
+/test
