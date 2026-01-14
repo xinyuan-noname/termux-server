@@ -1,6 +1,7 @@
-const { ValidationError, UnauthorizedError, ForbiddenError, NotFoundError, ConflictError, TimeoutError, RateLimitError } = require("../error");
+const { ValidationError, UnauthorizedError, ForbiddenError, NotFoundError, ConflictError, TimeoutError, RateLimitError, TokenIssueError } = require("../error");
 
 module.exports = (error, req, res, next) => {
+    console.error(error);
     if (error instanceof UnauthorizedError) {
         return res.status(401).json({ error: error.message, code: error.code });
     }
@@ -10,7 +11,6 @@ module.exports = (error, req, res, next) => {
     if (error instanceof NotFoundError) {
         return res.status(404).json({ error: error.message, code: error.code });
     }
-
     if (error instanceof ValidationError) {
         return res.status(400).json({ error: error.message, field: error.field, code: error.code });
     }
@@ -20,9 +20,11 @@ module.exports = (error, req, res, next) => {
     if (error instanceof TimeoutError) {
         return res.status(504).json({ error: error.message, code: error.code })
     }
-    if(error instanceof RateLimitError){
+    if (error instanceof RateLimitError) {
         return res.status(429).json({ error: error.message, code: error.code })
     }
-    console.error('Unexpected error:', error);
+    if (error instanceof TokenIssueError) {
+        return res.status(500).json({ error: error.message, code: error.code });
+    }
     return res.status(500).json({ error: 'Internal server error' });
 }

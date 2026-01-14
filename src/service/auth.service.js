@@ -1,10 +1,10 @@
 const AuthModel = require("../models/auth.model");
 const bcrypt = require("bcrypt");
-const { isExpired } = require("grofc_utils/time")
+const { isExpired, parseTimeToMs } = require("grofc_utils/time")
 const guard = require("grofc_utils/guard");
 const validation = require("grofc_utils/validation");
 const authConfig = require("../../config/auth");
-const { ValidationError, UnauthorizedError, ConflictError } = require("../error");
+const { ValidationError, UnauthorizedError, ConflictError, TokenIssueError } = require("../error");
 const { verifyRSASignature, verifyJWT, signJWT, decodeJWT, generateRandomSafeString } = require("../utils/verification");
 const bannedAccessToken = {
     map: new Map(),
@@ -21,11 +21,15 @@ const bannedAccessToken = {
     }
 }
 class AuthService {
-    static signAccessToken(payload) {
-        return signJWT(payload, {
-            expiresIn: authConfig.ACCESS_TOKEN_AGE,
-            jwtid: generateRandomSafeString(16)
-        })
+    static issueAccessToken(payload) {
+        try {
+            return signJWT(payload, {
+                expiresIn: authConfig.ACCESS_TOKEN_AGE,
+                jwtid: generateRandomSafeString()
+            })
+        } catch (error) {
+            throw new TokenIssueError()
+        }
     }
     static verifyAccessToken(token) {
         if (!token) return null;
@@ -33,6 +37,26 @@ class AuthService {
         if (!payload) return null;
         if (bannedAccessToken.has(payload.jti)) return null;
         return payload;
+    }
+    static async issueRefreshToken(id) {
+        try {
+            if (!validation.isUnsignedIntegerString(id)) {
+                throw new Error("Invalid ID.");
+            }
+            const user = AuthModel.findUser(id);
+            if (!user) {
+                throw new Error("Cannot find user.");
+            }
+            const token = generateRandomSafeString(64);
+            const tokenHash = await bcrypt.hash(token, 10)
+            const createdAt = Math.ceil(Date.now() / 1000);
+            const expiresAt = createdAt + authConfig.REFRESH_TOKEN_AGE;
+            AuthModel.addRefreshToken(id, tokenHash, createdAt, expiresAt);
+            return { refreshToken:token };
+        } catch (error) {
+            console.error(error);
+            throw new TokenIssueError()
+        }
     }
     static async verifyCredentials({ id, username, password } = {}) {
         if (!validation.isUnsignedIntegerString(id) || !validation.isCnNameString(username)) {

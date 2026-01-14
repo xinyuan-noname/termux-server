@@ -12,4 +12,5 @@ const dbPath = path.resolve(pathsConfig.DATA_DIR, "app.db");
 const db = new DataBase(dbPath);
 execSqlFile(db, "auth.sql");
 execSqlFile(db, "profiles.sql");
+execSqlFile(db, "refresh_token.sql");
 module.exports = db;

@@ -1,6 +1,7 @@
 const { UnauthorizedError, ValidationError } = require("../error");
-const AuthService = require("../service/auth.service");
 const { getTokenFromReq } = require("../utils/verification");
+const AuthService = require("../service/auth.service");
+const authConfig = require("../../config/auth")
 const formatRegisterResult = (user, error) => {
     return error ? {
         success: false,
@@ -17,21 +18,33 @@ const formatRegisterResult = (user, error) => {
 class AuthController {
     /**
      * POST auth/login
-     * @param {Request} req 
-     * @param {Response} res 
+     * @param {import("express").Request} req 
+     * @param {import("express").Response} res 
      * @returns 
      */
     static async login(req, res) {
         const { id, username, password } = req.body;
         const result = await AuthService.verifyCredentials({ id, username, password });
         const payload = { id, role: result.role };
-        const token = AuthService.signAccessToken(payload)
-        return res.json({ accessToken: token });
+        const accessToken = AuthService.issueAccessToken(payload);
+        const { refreshToken } = await AuthService.issueRefreshToken(id);
+        switch (true) {
+            default: {
+                res.cookie('refreshToken', refreshToken, {
+                    httpOnly: true,
+                    secure: true,
+                    sameSite: 'strict',
+                    path: '/auth/refresh',
+                    maxAge: authConfig.REFRESH_TOKEN_AGE * 1000
+                })
+            }
+        }
+        return res.json({ accessToken });
     }
     /**
      * POST auth/register
-     * @param {Request} req 
-     * @param {Response} res 
+     * @param {import("express").Request} req 
+     * @param {import("express").Response} res 
      * @returns 
      */
     static async register(req, res) {
@@ -50,8 +63,8 @@ class AuthController {
     }
     /**
      * POST auth/register/batch
-     * @param {Request} req 
-     * @param {Response} res 
+     * @param {import("express").Request} req 
+     * @param {import("express").Response} res 
      * @returns 
      */
     static async registerBatch(req, res) {

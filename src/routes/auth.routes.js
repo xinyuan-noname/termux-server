@@ -8,12 +8,15 @@ router.post(
   AuthController.login
 );
 
-router.post('/register',
+router.post(
+  '/register',
   createRateLimiter(15, 10, "Too many registration attempts, please try again later."),
   AuthController.register
 );
 
-router.post('/register/batch',
+router.post(
+  '/register/batch',
   createRateLimiter(15, 3, "Too many registration attempts, please try again later."),
-  AuthController.registerBatch)
+  AuthController.registerBatch
+)
 module.exports = router;

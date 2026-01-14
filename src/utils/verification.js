@@ -58,8 +58,8 @@ function verifyRSASignature(message, signatureBase64) {
  * @param {number} byteLength 
  * @returns 
  */
-function generateRandomSafeString(byteLength = 16) {
-    return crypto.randomBytes(byteLength).toString("hex")
+function generateRandomSafeString(byteLength = 32) {
+    return crypto.randomBytes(byteLength).toString("base64url")
 }
 module.exports = {
     getTokenFromReq,

@@ -56,6 +56,14 @@ class RateLimitError extends Error {
         Error?.captureStackTrace?.(this, RateLimitError);
     }
 }
+class TokenIssueError extends Error {
+    constructor(message = "Failed to issue tokens", code = "TOKEN_ISSUE_FAILED") {
+        super(message);
+        this.name = "TokenIssueError";
+        this.code = code;
+        Error?.captureStackTrace?.(this, TokenIssueError);
+    }
+}
 module.exports = {
     ValidationError,
     UnauthorizedError,
@@ -63,5 +71,6 @@ module.exports = {
     NotFoundError,
     ConflictError,
     TimeoutError,
-    RateLimitError
+    RateLimitError,
+    TokenIssueError
 }
