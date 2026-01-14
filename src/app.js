@@ -1,9 +1,11 @@
 const express = require('express');
+const cookieParser = require("cookie-parser")
 const app = express();
 require('dotenv').config();
 
 // Global Middleware
-app.use(express.json())
+app.use(express.json());
+app.use(cookieParser());
 
 if (process.env.TRUST_PROXY === 'true') {
     app.set('trust proxy', true);

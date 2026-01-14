@@ -21,6 +21,14 @@ const bannedAccessToken = {
     }
 }
 class AuthService {
+    static isAdmin(id) {
+        try {
+            const user = AuthModel.findUser(id);
+            return user.is_admin === 1;
+        } catch {
+            return false;
+        }
+    }
     static issueAccessToken(payload) {
         try {
             return signJWT(payload, {
@@ -42,7 +50,7 @@ class AuthService {
         if (!token) return null;
         bannedAccessToken.add(token);
     }
-    static issueRefreshToken(id) {
+    static issueRefreshToken(id, userType = "user") {
         try {
             if (!validation.isUnsignedIntegerString(id)) {
                 throw new Error("Invalid ID.");
@@ -55,25 +63,26 @@ class AuthService {
             const tokenHash = convertToHash(token);
             const createdAt = Math.ceil(Date.now() / 1000);
             const expiresAt = createdAt + authConfig.REFRESH_TOKEN_AGE;
-            AuthModel.addRefreshToken(id, tokenHash, createdAt, expiresAt);
+            AuthModel.addRefreshToken(id, userType, tokenHash, createdAt, expiresAt);
             return { refreshToken: token };
         } catch (error) {
             console.error(error);
             throw new TokenIssueError()
         }
     }
-    static verifyRefreshToken(id, token) {
-        const tokenHash = convertToHash(token);
-        const result = AuthModel.findRefreshToken(id, tokenHash);
-        if(!result){
+    static verifyRefreshToken(token) {
+        if (typeof token !== "string") {
             throw new UnauthorizedError();
         }
-        return {}
+        const tokenHash = convertToHash(token);
+        const result = AuthModel.findRefreshToken(tokenHash);
+        if (!result) {
+            console.error(result,tokenHash);
+            throw new UnauthorizedError();
+        }
+        return { id: result.id, userType: result.userType };
     }
     static revokeRefreshToken(token) {
-        if (typeof token !== "string") {
-            throw new ValidationError()
-        }
         const tokenHash = convertToHash(token);
         AuthModel.deleteRefreshToken(tokenHash);
         return {}
@@ -87,7 +96,7 @@ class AuthService {
             throw new UnauthorizedError("Invalid credentials");
         }
         if (user.password_required === 0 && (guard.isNullishValue(password) || password === "")) {
-            return { role: "user" };
+            return { userType: "user" };
         }
         if (typeof password !== "string") {
             throw new UnauthorizedError("Invalid credentials");
@@ -96,7 +105,7 @@ class AuthService {
         if (!passwordMatch) {
             throw new UnauthorizedError("Invalid credentials");
         }
-        return { role: user.is_admin === 1 ? "admin" : "user" };
+        return { userType: user.is_admin === 1 ? "admin" : "user" };
     }
     /**
      * 创建新用户

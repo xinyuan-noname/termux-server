@@ -14,6 +14,11 @@ router.post(
 );
 
 router.post(
+  "/refresh",
+  AuthController.refresh
+);
+
+router.post(
   '/register',
   createRateLimiter(15, 10, "Too many registration attempts, please try again later."),
   AuthController.register

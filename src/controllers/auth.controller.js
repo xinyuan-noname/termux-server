@@ -1,5 +1,5 @@
 const { UnauthorizedError, ValidationError } = require("../error");
-const { getAccessTokenFromReq } = require("../utils/verification");
+const { getAccessTokenFromReq, decodeJWT } = require("../utils/verification");
 const AuthService = require("../service/auth.service");
 const authConfig = require("../../config/auth")
 const formatRegisterResult = (user, error) => {
@@ -25,9 +25,9 @@ class AuthController {
     static async login(req, res) {
         const { id, username, password } = req.body;
         const result = await AuthService.verifyCredentials({ id, username, password });
-        const payload = { id, role: result.role };
+        const payload = { id, userType: result.userType };
         const accessToken = AuthService.issueAccessToken(payload);
-        const { refreshToken } = AuthService.issueRefreshToken(id);
+        const { refreshToken } = AuthService.issueRefreshToken(id, result.userType);
         switch (true) {
             default: {
                 res.cookie('refreshToken', refreshToken, {
@@ -54,7 +54,9 @@ class AuthController {
                 res.clearCookie('refreshToken', authConfig.REFRESH_TOKEN_COOKIE_OPTIONS);
             }; break;
         }
-        AuthService.revokeRefreshToken(refreshToken);
+        if (refreshToken) {
+            AuthService.revokeRefreshToken(refreshToken);
+        }
         return res.status(204).end();
     }
     /**
@@ -70,8 +72,8 @@ class AuthController {
                 refreshToken = req.cookies.refreshToken;
             }; break;
         }
-        AuthService.verifyRefreshToken(refreshToken);
-        const accessToken = AuthService.issueAccessToken(payload);
+        const { id, userType } = AuthService.verifyRefreshToken(refreshToken);
+        const accessToken = AuthService.issueAccessToken({ id, userType });
         return res.json({ accessToken });
     }
     /**
@@ -87,7 +89,7 @@ class AuthController {
         let result;
         if (signature) {
             result = await AuthService.createUserBySignature({ id, username, password, passwordRequired, isAdmin, signature, createdAt })
-        } else if (payload?.role === "admin") {
+        } else if (payload?.userType === "admin") {
             result = await AuthService.createUser({ id, username, password, passwordRequired })
         } else {
             throw new UnauthorizedError()
@@ -113,7 +115,7 @@ class AuthController {
         const byToken = [], bySignature = [];
         userList.forEach(user => user.signature ? bySignature.push(user) : byToken.push(user));
         const result = []
-        if (payload?.role === "admin") {
+        if (payload?.userType === "admin") {
             for (const user of byToken) {
                 try {
                     await AuthService.createUser(user);

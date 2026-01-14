@@ -6,8 +6,8 @@ module.exports = {
     REGISTRATION_SIGNATURE_AGE: "3min",
     REFRESH_TOKEN_COOKIE_OPTIONS: {
         httpOnly: true,
-        secure: true,
-        sameSite: 'strict',
+        // secure: true,
+        // sameSite: 'strict',
         path: '/auth'
     }
 };
