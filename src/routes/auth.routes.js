@@ -9,6 +9,11 @@ router.post(
 );
 
 router.post(
+  "/logout",
+  AuthController.logout
+);
+
+router.post(
   '/register',
   createRateLimiter(15, 10, "Too many registration attempts, please try again later."),
   AuthController.register

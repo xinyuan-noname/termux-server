@@ -5,7 +5,7 @@ const guard = require("grofc_utils/guard");
 const validation = require("grofc_utils/validation");
 const authConfig = require("../../config/auth");
 const { ValidationError, UnauthorizedError, ConflictError, TokenIssueError } = require("../error");
-const { verifyRSASignature, verifyJWT, signJWT, decodeJWT, generateRandomSafeString } = require("../utils/verification");
+const { verifyRSASignature, verifyJWT, signJWT, decodeJWT, generateRandomSafeString, convertToHash } = require("../utils/verification");
 const bannedAccessToken = {
     map: new Map(),
     add(token) {
@@ -38,7 +38,11 @@ class AuthService {
         if (bannedAccessToken.has(payload.jti)) return null;
         return payload;
     }
-    static async issueRefreshToken(id) {
+    static revokeAccessToken(token) {
+        if (!token) return null;
+        bannedAccessToken.add(token);
+    }
+    static issueRefreshToken(id) {
         try {
             if (!validation.isUnsignedIntegerString(id)) {
                 throw new Error("Invalid ID.");
@@ -48,15 +52,31 @@ class AuthService {
                 throw new Error("Cannot find user.");
             }
             const token = generateRandomSafeString(64);
-            const tokenHash = await bcrypt.hash(token, 10)
+            const tokenHash = convertToHash(token);
             const createdAt = Math.ceil(Date.now() / 1000);
             const expiresAt = createdAt + authConfig.REFRESH_TOKEN_AGE;
             AuthModel.addRefreshToken(id, tokenHash, createdAt, expiresAt);
-            return { refreshToken:token };
+            return { refreshToken: token };
         } catch (error) {
             console.error(error);
             throw new TokenIssueError()
         }
+    }
+    static verifyRefreshToken(id, token) {
+        const tokenHash = convertToHash(token);
+        const result = AuthModel.findRefreshToken(id, tokenHash);
+        if(!result){
+            throw new UnauthorizedError();
+        }
+        return {}
+    }
+    static revokeRefreshToken(token) {
+        if (typeof token !== "string") {
+            throw new ValidationError()
+        }
+        const tokenHash = convertToHash(token);
+        AuthModel.deleteRefreshToken(tokenHash);
+        return {}
     }
     static async verifyCredentials({ id, username, password } = {}) {
         if (!validation.isUnsignedIntegerString(id) || !validation.isCnNameString(username)) {
@@ -90,7 +110,6 @@ class AuthService {
      * @throws {ConflictError} 当用户已存在时抛出冲突错误
      */
     static async createUser({ id, username, password, passwordRequired = 0 } = {}) {
-
         if (!validation.isUnsignedIntegerString(id) || !validation.isCnNameString(username)) {
             throw new ValidationError("Invalid user ID or username", "id/username");
         }

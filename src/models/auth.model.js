@@ -16,9 +16,17 @@ class AuthModel {
         const stmt = db.prepare("INSERT INTO auth (id, username, password_hash, password_required, is_admin) VALUES (?, ?, ?, ?, ?)");
         return stmt.run(id, username, password_hash, password_required, is_admin);
     }
-    static addRefreshToken(id, refresh_hash, created_at, expires_at) {
+    static findRefreshToken(id, token_hash) {
+        const stmt = db.prepare("SELECT * FROM refresh_token WHERE id = ? AND token_hash = ?");
+        return stmt.get(id, username);
+    }
+    static addRefreshToken(id, token_hash, created_at, expires_at) {
         const stmt = db.prepare("INSERT INTO refresh_token (id, token_hash, created_at, expires_at) VALUES (?, ?, ?, ?)");
-        return stmt.run(id, refresh_hash, created_at, expires_at);
+        return stmt.run(id, token_hash, created_at, expires_at);
+    }
+    static deleteRefreshToken(token_hash) {
+        const stmt = db.prepare("DELETE FROM refresh_tokens WHERE token_hash = ?");
+        return stmt.run(token_hash);
     }
 }
 module.exports = AuthModel;

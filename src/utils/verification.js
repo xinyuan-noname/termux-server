@@ -3,7 +3,7 @@ const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const publicKeyPem = process.env.SUPER_ADMIN_PUBLIC_KEY;
 const jwtSecret = process.env.JWT_SECRET;
-function getTokenFromReq(req) {
+function getAccessTokenFromReq(req) {
     if (!req) return null;
     const authHeader = req.headers['authorization'];
     if (!authHeader) return null;
@@ -59,13 +59,17 @@ function verifyRSASignature(message, signatureBase64) {
  * @returns 
  */
 function generateRandomSafeString(byteLength = 32) {
-    return crypto.randomBytes(byteLength).toString("base64url")
+    return crypto.randomBytes(byteLength).toString("hex")
+}
+function convertToHash(str){
+    return crypto.createHash("sha256").update(str).digest("hex")
 }
 module.exports = {
-    getTokenFromReq,
+    getAccessTokenFromReq,
     signJWT,
     decodeJWT,
     verifyJWT,
     verifyRSASignature,
-    generateRandomSafeString
+    generateRandomSafeString,
+    convertToHash
 };

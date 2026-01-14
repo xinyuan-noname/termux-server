@@ -1,5 +1,5 @@
 const { UnauthorizedError, ValidationError } = require("../error");
-const { getTokenFromReq } = require("../utils/verification");
+const { getAccessTokenFromReq } = require("../utils/verification");
 const AuthService = require("../service/auth.service");
 const authConfig = require("../../config/auth")
 const formatRegisterResult = (user, error) => {
@@ -27,18 +27,51 @@ class AuthController {
         const result = await AuthService.verifyCredentials({ id, username, password });
         const payload = { id, role: result.role };
         const accessToken = AuthService.issueAccessToken(payload);
-        const { refreshToken } = await AuthService.issueRefreshToken(id);
+        const { refreshToken } = AuthService.issueRefreshToken(id);
         switch (true) {
             default: {
                 res.cookie('refreshToken', refreshToken, {
-                    httpOnly: true,
-                    secure: true,
-                    sameSite: 'strict',
-                    path: '/auth/refresh',
+                    ...authConfig.REFRESH_TOKEN_COOKIE_OPTIONS,
                     maxAge: authConfig.REFRESH_TOKEN_AGE * 1000
                 })
-            }
+            }; break;
         }
+        return res.json({ accessToken });
+    }
+    /**
+     * DELETE auth/login
+     * @param {import("express").Request} req 
+     * @param {import("express").Response} res 
+     * @returns 
+     */
+    static logout(req, res) {
+        let refreshToken;
+        const accessToken = getAccessTokenFromReq(req);
+        if (accessToken) AuthService.revokeAccessToken(accessToken);
+        switch (true) {
+            default: {
+                refreshToken = req.cookies.refreshToken;
+                res.clearCookie('refreshToken', authConfig.REFRESH_TOKEN_COOKIE_OPTIONS);
+            }; break;
+        }
+        AuthService.revokeRefreshToken(refreshToken);
+        return res.status(204).end();
+    }
+    /**
+     * DELETE auth/refresh
+     * @param {import("express").Request} req 
+     * @param {import("express").Response} res 
+     * @returns 
+     */
+    static async refresh(req, res) {
+        let refreshToken;
+        switch (true) {
+            default: {
+                refreshToken = req.cookies.refreshToken;
+            }; break;
+        }
+        AuthService.verifyRefreshToken(refreshToken);
+        const accessToken = AuthService.issueAccessToken(payload);
         return res.json({ accessToken });
     }
     /**
@@ -49,7 +82,7 @@ class AuthController {
      */
     static async register(req, res) {
         const { id, username, password, passwordRequired, isAdmin, signature, createdAt } = req.body;
-        const token = getTokenFromReq(req);
+        const token = getAccessTokenFromReq(req);
         const payload = AuthService.verifyAccessToken(token);
         let result;
         if (signature) {
@@ -75,7 +108,7 @@ class AuthController {
         if (userList.length > 30) {
             throw new ValidationError("Batch registration is limited to 30 users per request.", "userList")
         }
-        const token = getTokenFromReq(req);
+        const token = getAccessTokenFromReq(req);
         const payload = AuthService.verifyAccessToken(token);
         const byToken = [], bySignature = [];
         userList.forEach(user => user.signature ? bySignature.push(user) : byToken.push(user));
