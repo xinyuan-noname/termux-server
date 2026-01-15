@@ -39,7 +39,7 @@ class AuthController {
         return res.json({ accessToken });
     }
     /**
-     * DELETE auth/login
+     * POST auth/login
      * @param {import("express").Request} req 
      * @param {import("express").Response} res 
      * @returns 
@@ -138,6 +138,9 @@ class AuthController {
             }
         }
         return res.json({ result })
+    }
+    delete(){
+
     }
 }
 module.exports = AuthController

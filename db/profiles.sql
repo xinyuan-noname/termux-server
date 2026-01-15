@@ -1,6 +1,5 @@
 CREATE TABLE IF NOT EXISTS profiles (
-id TEXT NOT NULL UNIQUE,
-username TEXT NOT NULL,
-genender TEXT,
-CHECK (genender IS NULL OR genender IN ('male', 'female'))
+    id TEXT PRIMARY KEY,
+    gender TEXT CHECK (gender IS NULL OR gender IN ('male', 'female')),
+    FOREIGN KEY (id) REFERENCES auth(id) ON DELETE CASCADE
 )

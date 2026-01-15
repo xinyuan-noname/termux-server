@@ -50,7 +50,7 @@ class AuthService {
         if (!token) return null;
         bannedAccessToken.add(token);
     }
-    static issueRefreshToken(id, userType = "user") {
+    static issueRefreshToken(id, userType = "guest") {
         try {
             if (!validation.isUnsignedIntegerString(id)) {
                 throw new Error("Invalid ID.");
@@ -58,6 +58,9 @@ class AuthService {
             const user = AuthModel.findUser(id);
             if (!user) {
                 throw new Error("Cannot find user.");
+            }
+            if(!authConfig.USER_TYPE_LIST.includes(userType)){
+                throw new Error("Invalid user type.")
             }
             const token = generateRandomSafeString(64);
             const tokenHash = convertToHash(token);
@@ -77,7 +80,7 @@ class AuthService {
         const tokenHash = convertToHash(token);
         const result = AuthModel.findRefreshToken(tokenHash);
         if (!result) {
-            console.error(result,tokenHash);
+            console.error(result, tokenHash);
             throw new UnauthorizedError();
         }
         return { id: result.id, userType: result.userType };
@@ -86,6 +89,9 @@ class AuthService {
         const tokenHash = convertToHash(token);
         AuthModel.deleteRefreshToken(tokenHash);
         return {}
+    }
+    static clearExpiredRefreshToken() {
+        AuthModel.deleteExpiredTokens();
     }
     static async verifyCredentials({ id, username, password } = {}) {
         if (!validation.isUnsignedIntegerString(id) || !validation.isCnNameString(username)) {

@@ -16,6 +16,14 @@ class AuthModel {
         const stmt = db.prepare("INSERT INTO auth (id, username, password_hash, password_required, is_admin) VALUES (?, ?, ?, ?, ?)");
         return stmt.run(id, username, password_hash, password_required, is_admin);
     }
+    static deleteUser(id) {
+        const stmt = db.prepare("DELETE FROM auth WHERE id = ?");
+        return stmt.run(id);
+    }
+    static getRefreshTokensById(id) {
+        const stmt = db.prepare("SELECT * FROM refresh_token WHERE id = ?");
+        return stmt.all(id);
+    }
     static findRefreshToken(token_hash) {
         const stmt = db.prepare("SELECT * FROM refresh_token WHERE token_hash = ?");
         return stmt.get(token_hash);
@@ -28,9 +36,14 @@ class AuthModel {
         const stmt = db.prepare("DELETE FROM refresh_token WHERE token_hash = ?");
         return stmt.run(token_hash);
     }
-    static truncRefreshToken(id, limit) {
-        const stmt = db.prepare("DELETE FROM refresh_token WHERE id = ? AND rowid NOT IN (SELECT rowid FROM refresh_token WHERE id = ? ORDER BY created_at DESC LIMIT ?)")
-        return stmt.run(id, id, limit);
+    static deleteOldestRefreshTokens(id, count) {
+        const stmt = db.prepare("DELETE FROM refresh_token WHERE rowid IN (SELECT rowid FROM refresh_token WHERE id = ? ORDER BY created_at ASC LIMIT ?)");
+        return stmt.run(id, count);
+    }
+    static deleteExpiredTokens() {
+        const now = Math.trunc(Date.now() / 1000)
+        const stmt = db.prepare("DELETE FROM refresh_token WHERE expires_at < ?");
+        return stmt.run(now);
     }
 }
 module.exports = AuthModel;

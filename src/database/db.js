@@ -10,6 +10,7 @@ if (!fs.existsSync(pathsConfig.DATA_DIR)) {
 }
 const dbPath = path.resolve(pathsConfig.DATA_DIR, "app.db");
 const db = new DataBase(dbPath);
+db.exec('PRAGMA foreign_keys = ON;');
 execSqlFile(db, "auth.sql");
 execSqlFile(db, "profiles.sql");
 execSqlFile(db, "refresh_token.sql");
