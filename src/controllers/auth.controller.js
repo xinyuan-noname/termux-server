@@ -1,5 +1,5 @@
 const { UnauthorizedError, ValidationError } = require("../error");
-const { getAccessTokenFromReq, decodeJWT } = require("../utils/verification");
+const { getAccessTokenFromReq } = require("../utils/verification");
 const AuthService = require("../service/auth.service");
 const authConfig = require("../../config/auth")
 const formatRegisterResult = (user, error) => {
@@ -86,11 +86,10 @@ class AuthController {
         const { id, username, password, passwordRequired, isAdmin, signature, createdAt } = req.body;
         const token = getAccessTokenFromReq(req);
         const payload = AuthService.verifyAccessToken(token);
-        let result;
         if (signature) {
-            result = await AuthService.createUserBySignature({ id, username, password, passwordRequired, isAdmin, signature, createdAt })
+            await AuthService.createUserBySignature({ id, username, password, passwordRequired, isAdmin, signature, createdAt })
         } else if (payload?.userType === "admin") {
-            result = await AuthService.createUser({ id, username, password, passwordRequired })
+            await AuthService.createUser({ id, username, password, passwordRequired })
         } else {
             throw new UnauthorizedError()
         }
@@ -139,7 +138,7 @@ class AuthController {
         }
         return res.json({ result })
     }
-    delete(){
+    delete() {
 
     }
 }

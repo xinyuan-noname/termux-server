@@ -7,7 +7,7 @@
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
-    "link":"npm link ../grofc_utils",
+    "link": "npm link ../grofc_utils",
     "start": "node src/server.js",
     "dev": "nodemon src/server.js"
   },
@@ -19,5 +19,10 @@
     "express": "^5.2.1",
     "express-rate-limit": "^8.2.1",
     "jsonwebtoken": "^9.0.3"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.2",
+    "eslint": "^9.39.2",
+    "globals": "^17.0.0"
   }
 }

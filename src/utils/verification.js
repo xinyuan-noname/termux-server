@@ -1,4 +1,3 @@
-// utils/verification.js
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const publicKeyPem = process.env.SUPER_ADMIN_PUBLIC_KEY;

@@ -1,6 +1,6 @@
 const AuthModel = require("../models/auth.model");
 const bcrypt = require("bcrypt");
-const { isExpired, parseTimeToMs } = require("grofc_utils/time")
+const { isExpired } = require("grofc_utils/time")
 const guard = require("grofc_utils/guard");
 const validation = require("grofc_utils/validation");
 const authConfig = require("../../config/auth");
@@ -59,7 +59,7 @@ class AuthService {
             if (!user) {
                 throw new Error("Cannot find user.");
             }
-            if(!authConfig.USER_TYPE_LIST.includes(userType)){
+            if (!authConfig.USER_TYPE_LIST.includes(userType)) {
                 throw new Error("Invalid user type.")
             }
             const token = generateRandomSafeString(64);
