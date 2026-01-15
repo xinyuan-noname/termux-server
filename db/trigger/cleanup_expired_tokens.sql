@@ -1,3 +1,4 @@
+DROP TRIGGER IF EXISTS cleanup_expired_tokens;
 CREATE TRIGGER cleanup_expired_tokens
 AFTER INSERT ON refresh_tokens
 BEGIN 

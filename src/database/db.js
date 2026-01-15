@@ -13,4 +13,5 @@ const db = new DataBase(dbPath);
 db.exec('PRAGMA foreign_keys = ON;');
 execSqlFiles(db, "table");
 execSqlFiles(db, "trigger");
+execSqlFiles(db, "view");
 module.exports = db;

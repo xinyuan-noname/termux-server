@@ -5,4 +5,4 @@ CREATE TABLE IF NOT EXISTS refresh_tokens (
     created_at INTEGER NOT NULL,
     expires_at INTEGER NOT NULL,
     FOREIGN KEY (id) REFERENCES auth(id) ON DELETE CASCADE
-)
+);
