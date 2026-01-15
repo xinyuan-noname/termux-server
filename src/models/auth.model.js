@@ -21,29 +21,24 @@ class AuthModel {
         return stmt.run(id);
     }
     static getRefreshTokensById(id) {
-        const stmt = db.prepare("SELECT * FROM refresh_token WHERE id = ?");
+        const stmt = db.prepare("SELECT * FROM refresh_tokens WHERE id = ?");
         return stmt.all(id);
     }
     static findRefreshToken(token_hash) {
-        const stmt = db.prepare("SELECT * FROM refresh_token WHERE token_hash = ?");
+        const stmt = db.prepare("SELECT * FROM refresh_tokens WHERE token_hash = ?");
         return stmt.get(token_hash);
     }
     static addRefreshToken(id, user_type, token_hash, created_at, expires_at) {
-        const stmt = db.prepare("INSERT INTO refresh_token (id, user_type, token_hash, created_at, expires_at) VALUES (?, ?, ?, ?, ?)");
+        const stmt = db.prepare("INSERT INTO refresh_tokens (id, user_type, token_hash, created_at, expires_at) VALUES (?, ?, ?, ?, ?)");
         return stmt.run(id, user_type, token_hash, created_at, expires_at);
     }
     static deleteRefreshToken(token_hash) {
-        const stmt = db.prepare("DELETE FROM refresh_token WHERE token_hash = ?");
+        const stmt = db.prepare("DELETE FROM refresh_tokens WHERE token_hash = ?");
         return stmt.run(token_hash);
     }
     static deleteOldestRefreshTokens(id, count) {
-        const stmt = db.prepare("DELETE FROM refresh_token WHERE rowid IN (SELECT rowid FROM refresh_token WHERE id = ? ORDER BY created_at ASC LIMIT ?)");
+        const stmt = db.prepare("DELETE FROM refresh_tokens WHERE rowid IN (SELECT rowid FROM refresh_tokens WHERE id = ? ORDER BY created_at ASC LIMIT ?)");
         return stmt.run(id, count);
-    }
-    static deleteExpiredTokens() {
-        const now = Math.trunc(Date.now() / 1000)
-        const stmt = db.prepare("DELETE FROM refresh_token WHERE expires_at < ?");
-        return stmt.run(now);
     }
 }
 module.exports = AuthModel;
