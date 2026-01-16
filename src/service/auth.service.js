@@ -36,6 +36,7 @@ class AuthService {
                 jwtid: generateRandomSafeString()
             })
         } catch (error) {
+            console.error(error);
             throw new TokenIssueError()
         }
     }
@@ -50,7 +51,7 @@ class AuthService {
         if (!token) return null;
         bannedAccessToken.add(token);
     }
-    static issueRefreshToken(id, userType = "guest") {
+    static issueRefreshToken({ id, deviceDescription = "Unknow Device", userType = "guest" } = {}) {
         try {
             if (!validation.isUnsignedIntegerString(id)) {
                 throw new Error("Invalid ID.");
@@ -66,21 +67,20 @@ class AuthService {
             const tokenHash = convertToHash(token);
             const createdAt = Math.ceil(Date.now() / 1000);
             const expiresAt = createdAt + authConfig.REFRESH_TOKEN_AGE;
-            AuthModel.addRefreshToken(id, userType, tokenHash, createdAt, expiresAt);
+            AuthModel.addRefreshToken(id, userType, tokenHash, deviceDescription, createdAt, expiresAt);
             return { refreshToken: token };
         } catch (error) {
             console.error(error);
             throw new TokenIssueError()
         }
     }
-    static verifyRefreshToken(token) {
+    static verifyRefreshToken(token, deviceDescription = "Unknow Device") {
         if (typeof token !== "string") {
             throw new UnauthorizedError();
         }
         const tokenHash = convertToHash(token);
-        const result = AuthModel.findRefreshToken(tokenHash);
+        const result = AuthModel.findRefreshTokenMatchDevice(tokenHash, deviceDescription);
         if (!result) {
-            console.error(result, tokenHash);
             throw new UnauthorizedError();
         }
         return { id: result.id, userType: result.userType };
@@ -89,9 +89,6 @@ class AuthService {
         const tokenHash = convertToHash(token);
         AuthModel.deleteRefreshToken(tokenHash);
         return {}
-    }
-    static clearExpiredRefreshToken() {
-        AuthModel.deleteExpiredTokens();
     }
     static async verifyCredentials({ id, username, password } = {}) {
         if (!validation.isUnsignedIntegerString(id) || !validation.isCnNameString(username)) {
@@ -174,7 +171,6 @@ class AuthService {
      * @throws {ConflictError} 当用户已存在时抛出
      */
     static async createUserBySignature({ id, username, password, passwordRequired = 0, isAdmin = 0, signature, createdAt } = {}) {
-
         if (isExpired(createdAt, authConfig.REGISTRATION_SIGNATURE_AGE)) {
             throw new ValidationError("Expired signature", "signature")
         }

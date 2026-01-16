@@ -23,11 +23,12 @@ class AuthController {
      * @returns 
      */
     static async login(req, res) {
+        const deviceDescription = req.deviceDescription;
         const { id, username, password } = req.body;
         const result = await AuthService.verifyCredentials({ id, username, password });
         const payload = { id, userType: result.userType };
         const accessToken = AuthService.issueAccessToken(payload);
-        const { refreshToken } = AuthService.issueRefreshToken(id, result.userType);
+        const { refreshToken } = AuthService.issueRefreshToken({ id, userType: result.userType, deviceDescription });
         switch (true) {
             default: {
                 res.cookie('refreshToken', refreshToken, {
@@ -66,13 +67,14 @@ class AuthController {
      * @returns 
      */
     static async refresh(req, res) {
+        const deviceDescription = req.deviceDescription;
         let refreshToken;
         switch (true) {
             default: {
                 refreshToken = req.cookies.refreshToken;
             }; break;
         }
-        const { id, userType } = AuthService.verifyRefreshToken(refreshToken);
+        const { id, userType } = AuthService.verifyRefreshToken(refreshToken, deviceDescription);
         const accessToken = AuthService.issueAccessToken({ id, userType });
         return res.json({ accessToken });
     }

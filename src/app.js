@@ -3,20 +3,23 @@ const cookieParser = require("cookie-parser")
 const app = express();
 require('dotenv').config();
 
+if (process.env.TRUST_PROXY === 'true') {
+    app.set('trust proxy', true);
+}
 // Global Middleware
 app.use(express.json());
 app.use(cookieParser());
 
-if (process.env.TRUST_PROXY === 'true') {
-    app.set('trust proxy', true);
-}
+// Rate Limit Middleware
 const createRateLimiter = require("./middleware/rateLimit");
-app.use(createRateLimiter(1, 70, void 0, {
+app.use(createRateLimiter(1, 70, void 0)) // 60s w=70
 
-}))
+// Parser Device Middleware
+const parseDeviceMiddleware = require("./middleware/parserDevice");
+
 // Routes
 const authRoutes = require('./routes/auth.routes');
-app.use('/auth', authRoutes);
+app.use('/auth', parseDeviceMiddleware, authRoutes);
 
 // Error Handling Middleware
 const errorHandler = require('./middleware/error');

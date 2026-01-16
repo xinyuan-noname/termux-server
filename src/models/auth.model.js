@@ -28,17 +28,17 @@ class AuthModel {
         const stmt = db.prepare("SELECT * FROM refresh_tokens WHERE token_hash = ?");
         return stmt.get(token_hash);
     }
-    static addRefreshToken(id, user_type, token_hash, created_at, expires_at) {
-        const stmt = db.prepare("INSERT INTO refresh_tokens (id, user_type, token_hash, created_at, expires_at) VALUES (?, ?, ?, ?, ?)");
-        return stmt.run(id, user_type, token_hash, created_at, expires_at);
+    static findRefreshTokenMatchDevice(token_hash, device_desc) {
+        const stmt = db.prepare("SELECT * FROM refresh_tokens WHERE token_hash = ? AND device_desc = ?");
+        return stmt.get(token_hash, device_desc);
+    }
+    static addRefreshToken(id, user_type, token_hash, device_desc, created_at, expires_at) {
+        const stmt = db.prepare("INSERT INTO refresh_tokens (id, user_type, token_hash, device_desc, created_at, expires_at) VALUES (?, ?, ?, ?, ?)");
+        return stmt.run(id, user_type, token_hash, device_desc, created_at, expires_at);
     }
     static deleteRefreshToken(token_hash) {
         const stmt = db.prepare("DELETE FROM refresh_tokens WHERE token_hash = ?");
         return stmt.run(token_hash);
-    }
-    static deleteOldestRefreshTokens(id, count) {
-        const stmt = db.prepare("DELETE FROM refresh_tokens WHERE rowid IN (SELECT rowid FROM refresh_tokens WHERE id = ? ORDER BY created_at ASC LIMIT ?)");
-        return stmt.run(id, count);
     }
 }
 module.exports = AuthModel;
