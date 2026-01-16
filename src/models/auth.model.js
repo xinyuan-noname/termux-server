@@ -33,7 +33,7 @@ class AuthModel {
         return stmt.get(token_hash, device_desc);
     }
     static addRefreshToken(id, user_type, token_hash, device_desc, created_at, expires_at) {
-        const stmt = db.prepare("INSERT INTO refresh_tokens (id, user_type, token_hash, device_desc, created_at, expires_at) VALUES (?, ?, ?, ?, ?)");
+        const stmt = db.prepare("INSERT INTO refresh_tokens (id, user_type, token_hash, device_desc, created_at, expires_at) VALUES (?, ?, ?, ?, ?, ?)");
         return stmt.run(id, user_type, token_hash, device_desc, created_at, expires_at);
     }
     static deleteRefreshToken(token_hash) {
