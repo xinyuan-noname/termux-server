@@ -31,13 +31,16 @@ router.post(
   AuthController.registerBatch
 )
 
+// 签名格式：id|createdAt
 router.delete(
   '/delete',
+  createRateLimiter(5, 10, "Too many deletion attempts, please try again later."),
   AuthController.delete
 );
 
 router.delete(
   '/delete/batch',
+  createRateLimiter(5, 3, "Too many deletion attempts, please try again later."),
   AuthController.deleteBatch
 );
 module.exports = router;
