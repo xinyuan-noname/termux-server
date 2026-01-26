@@ -122,26 +122,84 @@ class AuthController {
                     await AuthService.createUser(user);
                     result.push(formatRegisterResult(user))
                 } catch (error) {
+                    console.error(error);
                     result.push(formatRegisterResult(user, error))
                 }
             }
         } else {
-            byToken.forEach(user =>
+            byToken.forEach(user => {
                 result.push(formatRegisterResult(user, new UnauthorizedError()))
-            )
+                console.error();
+            })
         }
         for (const user of bySignature) {
             try {
                 await AuthService.createUserBySignature(user);
                 result.push(formatRegisterResult(user))
             } catch (error) {
+                console.error(error);
                 result.push(formatRegisterResult(user, error))
             }
         }
         return res.json({ result })
     }
-    delete() {
-
+    static delete(req, res) {
+        const { id, signature, createdAt } = req.body;
+        const token = getAccessTokenFromReq(req);
+        const payload = AuthService.verifyAccessToken(token);
+        if (signature) {
+            AuthService.deleteUserBySignature({ id, signature, createdAt });
+        } else if (payload?.userType === "admin" && AuthService.isAdmin(id)) {
+            AuthService.deleteUser({ id });
+        } else {
+            throw new UnauthorizedError()
+        }
+        return res.end();
+    }
+    static deleteBatch(req, res) {
+        const { userList } = req.body;
+        if (!Array.isArray(userList)) {
+            throw new ValidationError("Invalid userList, expected userList to be an array", "userList")
+        }
+        if (userList.length > 30) {
+            throw new ValidationError("Batch deletion is limited to 30 users per request.", "userList")
+        }
+        const token = getAccessTokenFromReq(req);
+        const payload = AuthService.verifyAccessToken(token);
+        const byToken = [], bySignature = [];
+        userList.forEach(user => user.signature ? bySignature.push(user) : byToken.push(user));
+        const result = []
+        if (payload?.userType === "admin") {
+            for (const user of byToken) {
+                if (!AuthService.isAdmin(user.id)) {
+                    console.error();
+                    result.push(formatRegisterResult(user, new UnauthorizedError()))
+                    continue;
+                }
+                try {
+                    AuthService.deleteUser(user);
+                    result.push(formatRegisterResult(user))
+                } catch (error) {
+                    console.error(error);
+                    result.push(formatRegisterResult(user, error))
+                }
+            }
+        } else {
+            byToken.forEach(user => {
+                console.error();
+                result.push(formatRegisterResult(user, new UnauthorizedError()))
+            })
+        }
+        for (const user of bySignature) {
+            try {
+                AuthService.deleteUserBySignature(user);
+                result.push(formatRegisterResult(user))
+            } catch (error) {
+                console.error(error);
+                result.push(formatRegisterResult(user, error))
+            }
+        }
+        return res.json({ result })
     }
 }
 module.exports = AuthController

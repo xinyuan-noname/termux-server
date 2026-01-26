@@ -18,6 +18,7 @@ router.post(
   AuthController.refresh
 );
 
+// 签名格式：id|username|isAdmin|createdAt
 router.post(
   '/register',
   createRateLimiter(5, 10, "Too many registration attempts, please try again later."),
@@ -29,4 +30,14 @@ router.post(
   createRateLimiter(5, 3, "Too many registration attempts, please try again later."),
   AuthController.registerBatch
 )
+
+router.delete(
+  '/delete',
+  AuthController.delete
+);
+
+router.delete(
+  '/delete/batch',
+  AuthController.deleteBatch
+);
 module.exports = router;

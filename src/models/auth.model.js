@@ -1,9 +1,5 @@
 const db = require("../database/db");
 class AuthModel {
-    static isAdmin(id) {
-        const stmt = db.prepare("SELECT is_admin FROM auth WHERE id = ?")
-        return stmt.get(id);
-    }
     static findUser(id) {
         const stmt = db.prepare("SELECT * FROM auth WHERE id = ?");
         return stmt.get(id);

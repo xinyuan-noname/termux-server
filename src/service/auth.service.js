@@ -213,5 +213,35 @@ class AuthService {
             throw err;
         }
     }
+    static deleteUser({ id } = {}) {
+        if (!validation.isUnsignedIntegerString(id)) {
+            throw new UnauthorizedError();
+        }
+        try {
+            AuthModel.deleteUser(id);
+            return {};
+        } catch (err) {
+            console.error(err);
+            throw new UnauthorizedError();
+        }
+    }
+    static deleteUserBySignature({ id, signature, createdAt } = {}) {
+        if (isExpired(createdAt, authConfig.REGISTRATION_SIGNATURE_AGE)) {
+            throw new UnauthorizedError();
+        }
+        if (!validation.isUnsignedIntegerString(id)) {
+            throw new UnauthorizedError();
+        }
+        if (!verifyRSASignature(`${id}|${createdAt}`, signature)) {
+            throw new UnauthorizedError();
+        }
+        try {
+            AuthModel.deleteUser(id);
+            return {};
+        } catch (err) {
+            console.error(err);
+            throw new UnauthorizedError();
+        }
+    }
 }
 module.exports = AuthService;

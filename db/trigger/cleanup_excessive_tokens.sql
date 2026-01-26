@@ -7,7 +7,7 @@ BEGIN
         SELECT token_hash 
         FROM refresh_tokens 
         WHERE id = NEW.id 
-        ORDER BY created_at DESC
+        ORDER BY expires_at DESC
         LIMIT 3
     ) AND id = NEW.id;
 END
