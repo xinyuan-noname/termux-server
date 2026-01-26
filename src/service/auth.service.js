@@ -35,8 +35,7 @@ class AuthService {
                 expiresIn: authConfig.ACCESS_TOKEN_AGE,
                 jwtid: generateRandomSafeString()
             })
-        } catch (error) {
-            console.error(error);
+        } catch {
             throw new TokenIssueError()
         }
     }
@@ -69,8 +68,7 @@ class AuthService {
             const expiresAt = createdAt + authConfig.REFRESH_TOKEN_AGE;
             AuthModel.addRefreshToken(id, userType, tokenHash, deviceDescription, createdAt, expiresAt);
             return { refreshToken: token };
-        } catch (error) {
-            console.error(error);
+        } catch {
             throw new TokenIssueError()
         }
     }
@@ -219,8 +217,7 @@ class AuthService {
         try {
             AuthModel.deleteUser(id);
             return {};
-        } catch (err) {
-            console.error(err);
+        } catch {
             throw new UnauthorizedError();
         }
     }
@@ -237,8 +234,7 @@ class AuthService {
         try {
             AuthModel.deleteUser(id);
             return {};
-        } catch (err) {
-            console.error(err);
+        } catch {
             throw new UnauthorizedError();
         }
     }

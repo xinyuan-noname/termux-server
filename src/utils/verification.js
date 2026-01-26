@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
+const logger = require('./logger');
 const publicKeyPem = process.env.SUPER_ADMIN_PUBLIC_KEY;
 const jwtSecret = process.env.JWT_SECRET;
 function getAccessTokenFromReq(req) {
@@ -19,7 +20,7 @@ function verifyJWT(token) {
         return jwt.verify(token, jwtSecret);
     }
     catch (err) {
-        console.error('Error verifying JWT:', err);
+        logger.error('JWT校验出错', err);
         return null;
     }
 }
@@ -34,7 +35,9 @@ function decodeJWT(token) {
  */
 function verifyRSASignature(message, signatureBase64) {
     if (!publicKeyPem) {
-        throw new Error('公钥缺失，无法验证签名');
+        const err = new Error('公钥缺失，无法验证签名');
+        logger.error('公钥缺失，无法验证签名', err);
+        return false;
     }
     if (!signatureBase64) {
         return false;
@@ -48,7 +51,7 @@ function verifyRSASignature(message, signatureBase64) {
             signature
         );
     } catch (err) {
-        console.error('Error verifying RSA signature:', err);
+        logger.error('RSA签名校验出错', err);
         return false;
     }
 }
