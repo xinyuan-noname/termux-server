@@ -198,7 +198,6 @@ class AuthService {
                 throw new ValidationError(`Password must be at most ${authConfig.PASSWORD_MAX_LENGTH} characters long.`, "password");
             }
         }
-        console.log(`${id}|${username}|${isAdmin}|${createdAt}`)
         if (!verifyRSASignature(`${id}|${username}|${isAdmin}|${createdAt}`, signature)) {
             throw new UnauthorizedError("Invalid or tampered signature");
         }

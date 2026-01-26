@@ -1,7 +1,8 @@
 const { UnauthorizedError, ValidationError } = require("../error");
 const { getAccessTokenFromReq } = require("../utils/verification");
 const AuthService = require("../service/auth.service");
-const authConfig = require("../../config/auth")
+const authConfig = require("../../config/auth");
+const logger = require("../logger");
 const formatRegisterResult = (user, error) => {
     return error ? {
         success: false,
@@ -120,16 +121,17 @@ class AuthController {
             for (const user of byToken) {
                 try {
                     await AuthService.createUser(user);
-                    result.push(formatRegisterResult(user))
+                    result.push(formatRegisterResult(user));
                 } catch (error) {
-                    console.error(error);
+                    logger.error(`注册时,token校验失败,来自${payload.id}`, error)
                     result.push(formatRegisterResult(user, error))
                 }
             }
         } else {
             byToken.forEach(user => {
-                result.push(formatRegisterResult(user, new UnauthorizedError()))
-                console.error();
+                const error = new UnauthorizedError()
+                result.push(formatRegisterResult(user, error))
+                logger.error(`注册时,token校验失败,来源未知`, error);
             })
         }
         for (const user of bySignature) {
@@ -137,7 +139,7 @@ class AuthController {
                 await AuthService.createUserBySignature(user);
                 result.push(formatRegisterResult(user))
             } catch (error) {
-                console.error(error);
+                logger.error(`注册时,签名校验失败`, error);
                 result.push(formatRegisterResult(user, error))
             }
         }
@@ -172,22 +174,24 @@ class AuthController {
         if (payload?.userType === "admin") {
             for (const user of byToken) {
                 if (!AuthService.isAdmin(user.id)) {
-                    console.error();
-                    result.push(formatRegisterResult(user, new UnauthorizedError()))
+                    const error = new UnauthorizedError()
+                    logger.error(`尝试删除管理员账户,来自${payload.id}`, error);
+                    result.push(formatRegisterResult(user, error))
                     continue;
                 }
                 try {
                     AuthService.deleteUser(user);
                     result.push(formatRegisterResult(user))
                 } catch (error) {
-                    console.error(error);
+                    logger.error(`删除账户时,token校验失败,来自${payload.id}`, error);
                     result.push(formatRegisterResult(user, error))
                 }
             }
         } else {
             byToken.forEach(user => {
-                console.error();
-                result.push(formatRegisterResult(user, new UnauthorizedError()))
+                const error = new UnauthorizedError()
+                logger.error(`删除账户时,token校验失败,来源未知`, error);
+                result.push(formatRegisterResult(user, error))
             })
         }
         for (const user of bySignature) {
@@ -195,7 +199,7 @@ class AuthController {
                 AuthService.deleteUserBySignature(user);
                 result.push(formatRegisterResult(user))
             } catch (error) {
-                console.error(error);
+                logger.error(`删除账户时,签名校验失败`, error);
                 result.push(formatRegisterResult(user, error))
             }
         }
