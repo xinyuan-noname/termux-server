@@ -8,19 +8,19 @@
   "main": "index.js",
   "scripts": {
     "link": "npm link ../grofc_utils",
-    "start": "node src/server.js",
-    "dev": "nodemon src/server.js"
+    "start": "./sh/start.sh",
+    "dev": "./sh/start.sh -D"
   },
   "dependencies": {
-    "bcrypt": "^6.0.0",
+    "@node-rs/bcrypt": "^1.10.7",
     "better-sqlite3": "^12.5.0",
     "cookie-parser": "^1.4.7",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "express-rate-limit": "^8.2.1",
-    "ioredis": "^5.9.2",
     "jsonwebtoken": "^9.0.3",
     "rate-limit-redis": "^4.3.1",
+    "redis": "^5.10.0",
     "ua-parser-js": "^2.0.8",
     "winston": "^3.19.0"
   },

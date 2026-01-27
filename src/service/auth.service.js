@@ -1,5 +1,5 @@
 const AuthModel = require("../models/auth.model");
-const bcrypt = require("bcrypt");
+const bcrypt = require("@node-rs/bcrypt");
 const authConfig = require("../../config/auth");
 const { ValidationError, UnauthorizedError, ConflictError, TokenIssueError } = require("../error");
 const { verifyRSASignature, verifyJWT, signJWT, decodeJWT, generateRandomSafeString, convertToHash } = require("../utils/verification");
