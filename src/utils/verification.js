@@ -63,7 +63,7 @@ function verifyRSASignature(message, signatureBase64) {
 function generateRandomSafeString(byteLength = 32) {
     return crypto.randomBytes(byteLength).toString("hex")
 }
-function convertToHash(str){
+function convertToHash(str) {
     return crypto.createHash("sha256").update(str).digest("hex")
 }
 module.exports = {

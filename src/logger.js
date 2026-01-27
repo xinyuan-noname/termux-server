@@ -8,7 +8,7 @@ const logger = winston.createLogger({
             if (stack) {
                 return ` ${timestamp} [${level.toUpperCase()}]:  ${message}\n ${stack}`;
             }
-            return ` ${timestamp} [ ${level.toUpperCase()}]:  ${message}`;
+            return ` ${timestamp} [${level.toUpperCase()}]:  ${message}`;
         })
     ),
     transports: [

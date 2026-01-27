@@ -1,11 +1,9 @@
 const AuthModel = require("../models/auth.model");
 const bcrypt = require("bcrypt");
-const { isExpired } = require("grofc_utils/time")
-const guard = require("grofc_utils/guard");
-const validation = require("grofc_utils/validation");
 const authConfig = require("../../config/auth");
 const { ValidationError, UnauthorizedError, ConflictError, TokenIssueError } = require("../error");
 const { verifyRSASignature, verifyJWT, signJWT, decodeJWT, generateRandomSafeString, convertToHash } = require("../utils/verification");
+const { isUnsignedIntegerString, isCnNameString, isExpired } = require("../utils/validation");
 const bannedAccessToken = {
     map: new Map(),
     add(token) {
@@ -52,7 +50,7 @@ class AuthService {
     }
     static issueRefreshToken({ id, deviceDescription = "Unknow Device", userType = "guest" } = {}) {
         try {
-            if (!validation.isUnsignedIntegerString(id)) {
+            if (!isUnsignedIntegerString(id)) {
                 throw new Error("Invalid ID.");
             }
             const user = AuthModel.findUser(id);
@@ -89,14 +87,14 @@ class AuthService {
         return {}
     }
     static async verifyCredentials({ id, username, password } = {}) {
-        if (!validation.isUnsignedIntegerString(id) || !validation.isCnNameString(username)) {
+        if (!isUnsignedIntegerString(id) || !isCnNameString(username)) {
             throw new ValidationError("Invalid user ID or username", "id/username");
         }
         const user = AuthModel.findUserByIdAndUsername(id, username);
         if (!user) {
             throw new UnauthorizedError("Invalid credentials");
         }
-        if (user.password_required === 0 && (guard.isNullishValue(password) || password === "")) {
+        if (user.password_required === 0 && (password == null || password === "")) {
             return { userType: "guest" };
         }
         if (typeof password !== "string") {
@@ -120,7 +118,7 @@ class AuthService {
      * @throws {ConflictError} 当用户已存在时抛出冲突错误
      */
     static async createUser({ id, username, password, passwordRequired = 0 } = {}) {
-        if (!validation.isUnsignedIntegerString(id) || !validation.isCnNameString(username)) {
+        if (!isUnsignedIntegerString(id) || !isCnNameString(username)) {
             throw new ValidationError("Invalid user ID or username", "id/username");
         }
         if (![0, 1].includes(passwordRequired)) {
@@ -180,7 +178,7 @@ class AuthService {
             throw new ValidationError("Invalid password required value", "is_admin")
         }
 
-        if (!validation.isUnsignedIntegerString(id) || !validation.isCnNameString(username)) {
+        if (!isUnsignedIntegerString(id) || !isCnNameString(username)) {
             throw new ValidationError("Invalid user ID or username", "id/username");
         }
 
@@ -211,7 +209,7 @@ class AuthService {
         }
     }
     static deleteUser({ id } = {}) {
-        if (!validation.isUnsignedIntegerString(id)) {
+        if (!isUnsignedIntegerString(id)) {
             throw new UnauthorizedError();
         }
         try {
@@ -225,7 +223,7 @@ class AuthService {
         if (isExpired(createdAt, authConfig.REGISTRATION_SIGNATURE_AGE)) {
             throw new UnauthorizedError();
         }
-        if (!validation.isUnsignedIntegerString(id)) {
+        if (!isUnsignedIntegerString(id)) {
             throw new UnauthorizedError();
         }
         if (!verifyRSASignature(`${id}|${createdAt}`, signature)) {
