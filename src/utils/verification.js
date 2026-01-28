@@ -1,6 +1,6 @@
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
-const logger = require('./logger');
+const logger = require('../logger');
 const publicKeyPem = process.env.SUPER_ADMIN_PUBLIC_KEY;
 const jwtSecret = process.env.JWT_SECRET;
 function getAccessTokenFromReq(req) {
