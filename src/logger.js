@@ -18,7 +18,7 @@ const logger = winston.createLogger({
                 winston.format.simple()
             )
         }),
-        process.env.NODE_ENV === 'dev' ?
+        process.env.NODE_ENV === 'development' ?
             new winston.transports.File({ filename: 'logs/app-dev.log' }) :
             new winston.transports.File({ filename: 'logs/app.log' })
     ]

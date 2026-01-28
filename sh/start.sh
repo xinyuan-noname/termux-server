@@ -1,118 +1,97 @@
 #!/bin/bash
 
-set -euo pipefail
+# dev-or-prod.sh - 启动开发或生产环境脚本
 
-# 日志和文件配置
-LOG_DIR="logs"
-URL_FILE="url.txt"
-CLOUDFLARED_LOG="$LOG_DIR/cloudflared.log"
-APP_DEV_LOG="$LOG_DIR/app-dev.log"
+set -e  # 遇到错误立即退出
 
-# 确保日志目录存在
-mkdir -p "$LOG_DIR"
+# 创建日志目录（如果不存在）
+mkdir -p logs
 
-# 加载 .env（如果存在）
+# 从环境变量读取配置 确保.env是LF而非CRLF
 [ -f .env ] && source .env
+export PORT=${PORT:-3000}
+export NODE_ENV=${NODE_ENV:-development}
 
-# 设置默认端口3000
-export PORT="${PORT:-3000}"
+echo "Starting application in $NODE_ENV mode on port $PORT..."
 
-# 开发者模式：默认关闭
-DEV_MODE=false
-[ "${NODE_ENV:-}" == "dev" ] && DEV_MODE=true
-
-# 初始化 PID 变量（用于 cleanup）
-SERVER_PID=""
-REDIS_PID=""
-TUNNEL_PID=""
-
-# 检查必要命令
-required_cmds=("redis-server" "cloudflared")
-if [[ "$DEV_MODE" == "true" ]]; then
-  required_cmds+=("nodemon")
-else
-  required_cmds+=("node")
+# 清理开发日志（仅在开发模式下）
+if [[ "$NODE_ENV" == "development" ]]; then
+    echo "Clearing app-dev.log..."
+    > logs/app-dev.log
 fi
 
-for cmd in "${required_cmds[@]}"; do
-  if ! command -v "$cmd" &> /dev/null; then
-    echo "❌ Error: Required command '$cmd' not found." >&2
-    exit 1
-  fi
-done
+# 启动 Redis（后台运行）
+echo "Starting redis-server..."
+redis-server --daemonize yes --loglevel notice --logfile logs/redis.log
 
-# 清理函数：终止所有子进程
+# 函数：清理并退出
 cleanup() {
-  local pids=()
-  [[ -n "$SERVER_PID" ]] && pids+=("$SERVER_PID")
-  [[ -n "$REDIS_PID" ]]  && pids+=("$REDIS_PID")
-  [[ -n "$TUNNEL_PID" ]] && pids+=("$TUNNEL_PID")
-
-  if [ ${#pids[@]} -gt 0 ]; then
-    echo -e "\n🧹 Shutting down services..."
-    # 发送 SIGTERM
-    kill "${pids[@]}" 2>/dev/null || true
-    # 等待最多 2 秒
-    sleep 2
-    # 强制 kill 剩余进程
-    for pid in "${pids[@]}"; do
-      if kill -0 "$pid" 2>/dev/null; then
-        echo "⚠️  Force killing $pid"
-        kill -9 "$pid" 2>/dev/null || true
-      fi
-    done
-  fi
+    echo "Shutting down services..."
+    if [[ "$NODE_ENV" == "development" ]] && pgrep -f "nodemon.*src/server.js" > /dev/null; then
+        pkill -f "nodemon.*src/server.js"
+    elif [[ "$NODE_ENV" != "development" ]] && pgrep -f "node.*src/server.js" > /dev/null; then
+        pkill -f "node.*src/server.js"
+    fi
+    if pgrep redis-server > /dev/null; then
+        redis-cli shutdown
+    fi
+    if [[ -n "$TUNNEL_PID" ]]; then
+        kill "$TUNNEL_PID" 2>/dev/null || true
+    fi
+    exit 0
 }
 
-# 注册清理函数（覆盖 EXIT、INT、TERM）
-trap cleanup EXIT INT TERM
+# 注册退出信号处理
+trap cleanup SIGINT SIGTERM
 
-# 启动 Node.js 或 Nodemon（根据 DEV_MODE）
-if [[ "$DEV_MODE" == "true" ]]; then
-  echo "🛠️  Developer mode enabled. Clearing dev log: $APP_DEV_LOG"
-  > "$APP_DEV_LOG"
-  echo "🚀 Starting Nodemon server on port $PORT (logging to $APP_DEV_LOG)..."
-  nodemon src/server.js > "$APP_DEV_LOG" 2>&1 &
+# 启动应用服务器（根据 NODE_ENV 选择 nodemon 或 node）
+if [[ "$NODE_ENV" == "development" ]]; then
+    echo "Starting server with nodemon..."
+    nodemon src/server.js &
+    SERVER_PID=$!
 else
-  echo "🚀 Starting Node.js server on port $PORT..."
-  node src/server.js &
+    echo "Starting server with node..."
+    node src/server.js &
+    SERVER_PID=$!
 fi
-SERVER_PID=$!
 
-# 启动 Redis（非 daemon 模式，便于管理）
-echo "🚀 Starting Redis server..."
-redis-server --daemonize no > "$LOG_DIR/redis.log" 2>&1 &
-REDIS_PID=$!
+# 等待服务器启动（简单等待5秒，可根据需要调整）
+sleep 5
 
-# 等待服务就绪（可选，根据实际调整）
-sleep 1
+# 检查服务器是否成功启动
+if ! kill -0 "$SERVER_PID" 2>/dev/null; then
+    echo "Error: Server failed to start." >&2
+    cleanup
+fi
 
-# 启动 Cloudflare Tunnel
-echo "🚇 Starting Cloudflare Tunnel..."
-cloudflared tunnel --url "http://127.0.0.1:$PORT" > "$CLOUDFLARED_LOG" 2>&1 &
+# 启动 cloudflared tunnel 并获取临时 URL
+echo "Starting cloudflared tunnel on localhost:$PORT..."
+cloudflared tunnel --url "http://localhost:$PORT" --metrics 127.0.0.1:49999 > logs/cloudflared.log 2>&1 &
 TUNNEL_PID=$!
 
-# 清空 URL 文件
-> "$URL_FILE"
+# 等待 cloudflared 初始化并提取临时 URL
+echo "Waiting for cloudflared to assign a public URL..."
+sleep 8
 
-# 尝试获取公网 URL（最多 10 秒）
-echo "⏳ Waiting for Cloudflare Tunnel URL (max 10s)..."
-for i in {1..20}; do
-  # 检查 tunnel 是否还在运行
-  if ! kill -0 "$TUNNEL_PID" 2>/dev/null; then
-    echo "❌ Cloudflared exited unexpectedly."
-    exit 1
-  fi
-
-  URL=$(grep -o 'https://[a-zA-Z0-9.-]*\.trycloudflare\.com' "$CLOUDFLARED_LOG" 2>/dev/null | head -n1)
-  if [ -n "$URL" ]; then
-    echo "$URL" > "$URL_FILE"
-    echo "✅ Public URL: $URL"
-    cat "$URL_FILE"
-    exit 0
-  fi
-  sleep 0.5
+# 尝试从 cloudflared 日志中提取临时 URL
+TEMP_URL=""
+for i in {1..10}; do
+    TEMP_URL=$(grep -o 'https://[a-zA-Z0-9.-]*\.trycloudflare\.com' logs/cloudflared.log | head -n1)
+    if [[ -n "$TEMP_URL" ]]; then
+        break
+    fi
+    sleep 2
 done
 
-echo "❌ Failed to get Cloudflare Tunnel URL within timeout."
-exit 1
+if [[ -n "$TEMP_URL" ]]; then
+    echo ""
+    echo "✅ Temporary public URL: $TEMP_URL"
+    echo ""
+    echo "$TEMP_URL" > url.txt
+else
+    echo "⚠️  Warning: Could not extract temporary URL from cloudflared logs."
+    echo "   Check logs/cloudflared.log for details."
+fi
+
+# 等待主进程结束（保持脚本运行）
+wait "$SERVER_PID"

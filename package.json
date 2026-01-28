@@ -8,8 +8,7 @@
   "main": "index.js",
   "scripts": {
     "link": "npm link ../grofc_utils",
-    "start": "./sh/start.sh",
-    "dev": "./sh/start.sh -D"
+    "start": "./sh/start.sh"
   },
   "dependencies": {
     "@node-rs/bcrypt": "^1.10.7",
