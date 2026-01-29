@@ -1,25 +1,31 @@
 const express = require('express');
 const cookieParser = require("cookie-parser");
-const app = express();
+const logger = require('./logger');
 require('dotenv').config();
-// Global Middleware
-app.use(express.json());
-app.use(cookieParser());
 
-// Rate Limit Middleware
-const createRateLimiter = require("./middleware/rateLimit");
-app.use(createRateLimiter(1, 70, void 0)) // 60s w=70
+const app = express();
+try {
+    // Global Middleware
+    app.use(express.json());
+    app.use(cookieParser());
 
-// Parser Device Middleware
-const parseDeviceMiddleware = require("./middleware/parserDevice");
+    // Rate Limit Middleware
+    const createRateLimiter = require("./middleware/rateLimit");
+    app.use(createRateLimiter(1, 70, void 0)) // 60s w=70
 
-// Routes
-const authRoutes = require('./routes/auth.routes');
-app.use('/auth', parseDeviceMiddleware, authRoutes);
+    // Parser Device Middleware
+    const parseDeviceMiddleware = require("./middleware/parserDevice");
 
-// Error Handling Middleware
-const errorHandler = require('./middleware/error');
-app.use(errorHandler);
+    // Routes
+    const authRoutes = require('./routes/auth.routes');
+    app.use('/auth', parseDeviceMiddleware, authRoutes);
+
+    // Error Handling Middleware
+    const errorHandler = require('./middleware/error');
+    app.use(errorHandler);
+} catch (err) {
+    logger.error('环境变量加载失败', err);
+}
 
 
 module.exports = app;
