@@ -4,7 +4,6 @@ const AuthController = require('../controllers/auth.controller');
 const router = express.Router();
 router.post(
   '/login',
-  createRateLimiter(5, 5, "Too many login attempts, please try again later."),
   AuthController.login
 );
 
@@ -21,26 +20,26 @@ router.post(
 // 签名格式：id|username|isAdmin|createdAt
 router.post(
   '/register',
-  createRateLimiter(5, 10, "Too many registration attempts, please try again later."),
+  createRateLimiter(5, 10, true, "Too many registration attempts, please try again later."),
   AuthController.register
 );
 
 router.post(
   '/register/batch',
-  createRateLimiter(5, 3, "Too many registration attempts, please try again later."),
+  createRateLimiter(5, 3, true, "Too many registration attempts, please try again later."),
   AuthController.registerBatch
 )
 
 // 签名格式：id|createdAt
 router.delete(
   '/delete',
-  createRateLimiter(5, 10, "Too many deletion attempts, please try again later."),
+  createRateLimiter(5, 10, true, "Too many deletion attempts, please try again later."),
   AuthController.delete
 );
 
 router.delete(
   '/delete/batch',
-  createRateLimiter(5, 3, "Too many deletion attempts, please try again later."),
+  createRateLimiter(5, 3, true, "Too many deletion attempts, please try again later."),
   AuthController.deleteBatch
 );
 module.exports = router;

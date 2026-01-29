@@ -11,7 +11,7 @@ try {
 
     // Rate Limit Middleware
     const createRateLimiter = require("./middleware/rateLimit");
-    app.use(createRateLimiter(1, 70, void 0)) // 60s w=70
+    app.use(createRateLimiter(1, 150, void 0)) // 60s w=150
 
     // Parser Device Middleware
     const parseDeviceMiddleware = require("./middleware/parserDevice");
