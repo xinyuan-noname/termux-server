@@ -22,9 +22,9 @@ try {
 
     // Error Handling Middleware
     const errorHandler = require('./middleware/error');
-    app.use(errorHandler);
+    app.use("/", errorHandler);
 } catch (err) {
-    logger.error('环境变量加载失败', err);
+    logger.error('服务初始化失败', err);
 }
 
 

@@ -1,5 +1,5 @@
-const rateLimit = require("express-rate-limit");
-const RedisStore = require("rate-limit-redis");
+const { ipKeyGenerator, rateLimit } = require("express-rate-limit");
+const { RedisStore } = require("rate-limit-redis");
 const { getAccessTokenFromReq } = require("../utils/verification");
 const redis = require("../redis");
 
@@ -10,16 +10,17 @@ module.exports = (windowMinutes = 15, max = 5, useToken = false, errorMessage = 
         message: { error: errorMessage, code: "RATE_LIMIT_EXCEEDED" },
         standardHeaders: true,
         legacyHeaders: false,
-        keyGenerator: useToken ? (req) => {
+        keyGenerator: useToken ? (req, res) => {
             const token = getAccessTokenFromReq(req)
-            const ip = req.headers['cf-connecting-ip'] || req.ip;
+            const ip = ipKeyGenerator(req, res)
             return token ? `${token}:${ip}` : ip;
-        } : (req) => {
-            return req.headers['cf-connecting-ip'] || req.ip;
+        } : (req, res) => {
+            return ipKeyGenerator(req, res)
         },
         store: new RedisStore({
             client: redis,
             prefix: "rate-limit:",
+            sendCommand: (...args) => redis.sendCommand(args)
         }),
         ...options
     })
