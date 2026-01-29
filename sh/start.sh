@@ -5,24 +5,34 @@
 set -e  # 遇到错误立即退出
 
 # 创建日志目录（如果不存在）
-mkdir -p logs
+mkdir -p logs/prod
+mkdir -p logs/dev
 
 # 从环境变量读取配置 确保.env是LF而非CRLF
 [ -f .env ] && source .env
 export PORT=${PORT:-3000}
 export NODE_ENV=${NODE_ENV:-development}
 
+REDIS_LOG="logs/prod/redis.log"
+[ "$NODE_ENV" == "development" ] && REDIS_LOG="logs/dev/redis.log"
+
+APP_LOG="logs/prod/app.log"
+[ "$NODE_ENV" == "development" ] && APP_LOG="logs/dev/app.log"
+
+CLOUDFLARED_LOG="logs/prod/cloudflared.log"
+[ "$NODE_ENV" == "development" ] && CLOUDFLARED_LOG="logs/dev/cloudflared.log"
+
 echo "Starting application in $NODE_ENV mode on port $PORT..."
 
 # 清理开发日志（仅在开发模式下）
 if [[ "$NODE_ENV" == "development" ]]; then
     echo "Clearing app-dev.log..."
-    > logs/app-dev.log
+    > "$APP_LOG"
 fi
 
 # 启动 Redis（后台运行）
 echo "Starting redis-server..."
-redis-server --daemonize yes --loglevel notice --logfile logs/redis.log
+redis-server --daemonize yes --loglevel notice --logfile "$REDIS_LOG"
 
 # 函数：清理并退出
 cleanup() {
@@ -66,7 +76,7 @@ fi
 
 # 启动 cloudflared tunnel 并获取临时 URL
 echo "Starting cloudflared tunnel on localhost:$PORT..."
-cloudflared tunnel --url "http://localhost:$PORT" --metrics 127.0.0.1:49999 > logs/cloudflared.log 2>&1 &
+cloudflared tunnel --url "http://localhost:$PORT" --metrics 127.0.0.1:49999 > "$CLOUDFLARED_LOG" 2>&1 &
 TUNNEL_PID=$!
 
 # 等待 cloudflared 初始化并提取临时 URL
@@ -76,7 +86,7 @@ sleep 8
 # 尝试从 cloudflared 日志中提取临时 URL
 TEMP_URL=""
 for i in {1..10}; do
-    TEMP_URL=$(grep -o 'https://[a-zA-Z0-9.-]*\.trycloudflare\.com' logs/cloudflared.log | head -n1)
+    TEMP_URL=$(grep -o 'https://[a-zA-Z0-9.-]*\.trycloudflare\.com' "$CLOUDFLARED_LOG" | head -n1)
     if [[ -n "$TEMP_URL" ]]; then
         break
     fi
@@ -87,10 +97,10 @@ if [[ -n "$TEMP_URL" ]]; then
     echo ""
     echo "✅ Temporary public URL: $TEMP_URL"
     echo ""
-    echo "$TEMP_URL" > url.txt
+    printf '%s' "$TEMP_URL" > url.txt
 else
     echo "⚠️  Warning: Could not extract temporary URL from cloudflared logs."
-    echo "   Check logs/cloudflared.log for details."
+    echo "   Check $CLOUDFLARED_LOG for details."
 fi
 
 # 等待主进程结束（保持脚本运行）

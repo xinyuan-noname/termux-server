@@ -1,7 +1,8 @@
 const { ValidationError, UnauthorizedError, ForbiddenError, NotFoundError, ConflictError, TimeoutError, RateLimitError, TokenIssueError } = require("../error");
+const logger = require("../logger");
 
-module.exports = (error, req, res, next) => {
-    console.logger(error.message, error);
+module.exports = (error, req, res) => {
+    logger.error(error.message, error);
     if (error instanceof UnauthorizedError) {
         return res.status(401).json({ error: error.message, code: error.code });
     }
