@@ -22,13 +22,7 @@ function signJWT(payload, options) {
 }
 
 function verifyJWT(token) {
-    try {
-        return jwt.verify(token, jwtSecret);
-    }
-    catch (err) {
-        logger.error('JWT校验出错', err);
-        return null;
-    }
+    return jwt.verify(token, jwtSecret);
 }
 function decodeJWT(token) {
     return jwt.decode(token)

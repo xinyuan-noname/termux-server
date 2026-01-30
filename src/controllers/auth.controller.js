@@ -92,7 +92,7 @@ class AuthController {
         if (signature) {
             AuthService.verifyRSASignature([id, username, isAdmin], createdAt, signature)
             await AuthService.createUser({ id, username, password, passwordRequired })
-        } else if (payload?.userType === "admin") {
+        } else if (payload.userType === "admin") {
             await AuthService.createUser({ id, username, password, passwordRequired })
         } else {
             throw new UnauthorizedError()
@@ -114,7 +114,7 @@ class AuthController {
             throw new ValidationError("Batch registration is limited to 30 users per request.", "userList")
         }
         const token = getAccessTokenFromReq(req);
-        const payload = AuthService.verifyAccessToken(token);
+        const payload = AuthService.checkAccessToken(token);
         const byToken = [], bySignature = [];
         userList.forEach(user => user.signature ? bySignature.push(user) : byToken.push(user));
         const result = []
@@ -150,7 +150,7 @@ class AuthController {
     static delete(req, res) {
         const { id, signature, createdAt } = req.body;
         const token = getAccessTokenFromReq(req);
-        const payload = AuthService.verifyAccessToken(token);
+        const payload = AuthService.checkAccessToken(token);
         if (signature) {
             AuthService.verifyRSASignature([id], createdAt, signature);
             AuthService.deleteUser({ id });
@@ -170,7 +170,7 @@ class AuthController {
             throw new ValidationError("Batch deletion is limited to 30 users per request.", "userList")
         }
         const token = getAccessTokenFromReq(req);
-        const payload = AuthService.verifyAccessToken(token);
+        const payload = AuthService.checkAccessToken(token);
         const byToken = [], bySignature = [];
         userList.forEach(user => user.signature ? bySignature.push(user) : byToken.push(user));
         const result = []
@@ -213,7 +213,7 @@ class AuthController {
     static issuePasswordKey(req, res) {
         const { id, createdAt, signature } = req.body;
         const token = getAccessTokenFromReq(req);
-        const payload = AuthService.verifyAccessToken(token);
+        const payload = AuthService.checkAccessToken(token);
         let passwordKey;
         if (signature) {
             AuthService.verifyRSASignature([id], createdAt, signature)
@@ -228,24 +228,26 @@ class AuthController {
         }
     }
     static changePassword(req, res) {
-        const { id, passwordKey, newPassword } = req.body;
+        const {  passwordKey, newPassword } = req.body;
         const token = getAccessTokenFromReq(req);
         const payload = AuthService.verifyAccessToken(token);
-        if (!payload || payload.id !== id) {
+        if (!payload) {
             logger.warn(`修改密码时,token校验失败,来自${payload?.id || "未知"}`);
             throw new UnauthorizedError();
         }
+        const { id } = payload;
         AuthService.changePassword({ id, passwordKey, newPassword });
         return res.status(204).end();
     }
     static changePasswordRequired(req, res) {
-        const { id, passwordRequired } = req.body;
+        const { passwordRequired } = req.body;
         const token = getAccessTokenFromReq(req);
         const payload = AuthService.verifyAccessToken(token);
         if (!payload || payload.id !== id) {
             logger.warn(`修改密码时,token校验失败,来自${payload?.id || "未知"}`);
             throw new UnauthorizedError();
         }
+        const { id } = payload;
         AuthService.changePasswordRequired({ id, passwordRequired });
         return res.status(204).end();
     }

@@ -56,11 +56,21 @@ class AuthService {
         }
     }
     static verifyAccessToken(token) {
-        if (!token) return null;
-        const payload = verifyJWT(token);
-        if (!payload) return null;
-        if (bannedAccessToken.has(payload.jti)) return null;
-        return payload;
+        try {
+            const payload = verifyJWT(token);
+            if (bannedAccessToken.has(payload.jti)) throw "";
+            return payload;
+        } catch {
+            new new UnauthorizedError();
+        }
+    }
+    static checkAccessToken(token){
+        try {
+            AuthService.verifyAccessToken(token);
+            return true;
+        } catch {
+            return false;
+        }
     }
     static revokeAccessToken(token) {
         if (!token) return null;
@@ -69,14 +79,14 @@ class AuthService {
     static issueRefreshToken({ id, deviceDescription = "Unknow Device", userType = "guest" } = {}) {
         try {
             if (!isUnsignedIntegerString(id)) {
-                throw new Error("Invalid ID.");
+                throw "Invalid ID.";
             }
             const user = AuthModel.findUser(id);
             if (!user) {
-                throw new Error("Cannot find user.");
+                throw "Cannot find user.";
             }
             if (!authConfig.USER_TYPE_LIST.includes(userType)) {
-                throw new Error("Invalid user type.")
+                throw "Invalid user type.";
             }
             const token = generateRandomSafeString(64);
             const tokenHash = convertToHash(token);
