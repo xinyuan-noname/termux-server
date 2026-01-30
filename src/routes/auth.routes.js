@@ -49,5 +49,13 @@ router.patch(
   AuthController.changePassword
 )
 
+router.patch(
+  "/change/password_required",
+  AuthController.changePasswordRequired
+)
 
+router.patch(
+  "/change/admin_status",
+  AuthController.changeAdminStatus
+)
 module.exports = router;

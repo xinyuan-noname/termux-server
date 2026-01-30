@@ -225,5 +225,10 @@ class AuthController {
         AuthService.changePasswordRequired({ id, passwordRequired });
         return res.status(204).end();
     }
+    static changeAdminStatus(req, res) {
+        const { id, isAdmin, signature, createdAt } = req.body;
+        AuthService.changeAdminStatus({ id, isAdmin, signature, createdAt });
+        return res.status(204).end();
+    }
 }
 module.exports = AuthController

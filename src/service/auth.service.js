@@ -252,7 +252,38 @@ class AuthService {
                 throw new ValidationError("Cannot set password required when password is not set.", "passwordRequired");
             }
         }
-        AuthModel.changePasswordRequired(id, passwordRequired);
+        try {
+            AuthModel.changePasswordRequired(id, passwordRequired);
+            return {}
+        } catch {
+            throw new UnauthorizedError();
+        }
+    }
+    static changeAdminStatus({ id, isAdmin, signature, createdAt } = {}) {
+        if (isExpired(createdAt, authConfig.REGISTRATION_SIGNATURE_AGE)) {
+            throw new UnauthorizedError();
+        }
+        if (!verifyRSASignature(`${id}|${isAdmin}|${createdAt}`, signature)) {
+            throw new UnauthorizedError();
+        }
+        if (!isUnsignedIntegerString(id)) {
+            throw new UnauthorizedError();
+        }
+        if (![0, 1].includes(isAdmin)) {
+            throw new UnauthorizedError();
+        }
+        if (isAdmin === 1) {
+            const result = AuthModel.findPasswordIsNotNull(id);
+            if (!result) {
+                throw new ValidationError("Cannot set password required when password is not set.", "passwordRequired");
+            }
+        }
+        try{
+            AuthModel.changeIsAdmin(id, isAdmin);
+            return {};
+        }catch{
+            throw new UnauthorizedError();
+        }
     }
 }
 module.exports = AuthService;
