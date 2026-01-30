@@ -228,13 +228,9 @@ class AuthController {
         }
     }
     static changePassword(req, res) {
-        const {  passwordKey, newPassword } = req.body;
+        const { passwordKey, newPassword } = req.body;
         const token = getAccessTokenFromReq(req);
         const payload = AuthService.verifyAccessToken(token);
-        if (!payload) {
-            logger.warn(`修改密码时,token校验失败,来自${payload?.id || "未知"}`);
-            throw new UnauthorizedError();
-        }
         const { id } = payload;
         AuthService.changePassword({ id, passwordKey, newPassword });
         return res.status(204).end();
@@ -243,10 +239,6 @@ class AuthController {
         const { passwordRequired } = req.body;
         const token = getAccessTokenFromReq(req);
         const payload = AuthService.verifyAccessToken(token);
-        if (!payload || payload.id !== id) {
-            logger.warn(`修改密码时,token校验失败,来自${payload?.id || "未知"}`);
-            throw new UnauthorizedError();
-        }
         const { id } = payload;
         AuthService.changePasswordRequired({ id, passwordRequired });
         return res.status(204).end();

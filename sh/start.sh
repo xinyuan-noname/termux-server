@@ -19,6 +19,9 @@ REDIS_LOG="logs/prod/redis.log"
 APP_LOG="logs/prod/app.log"
 [ "$NODE_ENV" == "development" ] && APP_LOG="logs/dev/app.log"
 
+ERROR_LOG="logs/prod/error.log"
+[ "$NODE_ENV" == "development" ] && ERROR_LOG="logs/dev/error.log"
+
 CLOUDFLARED_LOG="logs/prod/cloudflared.log"
 [ "$NODE_ENV" == "development" ] && CLOUDFLARED_LOG="logs/dev/cloudflared.log"
 
@@ -28,6 +31,9 @@ echo "Starting application in $NODE_ENV mode on port $PORT..."
 if [[ "$NODE_ENV" == "development" ]]; then
     echo "Clearing app-dev.log..."
     > "$APP_LOG"
+    > "$ERROR_LOG"
+    > "$CLOUDFLARED_LOG"
+    > "$REDIS_LOG"
 fi
 
 # 启动 Redis（后台运行）

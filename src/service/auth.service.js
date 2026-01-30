@@ -39,7 +39,7 @@ class AuthService {
     static verifyRSASignature(args, createdAt, signatureBase64) {
         try {
             if (!verifyRSASignature(args, createdAt, signatureBase64)) {
-                throw new UnauthorizedError();
+                throw "";
             }
         } catch {
             throw new UnauthorizedError();
@@ -61,10 +61,10 @@ class AuthService {
             if (bannedAccessToken.has(payload.jti)) throw "";
             return payload;
         } catch {
-            new new UnauthorizedError();
+            throw new UnauthorizedError();
         }
     }
-    static checkAccessToken(token){
+    static checkAccessToken(token) {
         try {
             AuthService.verifyAccessToken(token);
             return true;
