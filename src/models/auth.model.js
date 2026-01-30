@@ -21,7 +21,7 @@ class AuthModel {
         return stmt.run(is_admin, id);
     }
     // Password Methods
-    static findPasswordIsNotNull(id){
+    static findPasswordIsNotNull(id) {
         const stmt = db.prepare("SELECT password_hash FROM auth WHERE id = ? AND password_hash IS NOT NULL");
         return stmt.get(id);
     }
@@ -36,6 +36,10 @@ class AuthModel {
     static findPasswordKey(id) {
         const stmt = db.prepare("SELECT * FROM password_key_hash WHERE id = ?");
         return stmt.get(id);
+    }
+    static addPasswordKey(id, password_key_hash, created_at, expires_at) {
+        const stmt = db.prepare("INSERT OR REPLACE INTO password_key_hash (id, password_key_hash, created_at, expires_at) VALUES (?, ?, ?, ?)");
+        return stmt.run(id, password_key_hash, created_at, expires_at);
     }
     // Refresh Token Methods
     static findRefreshToken(token_hash) {

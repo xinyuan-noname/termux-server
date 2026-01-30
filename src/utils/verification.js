@@ -1,6 +1,8 @@
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const logger = require('../logger');
+const authConfig = require('../../config/auth');
+const { isExpired } = require('./validation');
 const publicKeyPem = process.env.SUPER_ADMIN_PUBLIC_KEY;
 const jwtSecret = process.env.JWT_SECRET;
 function getAccessTokenFromReq(req) {
@@ -37,16 +39,22 @@ function decodeJWT(token) {
  * @param {string} publicKeyPem 
  * @returns {boolean}
  */
-function verifyRSASignature(message, signatureBase64) {
+function verifyRSASignature(args, createdAt, signatureBase64) {
     if (!publicKeyPem) {
         const err = new Error('公钥缺失，无法验证签名');
-        logger.error('公钥缺失，无法验证签名', err);
+        logger.error(err.message, err);
         return false;
     }
     if (!signatureBase64) {
         return false;
     }
+    if (isExpired(createdAt, authConfig.REGISTRATION_SIGNATURE_AGE)) {
+        const err = new Error('签名过期，无法验证签名');
+        logger.error(err.message, err)
+        return false
+    }
     try {
+        const message = Array.isArray(args) ? [...args, createdAt].join('|') : args;
         const signature = Buffer.from(signatureBase64, 'base64');
         return crypto.verify(
             'sha256',
@@ -67,6 +75,21 @@ function verifyRSASignature(message, signatureBase64) {
 function generateRandomSafeString(byteLength = 32) {
     return crypto.randomBytes(byteLength).toString("hex")
 }
+function generateCDKey(groups, sizePerGroup) {
+    groups = Number(groups) || 4;
+    sizePerGroup = Number(sizePerGroup) || 4;
+    const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+    const length = groups * sizePerGroup;
+    let result = '';
+    const bytes = crypto.randomBytes(length);
+    for (let i = 0; i < length; i++) {
+        result += chars[bytes[i] % chars.length];
+        if ((i + 1) % sizePerGroup === 0 && i !== length - 1) {
+            result += '-';
+        }
+    }
+    return result;
+}
 function convertToHash(str) {
     return crypto.createHash("sha256").update(str).digest("hex")
 }
@@ -77,5 +100,6 @@ module.exports = {
     verifyJWT,
     verifyRSASignature,
     generateRandomSafeString,
+    generateCDKey,
     convertToHash
 };

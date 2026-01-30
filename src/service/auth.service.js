@@ -2,8 +2,8 @@ const AuthModel = require("../models/auth.model");
 const bcrypt = require("@node-rs/bcrypt");
 const authConfig = require("../../config/auth");
 const { ValidationError, UnauthorizedError, ConflictError, TokenIssueError } = require("../error");
-const { verifyRSASignature, verifyJWT, signJWT, decodeJWT, generateRandomSafeString, convertToHash } = require("../utils/verification");
-const { isUnsignedIntegerString, isCnNameString, isExpired } = require("../utils/validation");
+const { verifyRSASignature, verifyJWT, signJWT, decodeJWT, generateRandomSafeString, convertToHash, generateCDKey } = require("../utils/verification");
+const { isUnsignedIntegerString, isCnNameString } = require("../utils/validation");
 const logger = require("../logger");
 const bannedAccessToken = {
     map: new Map(),
@@ -34,6 +34,15 @@ class AuthService {
             return user.is_admin === 1;
         } catch {
             return false;
+        }
+    }
+    static verifyRSASignature(args, createdAt, signatureBase64) {
+        try {
+            if (!verifyRSASignature(args, createdAt, signatureBase64)) {
+                throw new UnauthorizedError();
+            }
+        } catch {
+            throw new UnauthorizedError();
         }
     }
     static issueAccessToken(payload) {
@@ -151,42 +160,7 @@ class AuthService {
             throw err;
         }
     }
-    static async createUserBySignature({ id, username, password, passwordRequired = 0, isAdmin = 0, signature, createdAt } = {}) {
-        if (isExpired(createdAt, authConfig.REGISTRATION_SIGNATURE_AGE)) {
-            throw new ValidationError("Expired signature", "signature")
-        }
-
-        if (![0, 1].includes(passwordRequired)) {
-            throw new ValidationError("Invalid password required value", "password_required")
-        }
-        if (![0, 1].includes(isAdmin)) {
-            throw new ValidationError("Invalid password required value", "is_admin")
-        }
-
-        if (!isUnsignedIntegerString(id) || !isCnNameString(username)) {
-            throw new ValidationError("Invalid user ID or username", "id/username");
-        }
-
-        if ((isAdmin === 1 || passwordRequired === 1) && typeof password !== "string") {
-            throw new ValidationError("Password is required but not provided.", "password");
-        }
-        if (typeof password === 'string') {
-            checkPasswordValidation(password);
-        }
-        if (!verifyRSASignature(`${id}|${username}|${isAdmin}|${createdAt}`, signature)) {
-            throw new UnauthorizedError("Invalid or tampered signature");
-        }
-        const passwordHash = typeof password === "string" ? await bcrypt.hash(password.normalize("NFC"), 10) : null;
-        try {
-            AuthModel.createUser(id, username, passwordHash, passwordRequired, isAdmin);
-            return {};
-        } catch (err) {
-            if (err.message?.includes("UNIQUE constraint failed")) {
-                throw new ConflictError("User already exists", "id");
-            }
-            throw err;
-        }
-    }
+    //delete user
     static deleteUser({ id } = {}) {
         if (!isUnsignedIntegerString(id)) {
             throw new UnauthorizedError();
@@ -198,22 +172,17 @@ class AuthService {
             throw new UnauthorizedError();
         }
     }
-    static deleteUserBySignature({ id, signature, createdAt } = {}) {
-        if (isExpired(createdAt, authConfig.REGISTRATION_SIGNATURE_AGE)) {
-            throw new UnauthorizedError();
-        }
+    //change password
+    static async issuePasswordKey({ id } = {}) {
         if (!isUnsignedIntegerString(id)) {
-            throw new UnauthorizedError();
+            throw new ValidationError("Invalid user ID", "id");
         }
-        if (!verifyRSASignature(`${id}|${createdAt}`, signature)) {
-            throw new UnauthorizedError();
-        }
-        try {
-            AuthModel.deleteUser(id);
-            return {};
-        } catch {
-            throw new UnauthorizedError();
-        }
+        const passwordKey = generateCDKey();
+        const passwordKeyHash = await bcrypt.hash(passwordKey, 10);
+        const createdAt = Math.ceil(Date.now() / 1000);
+        const expiresAt = createdAt + authConfig.PASSWORD_KEY_AGE;
+        AuthModel.addPasswordKey(id, passwordKeyHash, createdAt, expiresAt);
+        return { passwordKey };
     }
     static async changePassword({ id, passwordKey, newPassword } = {}) {
         if (!isUnsignedIntegerString(id)) {
@@ -227,7 +196,7 @@ class AuthService {
             if (expires_at < Math.ceil(Date.now() / 1000)) {
                 throw new UnauthorizedError("Password key expired.");
             }
-            if (await bcrypt.compare(passwordKey.normalize("NFC"), password_key_hash)) {
+            if (await bcrypt.compare(passwordKey, password_key_hash)) {
                 throw new UnauthorizedError("Invalid password key.");
             };
         }
@@ -259,13 +228,8 @@ class AuthService {
             throw new UnauthorizedError();
         }
     }
-    static changeAdminStatus({ id, isAdmin, signature, createdAt } = {}) {
-        if (isExpired(createdAt, authConfig.REGISTRATION_SIGNATURE_AGE)) {
-            throw new UnauthorizedError();
-        }
-        if (!verifyRSASignature(`${id}|${isAdmin}|${createdAt}`, signature)) {
-            throw new UnauthorizedError();
-        }
+    //patch isAdmin
+    static changeAdminStatus({ id, isAdmin } = {}) {
         if (!isUnsignedIntegerString(id)) {
             throw new UnauthorizedError();
         }
@@ -278,10 +242,10 @@ class AuthService {
                 throw new ValidationError("Cannot set password required when password is not set.", "passwordRequired");
             }
         }
-        try{
+        try {
             AuthModel.changeIsAdmin(id, isAdmin);
             return {};
-        }catch{
+        } catch {
             throw new UnauthorizedError();
         }
     }
