@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS refresh_tokens (
+CREATE TABLE IF NOT EXISTS password_key (
     id TEXT PRIMARY KEY,
     password_key_hash TEXT NOT NULL UNIQUE,
     created_at INTEGER NOT NULL,

@@ -196,7 +196,7 @@ class AuthService {
             if (expires_at < Math.ceil(Date.now() / 1000)) {
                 throw new UnauthorizedError("Password key expired.");
             }
-            if (await bcrypt.compare(passwordKey, password_key_hash)) {
+            if (!(await bcrypt.compare(passwordKey, password_key_hash))) {
                 throw new UnauthorizedError("Invalid password key.");
             };
         }
