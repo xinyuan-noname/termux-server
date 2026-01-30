@@ -215,5 +215,15 @@ class AuthController {
         AuthService.changePassword({ id, passwordKey, newPassword });
         return res.status(204).end();
     }
+    static changePasswordRequired(req, res) {
+        const { id, passwordRequired } = req.body;
+        const token = getAccessTokenFromReq(req);
+        const payload = AuthService.verifyAccessToken(token);
+        if (!payload || payload.id !== id) {
+            throw new UnauthorizedError();
+        }
+        AuthService.changePasswordRequired({ id, passwordRequired });
+        return res.status(204).end();
+    }
 }
 module.exports = AuthController

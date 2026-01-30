@@ -217,15 +217,19 @@ class AuthService {
     }
     static async changePassword({ id, passwordKey, newPassword } = {}) {
         if (!isUnsignedIntegerString(id)) {
-            throw new ValidationError("Invalid user ID or username", "id/username");
+            throw new ValidationError("Invalid user ID", "id");
         }
         const resultPasswordKey = AuthModel.findPasswordKey(id);
         if (!resultPasswordKey) {
             throw new UnauthorizedError("Cannot find password key.");
-        }
-        const passwordKeyMatch = await bcrypt.compare(passwordKey, resultPasswordKey.password_key);
-        if (!passwordKeyMatch) {
-            throw new UnauthorizedError("Invalid password key.");
+        } else {
+            const { password_key_hash, expires_at } = resultPasswordKey;
+            if (expires_at < Math.ceil(Date.now() / 1000)) {
+                throw new UnauthorizedError("Password key expired.");
+            }
+            if (await bcrypt.compare(passwordKey.normalize("NFC"), password_key_hash)) {
+                throw new UnauthorizedError("Invalid password key.");
+            };
         }
         if (typeof newPassword !== "string") {
             throw new ValidationError("Invalid new password.", "newPassword");
@@ -234,6 +238,21 @@ class AuthService {
         const newPasswordHash = await bcrypt.hash(newPassword.normalize("NFC"), 10);
         AuthModel.changePassword(id, newPasswordHash);
         return {};
+    }
+    static changePasswordRequired({ id, passwordRequired } = {}) {
+        if (!isUnsignedIntegerString(id)) {
+            throw new ValidationError("Invalid user ID", "id");
+        }
+        if (![0, 1].includes(passwordRequired)) {
+            throw new ValidationError("Invalid password required value", "passwordRequired")
+        }
+        if (passwordRequired === 1) {
+            const result = AuthModel.findPasswordIsNotNull(id);
+            if (!result) {
+                throw new ValidationError("Cannot set password required when password is not set.", "passwordRequired");
+            }
+        }
+        AuthModel.changePasswordRequired(id, passwordRequired);
     }
 }
 module.exports = AuthService;
