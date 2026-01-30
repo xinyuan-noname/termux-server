@@ -16,10 +16,24 @@ class AuthModel {
         const stmt = db.prepare("DELETE FROM auth WHERE id = ?");
         return stmt.run(id);
     }
-    static getRefreshTokensById(id) {
-        const stmt = db.prepare("SELECT * FROM refresh_tokens WHERE id = ?");
-        return stmt.all(id);
+    static changeIsAdmin(id, is_admin) {
+        const stmt = db.prepare("UPDATE auth SET is_admin = ? WHERE id = ?");
+        return stmt.run(is_admin, id);
     }
+    // Password Methods
+    static changePassword(id, new_password_hash) {
+        const stmt = db.prepare("UPDATE auth SET password_hash = ? WHERE id = ?");
+        return stmt.run(new_password_hash, id);
+    }
+    static changePasswordRequired(id, password_required) {
+        const stmt = db.prepare("UPDATE auth SET password_required = ? WHERE id = ?");
+        return stmt.run(password_required, id);
+    }
+    static findPasswordKey(id) {
+        const stmt = db.prepare("SELECT password_key FROM auth WHERE id = ?");
+        return stmt.get(id);
+    }
+    // Refresh Token Methods
     static findRefreshToken(token_hash) {
         const stmt = db.prepare("SELECT * FROM refresh_tokens WHERE token_hash = ?");
         return stmt.get(token_hash);
@@ -28,6 +42,11 @@ class AuthModel {
         const stmt = db.prepare("SELECT * FROM refresh_tokens WHERE token_hash = ? AND device_desc = ?");
         return stmt.get(token_hash, device_desc);
     }
+    static findRefreshTokensById(id) {
+        const stmt = db.prepare("SELECT * FROM refresh_tokens WHERE id = ?");
+        return stmt.all(id);
+    }
+
     static addRefreshToken(id, user_type, token_hash, device_desc, created_at, expires_at) {
         const stmt = db.prepare("INSERT INTO refresh_tokens (id, user_type, token_hash, device_desc, created_at, expires_at) VALUES (?, ?, ?, ?, ?, ?)");
         return stmt.run(id, user_type, token_hash, device_desc, created_at, expires_at);

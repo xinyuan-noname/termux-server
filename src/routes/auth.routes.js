@@ -42,4 +42,12 @@ router.delete(
   createRateLimiter(5, 3, true, "Too many deletion attempts, please try again later."),
   AuthController.deleteBatch
 );
+
+//
+router.patch(
+  "/change/password",
+  AuthController.changePassword
+)
+
+
 module.exports = router;

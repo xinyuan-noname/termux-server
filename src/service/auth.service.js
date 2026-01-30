@@ -4,6 +4,7 @@ const authConfig = require("../../config/auth");
 const { ValidationError, UnauthorizedError, ConflictError, TokenIssueError } = require("../error");
 const { verifyRSASignature, verifyJWT, signJWT, decodeJWT, generateRandomSafeString, convertToHash } = require("../utils/verification");
 const { isUnsignedIntegerString, isCnNameString, isExpired } = require("../utils/validation");
+const logger = require("../logger");
 const bannedAccessToken = {
     map: new Map(),
     add(token) {
@@ -16,6 +17,14 @@ const bannedAccessToken = {
     },
     has(jti) {
         return this.map.has(jti);
+    }
+}
+const checkPasswordValidation = (password) => {
+    if (password.length < authConfig.PASSWORD_MIN_LENGTH) {
+        throw new ValidationError(`Password must be at least ${authConfig.PASSWORD_MIN_LENGTH} characters long.`, "password");
+    }
+    if (password.length > authConfig.PASSWORD_MAX_LENGTH) {
+        throw new ValidationError(`Password must be at most ${authConfig.PASSWORD_MAX_LENGTH} characters long.`, "password");
     }
 }
 class AuthService {
@@ -79,6 +88,10 @@ class AuthService {
         if (!result) {
             throw new UnauthorizedError();
         }
+        if (result.expires_at < Math.ceil(Date.now() / 1000)) {
+            logger.info(`Refresh token expired for user ID ${result.id}`);
+            throw new UnauthorizedError();
+        }
         return { id: result.id, userType: result.userType };
     }
     static revokeRefreshToken(token) {
@@ -106,17 +119,6 @@ class AuthService {
         }
         return { userType: user.is_admin === 1 ? "admin" : "user" };
     }
-    /**
-     * 创建新用户
-     * @param {Object} params - 用户信息参数对象
-     * @param {string} params.id - 用户ID，必须是无符号整数字符串
-     * @param {string} params.username - 用户名，必须是中文名称字符串
-     * @param {string} [params.password] - 用户密码（可选）
-     * @param {number} [params.passwordRequired=0] - 是否需要密码（0或1，默认为0）
-     * @returns {Promise<{}>} 返回操作结果对象，
-     * @throws {ValidationError} 当输入参数验证失败时抛出验证错误
-     * @throws {ConflictError} 当用户已存在时抛出冲突错误
-     */
     static async createUser({ id, username, password, passwordRequired = 0 } = {}) {
         if (!isUnsignedIntegerString(id) || !isCnNameString(username)) {
             throw new ValidationError("Invalid user ID or username", "id/username");
@@ -149,23 +151,6 @@ class AuthService {
             throw err;
         }
     }
-    /**
-     * 通过签名创建用户
-     * 验证签名的有效性、参数格式，并在数据库中创建新用户
-     * 
-     * @param {Object} params - 参数对象
-     * @param {string} params.id - 用户ID
-     * @param {string} params.username - 用户名
-     * @param {string} [params.password] - 用户密码（可选）
-     * @param {number} [params.passwordRequired=0] - 是否需要密码（0或1）
-     * @param {number} [params.isAdmin=0] - 是否为管理员（0或1）
-     * @param {string} params.signature - RSA签名
-     * @param {number} params.createdAt - 创建时间戳
-     * @returns {Promise<{}>} 返回成功状态对象 
-     * @throws {ValidationError} 当参数验证失败时抛出
-     * @throws {UnauthorizedError} 当签名无效时抛出
-     * @throws {ConflictError} 当用户已存在时抛出
-     */
     static async createUserBySignature({ id, username, password, passwordRequired = 0, isAdmin = 0, signature, createdAt } = {}) {
         if (isExpired(createdAt, authConfig.REGISTRATION_SIGNATURE_AGE)) {
             throw new ValidationError("Expired signature", "signature")
@@ -185,14 +170,8 @@ class AuthService {
         if ((isAdmin === 1 || passwordRequired === 1) && typeof password !== "string") {
             throw new ValidationError("Password is required but not provided.", "password");
         }
-
         if (typeof password === 'string') {
-            if (password.length < authConfig.PASSWORD_MIN_LENGTH) {
-                throw new ValidationError(`Password must be at least ${authConfig.PASSWORD_MIN_LENGTH} characters long.`, "password");
-            }
-            if (password.length > authConfig.PASSWORD_MAX_LENGTH) {
-                throw new ValidationError(`Password must be at most ${authConfig.PASSWORD_MAX_LENGTH} characters long.`, "password");
-            }
+            checkPasswordValidation(password);
         }
         if (!verifyRSASignature(`${id}|${username}|${isAdmin}|${createdAt}`, signature)) {
             throw new UnauthorizedError("Invalid or tampered signature");
@@ -235,6 +214,26 @@ class AuthService {
         } catch {
             throw new UnauthorizedError();
         }
+    }
+    static async changePassword({ id, passwordKey, newPassword } = {}) {
+        if (!isUnsignedIntegerString(id)) {
+            throw new ValidationError("Invalid user ID or username", "id/username");
+        }
+        const resultPasswordKey = AuthModel.findPasswordKey(id);
+        if (!resultPasswordKey) {
+            throw new UnauthorizedError("Cannot find password key.");
+        }
+        const passwordKeyMatch = await bcrypt.compare(passwordKey, resultPasswordKey.password_key);
+        if (!passwordKeyMatch) {
+            throw new UnauthorizedError("Invalid password key.");
+        }
+        if (typeof newPassword !== "string") {
+            throw new ValidationError("Invalid new password.", "newPassword");
+        }
+        checkPasswordValidation(newPassword);
+        const newPasswordHash = await bcrypt.hash(newPassword.normalize("NFC"), 10);
+        AuthModel.changePassword(id, newPasswordHash);
+        return {};
     }
 }
 module.exports = AuthService;
