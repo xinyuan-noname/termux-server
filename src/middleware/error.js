@@ -27,9 +27,12 @@ module.exports = (error, req, res, next) => {
     } else if (error instanceof TokenIssueError) {
         code = 500;
         errorJSON = { error: error.message, code: error.code };
+    } else if (error instanceof SyntaxError && error.status === 400 && "body" in error) {
+        code = 400;
+        errorJSON = { error: "Invalid JSON format", code: 400 }
     }
     if (code && errorJSON) {
-        logger.warn(error.message);
+        logger.warn(error.message, error);
         return res.status(code).json(errorJSON);
     } else {
         logger.error(error.message, error);

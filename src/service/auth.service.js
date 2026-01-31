@@ -241,7 +241,8 @@ class AuthService {
         if (isAdmin === 1) {
             const result = AuthModel.findPasswordIsNotNull(id);
             if (!result) {
-                throw new ValidationError("Cannot set password required when password is not set.", "passwordRequired");
+                logger.warn(`尝试将${id}提升为管理员权限, 但是其未设置密码.`);
+                throw new UnauthorizedError();
             }
         }
         try {

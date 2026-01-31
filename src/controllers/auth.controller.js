@@ -103,7 +103,7 @@ class AuthController {
         } else {
             const error = new UnauthorizedError();
             logger.warn(`注册${id}用户失败, 来自:${signature ?
-                authConfig.SIGNATURE_USER_ID :
+                authConfig.BAD_SIGNATURE_USER_ID :
                 payload?.id || authConfig.UNKNOWN_USER_ID}`, error);
             throw error;
         }
@@ -154,7 +154,7 @@ class AuthController {
                 result.push(formatRegisterResult(user))
                 logger.info(`注册用户${id}成功, 来自:${authConfig.SIGNATURE_USER_ID}`);
             } catch (error) {
-                logger.warn(`注册用户${user.id}失败, 来自:${authConfig.SIGNATURE_USER_ID}`, error);
+                logger.warn(`注册用户${user.id}失败, 来自:${authConfig.BAD_SIGNATURE_USER_ID}`, error);
                 result.push(formatRegisterResult(user, error))
             }
         }
@@ -172,7 +172,7 @@ class AuthController {
         } else {
             const error = new UnauthorizedError()
             logger.warn(`删除用户${id}失败, 来自:${signature ?
-                authConfig.SIGNATURE_USER_ID :
+                authConfig.BAD_SIGNATURE_USER_ID :
                 payload?.id || authConfig.UNKNOWN_USER_ID}`, error);
             throw error
         }
@@ -221,9 +221,9 @@ class AuthController {
                 AuthService.verifyRSASignature([id], createdAt, signature)
                 AuthService.deleteUser(user);
                 result.push(formatRegisterResult(user))
-                logger.info(`删除用户${user.id}, 来自:${authConfig.SIGNATURE_USER_ID}`)
+                logger.info(`删除用户${user.id}成功, 来自:${authConfig.SIGNATURE_USER_ID}`)
             } catch (error) {
-                logger.error(`删除用户${user.id}失败, 来自:${authConfig.SIGNATURE_USER_ID}`, error);
+                logger.error(`删除用户${user.id}失败, 来自:${authConfig.BAD_SIGNATURE_USER_ID}`, error);
                 result.push(formatRegisterResult(user, error))
             }
         }
@@ -249,7 +249,7 @@ class AuthController {
         } else {
             const error = new UnauthorizedError();
             logger.warn(`尝试为用户${id}签发pswd-key失败, 来自:${signature ?
-                authConfig.SIGNATURE_USER_ID :
+                authConfig.BAD_SIGNATURE_USER_ID :
                 payload?.id || authConfig.UNKNOWN_USER_ID}`, error);
             throw error;
         }
