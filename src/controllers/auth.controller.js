@@ -236,17 +236,21 @@ class AuthController {
         let passwordKey;
         if (signature) {
             AuthService.verifyRSASignature([id], createdAt, signature)
-            passwordKey = await AuthService.issuePasswordKey({ id });
+            const result = await AuthService.issuePasswordKey({ id });
+            passwordKey = result.passwordKey
             logger.info(`已为用户${id}签发pswd-key, 来自:${authConfig.SIGNATURE_USER_ID}`);
         } else if (payload && !AuthService.isAdmin(payload?.id)) {
-            passwordKey = await AuthService.issuePasswordKey({ id });
+            const result = await AuthService.issuePasswordKey({ id });
+            passwordKey = result.passwordKey;
             logger.info(`已为用户${id}签发pswd-key, 来自:${payload.id}`);
         }
         if (passwordKey) {
             return res.json({ passwordKey });
         } else {
             const error = new UnauthorizedError();
-            logger.warn(`尝试为用户${id}签发pswd-key失败, 来自:${payload?.id || authConfig.UNKNOWN_USER_ID}`, error);
+            logger.warn(`尝试为用户${id}签发pswd-key失败, 来自:${signature ?
+                authConfig.SIGNATURE_USER_ID :
+                payload?.id || authConfig.UNKNOWN_USER_ID}`, error);
             throw error;
         }
     }

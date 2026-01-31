@@ -34,11 +34,11 @@ class AuthModel {
         return stmt.run(password_required, id);
     }
     static findPasswordKey(id) {
-        const stmt = db.prepare("SELECT * FROM password_key_hash WHERE id = ?");
+        const stmt = db.prepare("SELECT * FROM password_key WHERE id = ?");
         return stmt.get(id);
     }
     static addPasswordKey(id, password_key_hash, created_at, expires_at) {
-        const stmt = db.prepare("INSERT OR REPLACE INTO password_key_hash (id, password_key_hash, created_at, expires_at) VALUES (?, ?, ?, ?)");
+        const stmt = db.prepare("INSERT OR REPLACE INTO password_key (id, password_key_hash, created_at, expires_at) VALUES (?, ?, ?, ?)");
         return stmt.run(id, password_key_hash, created_at, expires_at);
     }
     // Refresh Token Methods

@@ -56,7 +56,9 @@ class AuthService {
     }
     static async useAccessToken(token) {
         try {
-            return await AuthService.verifyAccessToken(token);
+            const payload = verifyJWT(token);
+            if (await checkJWTIsBanned(payload.jti)) return null;
+            return payload;
         } catch {
             return null;
         }
@@ -106,7 +108,7 @@ class AuthService {
         const tokenHash = convertToHash(token);
         AuthModel.deleteRefreshTokenMatchId(id, tokenHash);
     }
-    static revokeRefreshTokenAll(id){
+    static revokeRefreshTokenAll(id) {
         AuthModel.deleteRefreshTokenAll(id);
     }
     static async verifyCredentials({ id, username, password } = {}) {
@@ -176,7 +178,7 @@ class AuthService {
         if (!isUnsignedIntegerString(id)) {
             throw new ValidationError("Invalid user ID", "id");
         }
-        if(!AuthModel.findUser(id)){
+        if (!AuthModel.findUser(id)) {
             throw new NotFoundError("Cannot find user ID");
         }
         const passwordKey = generateCDKey();
