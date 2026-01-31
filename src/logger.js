@@ -3,7 +3,14 @@ const RUN_IN_DEV = process.env.NODE_ENV === 'development';
 const logger = winston.createLogger({
     level: 'info',
     format: winston.format.combine(
-        winston.format.timestamp(),
+        winston.format.timestamp({
+            format: () => {
+                return new Date().toLocaleString('zh-CN', {
+                    timeZone: 'Asia/Shanghai',
+                    hour12: false
+                })
+            }
+        }),
         winston.format.errors({ stack: true }),
         winston.format.printf(({ timestamp, level, message, stack }) => {
             if (stack) {
