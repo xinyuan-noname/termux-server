@@ -61,7 +61,7 @@ class AuthController {
             await AuthService.revokeAccessToken(accessToken);
             AuthService.revokeRefreshToken(payload.id, refreshToken);
         }
-        logger.info(`用户${payload.id}登出成功, 废止访问令牌`);
+        logger.info(`用户${payload.id}从${req.deviceDescription}登出成功, 废止访问令牌`);
         return res.status(204).end();
     }
     /**
@@ -116,8 +116,8 @@ class AuthController {
         if (!Array.isArray(userList)) {
             throw new ValidationError("Invalid userList, expected userList to be an array", "userList")
         }
-        if (userList.length > 30) {
-            throw new ValidationError("Batch registration is limited to 30 users per request.", "userList")
+        if (userList.length > authConfig.ADDITION_USER_MAX_LENGTH) {
+            throw new ValidationError(`Batch registration is limited to ${authConfig.ADDITION_USER_MAX_LENGTH} users per request.`, "userList")
         }
         const token = getAccessTokenFromReq(req);
         const payload = await AuthService.checkAccessToken(token);
@@ -174,8 +174,8 @@ class AuthController {
         if (!Array.isArray(userList)) {
             throw new ValidationError("Invalid userList, expected userList to be an array", "userList")
         }
-        if (userList.length > 30) {
-            throw new ValidationError("Batch deletion is limited to 30 users per request.", "userList")
+        if (userList.length > authConfig.DELETION_USER_MAX_LENGTH) {
+            throw new ValidationError(`Batch deletion is limited to ${authConfig.DELETION_USER_MAX_LENGTH} users per request.`, "userList")
         }
         const token = getAccessTokenFromReq(req);
         const payload = await AuthService.checkAccessToken(token);

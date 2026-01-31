@@ -31,11 +31,11 @@ module.exports = (error, req, res, next) => {
     }
     if (code && errorJSON) {
         process.env.NODE_ENV !== 'production' ?
-            logger.error(`抛出错误: ${error.message}`, error) :
-            logger.warn(`${error.message}`);
+            logger.error(error.message, error) :
+            logger.warn(error.message);
         return res.status(code).json(errorJSON);
     } else {
-        logger.error(`抛出错误: ${error.message}`, error);
+        logger.error(error.message, error);
         return res.status(500).json({ error: 'Internal server error' });
     }
 }
