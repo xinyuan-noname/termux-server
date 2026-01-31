@@ -238,15 +238,16 @@ class AuthController {
             AuthService.verifyRSASignature([id], createdAt, signature)
             passwordKey = await AuthService.issuePasswordKey({ id });
             logger.info(`已为用户${id}签发pswd-key, 来自:${authConfig.SIGNATURE_USER_ID}`);
-        } else if (!AuthService.isAdmin(payload?.id)) {
+        } else if (payload && !AuthService.isAdmin(payload?.id)) {
             passwordKey = await AuthService.issuePasswordKey({ id });
             logger.info(`已为用户${id}签发pswd-key, 来自:${payload.id}`);
         }
-        if (!passwordKey) {
+        if (passwordKey) {
             return res.json({ passwordKey });
         } else {
-            logger.warn(`尝试为用户${id}签发pswd-key失败, 来自:${payload?.id || authConfig.UNKNOWN_USER_ID}`)
-            throw new UnauthorizedError()
+            const error = new UnauthorizedError();
+            logger.warn(`尝试为用户${id}签发pswd-key失败, 来自:${payload?.id || authConfig.UNKNOWN_USER_ID}`, error);
+            throw error;
         }
     }
     static async changePassword(req, res) {

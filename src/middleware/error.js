@@ -2,7 +2,6 @@ const { ValidationError, UnauthorizedError, ForbiddenError, NotFoundError, Confl
 const logger = require("../logger");
 
 module.exports = (error, req, res, next) => {
-    logger.error(error.message, error);
     let code, errorJSON;
     if (error instanceof UnauthorizedError) {
         code = 401;

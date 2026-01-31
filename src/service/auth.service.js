@@ -1,7 +1,7 @@
 const AuthModel = require("../models/auth.model");
 const bcrypt = require("@node-rs/bcrypt");
 const authConfig = require("../../config/auth");
-const { ValidationError, UnauthorizedError, ConflictError, TokenIssueError } = require("../error");
+const { ValidationError, UnauthorizedError, ConflictError, TokenIssueError, NotFoundError } = require("../error");
 const { verifyRSASignature, verifyJWT, signJWT, generateRandomSafeString, convertToHash, generateCDKey, checkJWTIsBanned, banJWT } = require("../utils/verification");
 const { isUnsignedIntegerString, isCnNameString } = require("../utils/validation");
 const logger = require("../logger");
@@ -155,7 +155,7 @@ class AuthService {
             AuthModel.createUser(id, username, passwordHash, passwordRequired, isAdmin);
         } catch (err) {
             if (err.message?.includes("UNIQUE constraint failed")) {
-                throw new ConflictError("User already exists", "id");
+                throw new ConflictError("User already exists", "id/username");
             }
             throw err;
         }
@@ -175,6 +175,9 @@ class AuthService {
     static async issuePasswordKey({ id } = {}) {
         if (!isUnsignedIntegerString(id)) {
             throw new ValidationError("Invalid user ID", "id");
+        }
+        if(!AuthModel.findUser(id)){
+            throw new NotFoundError("Cannot find user ID");
         }
         const passwordKey = generateCDKey();
         const passwordKeyHash = await bcrypt.hash(passwordKey, 10);
