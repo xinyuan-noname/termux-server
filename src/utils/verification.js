@@ -5,6 +5,7 @@ const authConfig = require('../../config/auth');
 const { isExpired } = require('./validation');
 const publicKeyPem = process.env.SUPER_ADMIN_PUBLIC_KEY;
 const jwtSecret = process.env.JWT_SECRET;
+const redis = require('../redis');
 function getAccessTokenFromReq(req) {
     try {
         if (!req) return null;
@@ -26,6 +27,18 @@ function verifyJWT(token) {
 }
 function decodeJWT(token) {
     return jwt.decode(token)
+}
+async function banJWT(token) {
+    const { jti, exp, iat } = decodeJWT(token);
+    const key = `${authConfig.BANNED_ACCESS_TOKEN_REDIS_PREFIX}:${jti}`;
+    const exists = (await redis.exists(key)) === 1;
+    if (exists) return;
+    const ttl = exp - iat;
+    await redis.set(key, 'banned', 'EX', ttl, 'NX');
+}
+async function checkJWTIsBanned(jti) {
+    const key = `${authConfig.BANNED_ACCESS_TOKEN_REDIS_PREFIX}:${jti}`;
+    return (await redis.exists(key)) === 1;
 }
 /**
  * @param {string} message 
@@ -92,6 +105,8 @@ module.exports = {
     signJWT,
     decodeJWT,
     verifyJWT,
+    banJWT,
+    checkJWTIsBanned,
     verifyRSASignature,
     generateRandomSafeString,
     generateCDKey,

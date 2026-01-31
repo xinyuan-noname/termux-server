@@ -2,23 +2,9 @@ const AuthModel = require("../models/auth.model");
 const bcrypt = require("@node-rs/bcrypt");
 const authConfig = require("../../config/auth");
 const { ValidationError, UnauthorizedError, ConflictError, TokenIssueError } = require("../error");
-const { verifyRSASignature, verifyJWT, signJWT, decodeJWT, generateRandomSafeString, convertToHash, generateCDKey } = require("../utils/verification");
+const { verifyRSASignature, verifyJWT, signJWT, generateRandomSafeString, convertToHash, generateCDKey, checkJWTIsBanned, banJWT } = require("../utils/verification");
 const { isUnsignedIntegerString, isCnNameString } = require("../utils/validation");
 const logger = require("../logger");
-const bannedAccessToken = {
-    map: new Map(),
-    add(token) {
-        const { jti, exp, iat } = decodeJWT(token);
-        if (this.map.has(jti)) return this;
-        const delta = exp - iat;
-        setTimeout(() => this.map.delete(jti), delta * 1000 + 500);
-        this.map.set(jti, exp);
-        return this;
-    },
-    has(jti) {
-        return this.map.has(jti);
-    }
-}
 const checkPasswordValidation = (password) => {
     if (password.length < authConfig.PASSWORD_MIN_LENGTH) {
         throw new ValidationError(`Password must be at least ${authConfig.PASSWORD_MIN_LENGTH} characters long.`, "password");
@@ -55,26 +41,26 @@ class AuthService {
             throw new TokenIssueError()
         }
     }
-    static verifyAccessToken(token) {
+    static async verifyAccessToken(token) {
         try {
             const payload = verifyJWT(token);
-            if (bannedAccessToken.has(payload.jti)) throw "";
+            if (checkJWTIsBanned(payload.jti)) throw "";
             return payload;
         } catch {
             throw new UnauthorizedError();
         }
     }
-    static checkAccessToken(token) {
+    static async checkAccessToken(token) {
         try {
-            AuthService.verifyAccessToken(token);
+            await AuthService.verifyAccessToken(token);
             return true;
         } catch {
             return false;
         }
     }
-    static revokeAccessToken(token) {
+    static async revokeAccessToken(token) {
         if (!token) return null;
-        bannedAccessToken.add(token);
+        await banJWT(token);
     }
     static issueRefreshToken({ id, deviceDescription = "Unknow Device", userType = "guest" } = {}) {
         try {
@@ -113,10 +99,9 @@ class AuthService {
         }
         return { id: result.id, userType: result.userType };
     }
-    static revokeRefreshToken(token) {
+    static revokeRefreshToken(id, token) {
         const tokenHash = convertToHash(token);
-        AuthModel.deleteRefreshToken(tokenHash);
-        return {}
+        AuthModel.deleteRefreshTokenMatchId(id, tokenHash);
     }
     static async verifyCredentials({ id, username, password } = {}) {
         if (!isUnsignedIntegerString(id) || !isCnNameString(username)) {
@@ -162,7 +147,6 @@ class AuthService {
             isAdmin = 0;
         try {
             AuthModel.createUser(id, username, passwordHash, passwordRequired, isAdmin);
-            return {};
         } catch (err) {
             if (err.message?.includes("UNIQUE constraint failed")) {
                 throw new ConflictError("User already exists", "id");
@@ -177,7 +161,6 @@ class AuthService {
         }
         try {
             AuthModel.deleteUser(id);
-            return {};
         } catch {
             throw new UnauthorizedError();
         }
@@ -216,7 +199,6 @@ class AuthService {
         checkPasswordValidation(newPassword);
         const newPasswordHash = await bcrypt.hash(newPassword.normalize("NFC"), 10);
         AuthModel.changePassword(id, newPasswordHash);
-        return {};
     }
     static changePasswordRequired({ id, passwordRequired } = {}) {
         if (!isUnsignedIntegerString(id)) {
@@ -233,7 +215,6 @@ class AuthService {
         }
         try {
             AuthModel.changePasswordRequired(id, passwordRequired);
-            return {}
         } catch {
             throw new UnauthorizedError();
         }
@@ -254,7 +235,6 @@ class AuthService {
         }
         try {
             AuthModel.changeIsAdmin(id, isAdmin);
-            return {};
         } catch {
             throw new UnauthorizedError();
         }

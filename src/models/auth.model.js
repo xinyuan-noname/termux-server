@@ -63,5 +63,9 @@ class AuthModel {
         const stmt = db.prepare("DELETE FROM refresh_tokens WHERE token_hash = ?");
         return stmt.run(token_hash);
     }
+    static deleteRefreshTokenMatchId(id, token_hash) {
+        const stmt = db.prepare("DELETE FROM refresh_tokens WHERE id = ? AND token_hash = ?");
+        return stmt.run(id, token_hash);
+    }
 }
 module.exports = AuthModel;

@@ -3,29 +3,39 @@ const logger = require("../logger");
 
 module.exports = (error, req, res, next) => {
     logger.error(error.message, error);
+    let code, errorJSON;
     if (error instanceof UnauthorizedError) {
-        return res.status(401).json({ error: error.message, code: error.code });
+        code = 401;
+        errorJSON = { error: error.message, code: error.code };
+    } else if (error instanceof ForbiddenError) {
+        code = 403;
+        errorJSON = { error: error.message, code: error.code };
+    } else if (error instanceof NotFoundError) {
+        code = 404;
+        errorJSON = { error: error.message, code: error.code };
+    } else if (error instanceof ValidationError) {
+        code = 400;
+        errorJSON = { error: error.message, field: error.field, code: error.code };
+    } else if (error instanceof ConflictError) {
+        code = 409;
+        errorJSON = { error: error.message, field: error.field, code: error.code };
+    } else if (error instanceof TimeoutError) {
+        code = 504;
+        errorJSON = { error: error.message, code: error.code };
+    } else if (error instanceof RateLimitError) {
+        code = 429;
+        errorJSON = { error: error.message, code: error.code };
+    } else if (error instanceof TokenIssueError) {
+        code = 500;
+        errorJSON = { error: error.message, code: error.code };
     }
-    if (error instanceof ForbiddenError) {
-        return res.status(403).json({ error: error.message, code: error.code });
+    if (code && errorJSON) {
+        process.env.NODE_ENV !== 'production' ?
+            logger.error(`抛出错误: ${error.message}`, error) :
+            logger.warn(`${error.message}`);
+        return res.status(code).json(errorJSON);
+    } else {
+        logger.error(`抛出错误: ${error.message}`, error);
+        return res.status(500).json({ error: 'Internal server error' });
     }
-    if (error instanceof NotFoundError) {
-        return res.status(404).json({ error: error.message, code: error.code });
-    }
-    if (error instanceof ValidationError) {
-        return res.status(400).json({ error: error.message, field: error.field, code: error.code });
-    }
-    if (error instanceof ConflictError) {
-        return res.status(409).json({ error: error.message, field: error.field, code: error.code });
-    }
-    if (error instanceof TimeoutError) {
-        return res.status(504).json({ error: error.message, code: error.code })
-    }
-    if (error instanceof RateLimitError) {
-        return res.status(429).json({ error: error.message, code: error.code })
-    }
-    if (error instanceof TokenIssueError) {
-        return res.status(500).json({ error: error.message, code: error.code });
-    }
-    return res.status(500).json({ error: 'Internal server error' });
 }

@@ -38,6 +38,7 @@ class AuthController {
                 })
             }; break;
         }
+        logger.info(`用户${id}登录成功, 签发访问令牌和刷新令牌`);
         return res.json({ accessToken });
     }
     /**
@@ -46,19 +47,21 @@ class AuthController {
      * @param {import("express").Response} res 
      * @returns 
      */
-    static logout(req, res) {
+    static async logout(req, res) {
         let refreshToken;
         const accessToken = getAccessTokenFromReq(req);
-        if (accessToken) AuthService.revokeAccessToken(accessToken);
+        const payload = await AuthService.verifyAccessToken(accessToken);
         switch (true) {
             default: {
                 refreshToken = req.cookies.refreshToken;
                 res.clearCookie('refreshToken', authConfig.REFRESH_TOKEN_COOKIE_OPTIONS);
             }; break;
         }
-        if (refreshToken) {
-            AuthService.revokeRefreshToken(refreshToken);
+        if (payload.id && refreshToken) {
+            await AuthService.revokeAccessToken(accessToken);
+            AuthService.revokeRefreshToken(payload.id, refreshToken);
         }
+        logger.info(`用户${payload.id}登出成功, 废止访问令牌`);
         return res.status(204).end();
     }
     /**
@@ -77,6 +80,7 @@ class AuthController {
         }
         const { id, userType } = AuthService.verifyRefreshToken(refreshToken, deviceDescription);
         const accessToken = AuthService.issueAccessToken({ id, userType });
+        logger.info(`用户${id}刷新访问令牌`);
         return res.json({ accessToken });
     }
     /**
@@ -88,12 +92,14 @@ class AuthController {
     static async register(req, res) {
         const { id, username, password, passwordRequired, isAdmin, signature, createdAt } = req.body;
         const token = getAccessTokenFromReq(req);
-        const payload = AuthService.verifyAccessToken(token);
+        const payload = await AuthService.verifyAccessToken(token);
         if (signature) {
             AuthService.verifyRSASignature([id, username, isAdmin], createdAt, signature)
             await AuthService.createUser({ id, username, password, passwordRequired })
+            logger.info(`用户${id}注册成功, 来自:${authConfig.SIGNATURE_USER_ID}`);
         } else if (payload.userType === "admin") {
             await AuthService.createUser({ id, username, password, passwordRequired })
+            logger.info(`用户${id}注册成功, 来自:${payload.id}`);
         } else {
             throw new UnauthorizedError()
         }
@@ -114,7 +120,7 @@ class AuthController {
             throw new ValidationError("Batch registration is limited to 30 users per request.", "userList")
         }
         const token = getAccessTokenFromReq(req);
-        const payload = AuthService.checkAccessToken(token);
+        const payload = await AuthService.checkAccessToken(token);
         const byToken = [], bySignature = [];
         userList.forEach(user => user.signature ? bySignature.push(user) : byToken.push(user));
         const result = []
@@ -123,14 +129,15 @@ class AuthController {
                 try {
                     await AuthService.createUser(user);
                     result.push(formatRegisterResult(user));
+                    logger.info(`用户${user?.id}注册成功, 来自:${payload?.id}`);
                 } catch (error) {
-                    logger.warn(`注册时,token校验失败,来自${payload.id}`)
+                    logger.warn(`注册时,校验失败,来自${payload?.id}`)
                     result.push(formatRegisterResult(user, error))
                 }
             }
         } else {
             byToken.forEach(user => {
-                logger.warn(`注册时,token校验失败,来源${payload?.id || "未知"}`);
+                logger.warn(`注册用户${user?.id}时, 校验失败, 来自:${payload?.id || authConfig.UNKNOWN_USER_ID}`);
                 result.push(formatRegisterResult(user, new UnauthorizedError()))
             })
         }
@@ -140,17 +147,18 @@ class AuthController {
                 AuthService.verifyRSASignature([id, username, isAdmin], createdAt, signature);
                 await AuthService.createUser(user);
                 result.push(formatRegisterResult(user))
+                logger.info(`用户${id}注册成功,来自:${authConfig.SIGNATURE_USER_ID}`);
             } catch (error) {
-                logger.warn(`注册时,签名校验失败`, error);
+                logger.warn(`注册用户${user.id}时, 校验失败, 来自:${authConfig.SIGNATURE_USER_ID}`);
                 result.push(formatRegisterResult(user, error))
             }
         }
         return res.json({ result })
     }
-    static delete(req, res) {
+    static async delete(req, res) {
         const { id, signature, createdAt } = req.body;
         const token = getAccessTokenFromReq(req);
-        const payload = AuthService.checkAccessToken(token);
+        const payload = await AuthService.checkAccessToken(token);
         if (signature) {
             AuthService.verifyRSASignature([id], createdAt, signature);
             AuthService.deleteUser({ id });
@@ -161,7 +169,7 @@ class AuthController {
         }
         return res.status(204).end();
     }
-    static deleteBatch(req, res) {
+    static async deleteBatch(req, res) {
         const { userList } = req.body;
         if (!Array.isArray(userList)) {
             throw new ValidationError("Invalid userList, expected userList to be an array", "userList")
@@ -170,7 +178,7 @@ class AuthController {
             throw new ValidationError("Batch deletion is limited to 30 users per request.", "userList")
         }
         const token = getAccessTokenFromReq(req);
-        const payload = AuthService.checkAccessToken(token);
+        const payload = await AuthService.checkAccessToken(token);
         const byToken = [], bySignature = [];
         userList.forEach(user => user.signature ? bySignature.push(user) : byToken.push(user));
         const result = []
@@ -178,7 +186,7 @@ class AuthController {
             for (const user of byToken) {
                 if (!AuthService.isAdmin(user.id)) {
                     const error = new UnauthorizedError()
-                    logger.warn(`尝试删除管理员账户,来自${payload.id}`, error);
+                    logger.warn(`尝试删除管理员账户, 来自:${payload.id}`, error);
                     result.push(formatRegisterResult(user, error))
                     continue;
                 }
@@ -186,14 +194,14 @@ class AuthController {
                     AuthService.deleteUser(user);
                     result.push(formatRegisterResult(user))
                 } catch (error) {
-                    logger.warn(`删除账户时,token校验失败,来自${payload.id}`, error);
+                    logger.warn(`删除账户时, 校验失败, 来自:${payload.id}`, error);
                     result.push(formatRegisterResult(user, error))
                 }
             }
         } else {
             byToken.forEach(user => {
                 const error = new UnauthorizedError()
-                logger.warn(`删除账户时,token校验失败,来源${payload?.id || "未知"}`, error);
+                logger.warn(`删除账户时, 校验失败, 来自:${payload?.id || authConfig.UNKNOWN_USER_ID}`, error);
                 result.push(formatRegisterResult(user, error))
             })
         }
@@ -204,22 +212,22 @@ class AuthController {
                 AuthService.deleteUser(user);
                 result.push(formatRegisterResult(user))
             } catch (error) {
-                logger.error(`删除账户时,签名校验失败`, error);
+                logger.error(`删除账户时, 校验失败, 来自:${authConfig.SIGNATURE_USER_ID}`, error);
                 result.push(formatRegisterResult(user, error))
             }
         }
         return res.json({ result })
     }
-    static issuePasswordKey(req, res) {
+    static async issuePasswordKey(req, res) {
         const { id, createdAt, signature } = req.body;
         const token = getAccessTokenFromReq(req);
-        const payload = AuthService.checkAccessToken(token);
+        const payload = await AuthService.checkAccessToken(token);
         let passwordKey;
         if (signature) {
             AuthService.verifyRSASignature([id], createdAt, signature)
-            passwordKey = AuthService.issuePasswordKey({ id });
+            passwordKey = await AuthService.issuePasswordKey({ id });
         } else if (!AuthService.isAdmin(payload?.id)) {
-            passwordKey = AuthService.issuePasswordKey({ id });
+            passwordKey = await AuthService.issuePasswordKey({ id });
         }
         if (!passwordKey) {
             return res.json({ passwordKey });
@@ -227,23 +235,23 @@ class AuthController {
             throw new UnauthorizedError()
         }
     }
-    static changePassword(req, res) {
+    static async changePassword(req, res) {
         const { passwordKey, newPassword } = req.body;
         const token = getAccessTokenFromReq(req);
-        const payload = AuthService.verifyAccessToken(token);
+        const payload = await AuthService.verifyAccessToken(token);
         const { id } = payload;
         AuthService.changePassword({ id, passwordKey, newPassword });
         return res.status(204).end();
     }
-    static changePasswordRequired(req, res) {
+    static async changePasswordRequired(req, res) {
         const { passwordRequired } = req.body;
         const token = getAccessTokenFromReq(req);
-        const payload = AuthService.verifyAccessToken(token);
+        const payload = await AuthService.verifyAccessToken(token);
         const { id } = payload;
         AuthService.changePasswordRequired({ id, passwordRequired });
         return res.status(204).end();
     }
-    static changeAdminStatus(req, res) {
+    static async changeAdminStatus(req, res) {
         const { id, isAdmin, signature, createdAt } = req.body;
         AuthService.verifyRSASignature([id, isAdmin], createdAt, signature)
         AuthService.changeAdminStatus({ id, isAdmin });
