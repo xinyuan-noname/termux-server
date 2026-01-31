@@ -28,8 +28,7 @@ module.exports = (error, req, res, next) => {
         code = 500;
         errorJSON = { error: error.message, code: error.code };
     } else if (error instanceof SyntaxError && error.status === 400 && "body" in error) {
-        code = 400;
-        errorJSON = { error: "Invalid JSON format", code: 400 }
+        return res.status(400).json({ error: "Json syntax error", code:"INVALID_JSON_FORMAT"})
     }
     if (code && errorJSON) {
         logger.warn(error.message, error);
