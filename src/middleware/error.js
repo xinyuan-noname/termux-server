@@ -30,9 +30,7 @@ module.exports = (error, req, res, next) => {
         errorJSON = { error: error.message, code: error.code };
     }
     if (code && errorJSON) {
-        process.env.NODE_ENV !== 'production' ?
-            logger.error(error.message, error) :
-            logger.warn(error.message);
+        logger.warn(error.message);
         return res.status(code).json(errorJSON);
     } else {
         logger.error(error.message, error);

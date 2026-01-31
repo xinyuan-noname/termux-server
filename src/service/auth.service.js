@@ -37,25 +37,28 @@ class AuthService {
                 expiresIn: authConfig.ACCESS_TOKEN_AGE,
                 jwtid: generateRandomSafeString()
             })
-        } catch {
+        } catch (error) {
+            logger.warn(`签发access token失败`, error)
             throw new TokenIssueError()
         }
     }
     static async verifyAccessToken(token) {
         try {
             const payload = verifyJWT(token);
-            if (checkJWTIsBanned(payload.jti)) throw "";
+            if (await checkJWTIsBanned(payload.jti)) {
+                throw `收到已禁用的accessToken, jti:${payload.jti}, 来源:${payload.id || authConfig.UNKNOWN_USER_ID}`;
+            }
             return payload;
-        } catch {
+        } catch (error) {
+            logger.warn("校验access token失效", error);
             throw new UnauthorizedError();
         }
     }
-    static async checkAccessToken(token) {
+    static async useAccessToken(token) {
         try {
-            await AuthService.verifyAccessToken(token);
-            return true;
+            return await AuthService.verifyAccessToken(token);
         } catch {
-            return false;
+            return null;
         }
     }
     static async revokeAccessToken(token) {
@@ -102,6 +105,9 @@ class AuthService {
     static revokeRefreshToken(id, token) {
         const tokenHash = convertToHash(token);
         AuthModel.deleteRefreshTokenMatchId(id, tokenHash);
+    }
+    static revokeRefreshTokenAll(id){
+        AuthModel.deleteRefreshTokenAll(id);
     }
     static async verifyCredentials({ id, username, password } = {}) {
         if (!isUnsignedIntegerString(id) || !isCnNameString(username)) {

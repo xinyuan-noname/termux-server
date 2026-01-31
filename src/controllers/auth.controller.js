@@ -120,25 +120,26 @@ class AuthController {
             throw new ValidationError(`Batch registration is limited to ${authConfig.ADDITION_USER_MAX_LENGTH} users per request.`, "userList")
         }
         const token = getAccessTokenFromReq(req);
-        const payload = await AuthService.checkAccessToken(token);
+        const payload = await AuthService.useAccessToken(token);
         const byToken = [], bySignature = [];
         userList.forEach(user => user.signature ? bySignature.push(user) : byToken.push(user));
-        const result = []
+        const result = [];
         if (payload?.userType === "admin") {
             for (const user of byToken) {
                 try {
                     await AuthService.createUser(user);
                     result.push(formatRegisterResult(user));
-                    logger.info(`用户${user?.id}注册成功, 来自:${payload?.id}`);
+                    logger.info(`注册用户${user?.id}成功, 来自:${payload?.id}`);
                 } catch (error) {
-                    logger.warn(`注册时,校验失败,来自${payload?.id}`)
+                    logger.warn(`注册用户${user.id}时,校验失败,来自${payload?.id}`, error)
                     result.push(formatRegisterResult(user, error))
                 }
             }
         } else {
             byToken.forEach(user => {
-                logger.warn(`注册用户${user?.id}时, 校验失败, 来自:${payload?.id || authConfig.UNKNOWN_USER_ID}`);
-                result.push(formatRegisterResult(user, new UnauthorizedError()))
+                const error = new UnauthorizedError()
+                logger.warn(`注册用户${user?.id}时, 校验失败, 来自:${payload?.id || authConfig.UNKNOWN_USER_ID}`, error);
+                result.push(formatRegisterResult(user, error))
             })
         }
         for (const user of bySignature) {
@@ -147,9 +148,9 @@ class AuthController {
                 AuthService.verifyRSASignature([id, username, isAdmin], createdAt, signature);
                 await AuthService.createUser(user);
                 result.push(formatRegisterResult(user))
-                logger.info(`用户${id}注册成功,来自:${authConfig.SIGNATURE_USER_ID}`);
+                logger.info(`注册用户${id}成功,来自:${authConfig.SIGNATURE_USER_ID}`);
             } catch (error) {
-                logger.warn(`注册用户${user.id}时, 校验失败, 来自:${authConfig.SIGNATURE_USER_ID}`);
+                logger.warn(`注册用户${user.id}时, 校验失败, 来自:${authConfig.SIGNATURE_USER_ID}`, error);
                 result.push(formatRegisterResult(user, error))
             }
         }
@@ -158,14 +159,17 @@ class AuthController {
     static async delete(req, res) {
         const { id, signature, createdAt } = req.body;
         const token = getAccessTokenFromReq(req);
-        const payload = await AuthService.checkAccessToken(token);
+        const payload = await AuthService.useAccessToken(token);
         if (signature) {
             AuthService.verifyRSASignature([id], createdAt, signature);
             AuthService.deleteUser({ id });
         } else if (payload?.userType === "admin" && !AuthService.isAdmin(payload?.id)) {
             AuthService.deleteUser({ id });
         } else {
-            throw new UnauthorizedError()
+            const error = new UnauthorizedError()
+            logger.warn(`删除用户时, 校验失败, 来自:${signature ?
+                authConfig.SIGNATURE_USER_ID :
+                payload?.id || authConfig.UNKNOWN_USER_ID}`, error);
         }
         return res.status(204).end();
     }
@@ -178,30 +182,31 @@ class AuthController {
             throw new ValidationError(`Batch deletion is limited to ${authConfig.DELETION_USER_MAX_LENGTH} users per request.`, "userList")
         }
         const token = getAccessTokenFromReq(req);
-        const payload = await AuthService.checkAccessToken(token);
+        const payload = await AuthService.useAccessToken(token);
         const byToken = [], bySignature = [];
         userList.forEach(user => user.signature ? bySignature.push(user) : byToken.push(user));
         const result = []
         if (payload?.userType === "admin") {
             for (const user of byToken) {
-                if (!AuthService.isAdmin(user.id)) {
+                if (AuthService.isAdmin(user.id)) {
                     const error = new UnauthorizedError()
-                    logger.warn(`尝试删除管理员账户, 来自:${payload.id}`, error);
+                    logger.warn(`删除用户${user.id}时, 校验失败, 来自:${payload?.id || authConfig.UNKNOWN_USER_ID}`, error);
                     result.push(formatRegisterResult(user, error))
                     continue;
                 }
                 try {
                     AuthService.deleteUser(user);
                     result.push(formatRegisterResult(user))
+                    logger.info(`删除用户${user.id}, 来自:${payload.id}`)
                 } catch (error) {
-                    logger.warn(`删除账户时, 校验失败, 来自:${payload.id}`, error);
+                    logger.warn(`删除用户${user.id}时, 校验失败, 来自:${payload.id}`, error);
                     result.push(formatRegisterResult(user, error))
                 }
             }
         } else {
             byToken.forEach(user => {
                 const error = new UnauthorizedError()
-                logger.warn(`删除账户时, 校验失败, 来自:${payload?.id || authConfig.UNKNOWN_USER_ID}`, error);
+                logger.warn(`删除用户${user.id}时, 校验失败, 来自:${payload?.id || authConfig.UNKNOWN_USER_ID}`, error);
                 result.push(formatRegisterResult(user, error))
             })
         }
@@ -211,8 +216,9 @@ class AuthController {
                 AuthService.verifyRSASignature([id], createdAt, signature)
                 AuthService.deleteUser(user);
                 result.push(formatRegisterResult(user))
+                logger.info(`删除用户${user.id}, 来自:${authConfig.SIGNATURE_USER_ID}`)
             } catch (error) {
-                logger.error(`删除账户时, 校验失败, 来自:${authConfig.SIGNATURE_USER_ID}`, error);
+                logger.error(`删除用户${user.id}时, 校验失败, 来自:${authConfig.SIGNATURE_USER_ID}`, error);
                 result.push(formatRegisterResult(user, error))
             }
         }
@@ -221,17 +227,20 @@ class AuthController {
     static async issuePasswordKey(req, res) {
         const { id, createdAt, signature } = req.body;
         const token = getAccessTokenFromReq(req);
-        const payload = await AuthService.checkAccessToken(token);
+        const payload = await AuthService.useAccessToken(token);
         let passwordKey;
         if (signature) {
             AuthService.verifyRSASignature([id], createdAt, signature)
             passwordKey = await AuthService.issuePasswordKey({ id });
+            logger.info(`已为用户${id}签发pswd-key, 来自:${authConfig.SIGNATURE_USER_ID}`);
         } else if (!AuthService.isAdmin(payload?.id)) {
             passwordKey = await AuthService.issuePasswordKey({ id });
+            logger.info(`已为用户${id}签发pswd-key, 来自:${payload.id}`);
         }
         if (!passwordKey) {
             return res.json({ passwordKey });
         } else {
+            logger.warn(`尝试签发pswd-key失败, 来自:${payload?.id || authConfig.UNKNOWN_USER_ID}`)
             throw new UnauthorizedError()
         }
     }
@@ -241,6 +250,7 @@ class AuthController {
         const payload = await AuthService.verifyAccessToken(token);
         const { id } = payload;
         AuthService.changePassword({ id, passwordKey, newPassword });
+        logger.info(`用户${id}更换密码成功`)
         return res.status(204).end();
     }
     static async changePasswordRequired(req, res) {
@@ -249,12 +259,17 @@ class AuthController {
         const payload = await AuthService.verifyAccessToken(token);
         const { id } = payload;
         AuthService.changePasswordRequired({ id, passwordRequired });
+        logger.info(`用户${id}已将登录密码要求切换为${passwordRequired === 1 ? "" : "不"}要求密码`)
         return res.status(204).end();
     }
     static async changeAdminStatus(req, res) {
         const { id, isAdmin, signature, createdAt } = req.body;
         AuthService.verifyRSASignature([id, isAdmin], createdAt, signature)
         AuthService.changeAdminStatus({ id, isAdmin });
+        AuthService.revokeRefreshTokenAll(id);
+        isAdmin === 1 ?
+            logger.info(`授予用户${id}的管理员权限, 已吊销其全部刷新令牌, 来自:${authConfig.SIGNATURE_USER_ID}`):
+            logger.info(`撤销用户${id}的管理员权限, 已吊销其全部刷新令牌, 来自:${authConfig.SIGNATURE_USER_ID}`);
         return res.status(204).end();
     }
 }
