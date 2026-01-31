@@ -5,6 +5,7 @@ require('dotenv').config();
 
 const app = express();
 try {
+    app.disable('x-powered-by');
     // Global Middleware
     app.use(express.json());
     app.use(cookieParser());

@@ -41,6 +41,10 @@ class AuthModel {
         const stmt = db.prepare("INSERT OR REPLACE INTO password_key (id, password_key_hash, created_at, expires_at) VALUES (?, ?, ?, ?)");
         return stmt.run(id, password_key_hash, created_at, expires_at);
     }
+    static deletePasswordKey(id) {
+        const stmt = db.prepare("DELETE FROM password_key WHERE id = ?");
+        return stmt.run(id);
+    }
     // Refresh Token Methods
     static findRefreshToken(token_hash) {
         const stmt = db.prepare("SELECT * FROM refresh_tokens WHERE token_hash = ?");
@@ -67,7 +71,7 @@ class AuthModel {
         const stmt = db.prepare("DELETE FROM refresh_tokens WHERE id = ? AND token_hash = ?");
         return stmt.run(id, token_hash);
     }
-    static deleteRefreshTokenAll(id){
+    static deleteRefreshTokenAll(id) {
         const stmt = db.prepare("DELETE FROM refresh_tokens WHERE id = ?");
         return stmt.run(id);
     }

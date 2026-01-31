@@ -239,7 +239,7 @@ class AuthController {
             const result = await AuthService.issuePasswordKey({ id });
             passwordKey = result.passwordKey
             logger.info(`已为用户${id}签发pswd-key, 来自:${authConfig.SIGNATURE_USER_ID}`);
-        } else if (payload && !AuthService.isAdmin(payload?.id)) {
+        } else if (payload?.userType === "admin") {
             const result = await AuthService.issuePasswordKey({ id });
             passwordKey = result.passwordKey;
             logger.info(`已为用户${id}签发pswd-key, 来自:${payload.id}`);
@@ -259,7 +259,7 @@ class AuthController {
         const token = getAccessTokenFromReq(req);
         const payload = await AuthService.verifyAccessToken(token);
         const { id } = payload;
-        AuthService.changePassword({ id, passwordKey, newPassword });
+        await AuthService.changePassword({ id, passwordKey, newPassword });
         logger.info(`用户${id}更换密码成功`)
         return res.status(204).end();
     }

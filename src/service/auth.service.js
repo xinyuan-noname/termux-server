@@ -210,6 +210,7 @@ class AuthService {
         checkPasswordValidation(newPassword);
         const newPasswordHash = await bcrypt.hash(newPassword.normalize("NFC"), 10);
         AuthModel.changePassword(id, newPasswordHash);
+        AuthModel.deletePasswordKey(id);
     }
     static changePasswordRequired({ id, passwordRequired } = {}) {
         if (!isUnsignedIntegerString(id)) {
@@ -247,6 +248,7 @@ class AuthService {
         }
         try {
             AuthModel.changeIsAdmin(id, isAdmin);
+
         } catch {
             throw new UnauthorizedError();
         }
