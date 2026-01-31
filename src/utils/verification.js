@@ -55,7 +55,7 @@ function verifyRSASignature(args, createdAt, signatureBase64) {
     if (!signatureBase64) {
         return false;
     }
-    if (isExpired(createdAt, authConfig.REGISTRATION_SIGNATURE_AGE)) {
+    if (isExpired(createdAt, process.env.REGISTRATION_SIGNATURE_AGE)) {
         const err = new Error('签名过期，无法验证签名');
         logger.error(err.message, err)
         return false

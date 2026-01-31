@@ -15,8 +15,6 @@ module.exports = {
         path: '/auth'
     },
 
-    REGISTRATION_SIGNATURE_AGE: "3min",
-
     USER_TYPE_LIST: ["guest", "user", "admin"],
 
     UNKNOWN_USER_ID: "0000000000",
