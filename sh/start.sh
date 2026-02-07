@@ -45,7 +45,7 @@ cleanup() {
     echo "Shutting down services..."
     if [[ "$NODE_ENV" == "development" ]] && pgrep -f "nodemon.*src/server.js" > /dev/null; then
         pkill -f "nodemon.*src/server.js"
-    elif [[ "$NODE_ENV" != "development" ]] && pgrep -f "node.*src/server.js" > /dev/null; then
+        elif [[ "$NODE_ENV" != "development" ]] && pgrep -f "node.*src/server.js" > /dev/null; then
         pkill -f "node.*src/server.js"
     fi
     if pgrep redis-server > /dev/null; then
@@ -103,7 +103,11 @@ if [[ -n "$TEMP_URL" ]]; then
     echo ""
     echo "✅ Temporary public URL: $TEMP_URL"
     echo ""
-    printf '%s' "$TEMP_URL" > url.txt
+    printf '%s' "$TEMP_URL" > url.txt&&\
+    git add url.txt >/dev/null&&\
+    git commit -m "change url" >/dev/null&&\
+    git push -u origin main >/dev/null&&\
+    echo "✅ URl push to origin"
 else
     echo "⚠️  Warning: Could not extract temporary URL from cloudflared logs."
     echo "   Check $CLOUDFLARED_LOG for details."
