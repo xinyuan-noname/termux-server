@@ -12,11 +12,16 @@ const logger = winston.createLogger({
             }
         }),
         winston.format.errors({ stack: true }),
-        winston.format.printf(({ timestamp, level, message, stack }) => {
-            if (stack) {
-                return ` ${timestamp} [${level.toUpperCase()}]:  ${message}\n ${stack}`;
+        winston.format.printf((info) => {
+            const { timestamp, level, message, stack, ...meta } = info;
+            let output = ` ${timestamp} [${level.toUpperCase()}]: ${message}`;
+            if (Object.keys(meta).length > 0) {
+                output += JSON.stringify(meta);
             }
-            return ` ${timestamp} [${level.toUpperCase()}]:  ${message}`;
+            if (stack) {
+                output += `\n${stack}`;
+            }
+            return output;
         })
     ),
     transports: [
