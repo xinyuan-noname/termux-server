@@ -31,6 +31,9 @@ class AuthController {
         const accessToken = AuthService.issueAccessToken(payload);
         const { refreshToken } = AuthService.issueRefreshToken({ id, userType: result.userType, deviceDescription });
         switch (true) {
+            case deviceDescription.startsWith("Flutter App"): {
+                return res.json({ accessToken, refreshToken });
+            };
             default: {
                 res.cookie('refreshToken', refreshToken, {
                     ...authConfig.REFRESH_TOKEN_COOKIE_OPTIONS,

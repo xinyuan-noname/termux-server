@@ -19,7 +19,7 @@ function parseDeviceMiddleware(req, res, next) {
       const appVersion = req.headers['x-app-version']?.trim();
 
       deviceDescription = [
-        'Flutter',
+        'Flutter APP',
         deviceModel,
         osVersion ? `OS ${osVersion}` : '',
         appVersion ? `v${appVersion}` : ''
