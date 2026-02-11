@@ -84,7 +84,7 @@ class AuthService {
             const createdAt = Math.ceil(Date.now() / 1000);
             let expiresAt;
             switch (true) {
-                case deviceDescription.startsWith("Flutter App"): {
+                case deviceDescription.startsWith(authConfig.FLUTTER_DEVICE_LABEL): {
                     expiresAt = createdAt + authConfig.REFRESH_TOKEN_AGE_APP;
                 }; break;
                 default: {

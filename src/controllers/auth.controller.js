@@ -30,10 +30,11 @@ class AuthController {
         const payload = { id, userType: result.userType };
         const accessToken = AuthService.issueAccessToken(payload);
         const { refreshToken } = AuthService.issueRefreshToken({ id, userType: result.userType, deviceDescription });
+        const data = { accessToken };
         switch (true) {
-            case deviceDescription.startsWith("Flutter App"): {
-                return res.json({ accessToken, refreshToken });
-            };
+            case deviceDescription.startsWith(authConfig.FLUTTER_DEVICE_LABEL): {
+                data.refreshToken = refreshToken;
+            }; break;
             default: {
                 res.cookie('refreshToken', refreshToken, {
                     ...authConfig.REFRESH_TOKEN_COOKIE_OPTIONS,
@@ -42,7 +43,7 @@ class AuthController {
             }; break;
         }
         logger.info(`用户${id}登录成功, 签发访问令牌和刷新令牌`);
-        return res.json({ accessToken });
+        return res.json(data);
     }
     /**
      * POST auth/login
