@@ -37,7 +37,7 @@ class AuthController {
             default: {
                 res.cookie('refreshToken', refreshToken, {
                     ...authConfig.REFRESH_TOKEN_COOKIE_OPTIONS,
-                    maxAge: authConfig.REFRESH_TOKEN_AGE * 1000
+                    maxAge: authConfig.REFRESH_TOKEN_AGE_DEFAULT * 1000
                 })
             }; break;
         }

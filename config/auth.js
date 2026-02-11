@@ -7,7 +7,8 @@ module.exports = {
     BANNED_ACCESS_TOKEN_REDIS_PREFIX: "banned_jti",
     ACCESS_TOKEN_AGE: "15min",
 
-    REFRESH_TOKEN_AGE: 7 * 24 * 3600, // 7 days in seconds
+    REFRESH_TOKEN_AGE_APP: 30 * 24 * 3600, // 30 days in seconds
+    REFRESH_TOKEN_AGE_DEFAULT: 1 * 24 * 3600, // 1 days in seconds
     REFRESH_TOKEN_COOKIE_OPTIONS: {
         httpOnly: true,
         secure: true,

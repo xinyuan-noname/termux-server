@@ -82,7 +82,15 @@ class AuthService {
             const token = generateRandomSafeString(64);
             const tokenHash = convertToHash(token);
             const createdAt = Math.ceil(Date.now() / 1000);
-            const expiresAt = createdAt + authConfig.REFRESH_TOKEN_AGE;
+            let expiresAt;
+            switch (true) {
+                case deviceDescription.startsWith("Flutter App"): {
+                    expiresAt = createdAt + authConfig.REFRESH_TOKEN_AGE_APP;
+                }; break;
+                default: {
+                    expiresAt = createdAt + authConfig.REFRESH_TOKEN_AGE_DEFAULT;
+                }; break;
+            }
             AuthModel.addRefreshToken(id, userType, tokenHash, deviceDescription, createdAt, expiresAt);
             return { refreshToken: token };
         } catch {
