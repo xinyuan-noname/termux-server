@@ -53,9 +53,13 @@ class AuthController {
      */
     static async logout(req, res) {
         let refreshToken;
+        const deviceDescription = req.deviceDescription;
         const accessToken = getAccessTokenFromReq(req);
         const payload = await AuthService.verifyAccessToken(accessToken);
         switch (true) {
+            case deviceDescription.startsWith(authConfig.FLUTTER_DEVICE_LABEL):{
+                refreshToken = req.body.refreshToken;
+            } break;
             default: {
                 refreshToken = req.cookies.refreshToken;
                 res.clearCookie('refreshToken', authConfig.REFRESH_TOKEN_COOKIE_OPTIONS);
@@ -78,6 +82,9 @@ class AuthController {
         const deviceDescription = req.deviceDescription;
         let refreshToken;
         switch (true) {
+            case deviceDescription.startsWith(authConfig.FLUTTER_DEVICE_LABEL): {
+                refreshToken = req.body.refreshToken;
+            }; break;
             default: {
                 refreshToken = req.cookies.refreshToken;
             }; break;
