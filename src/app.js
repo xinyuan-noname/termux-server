@@ -20,6 +20,9 @@ try {
     // Parser Device Middleware
     const authRoutes = require('./routes/auth.routes');
     app.use('/auth', authRoutes);
+    // Parser Device Middleware
+    const profilesRoutes = require('./routes/profiles.routes');
+    app.use('/profiles', profilesRoutes);
 
     // Error Handling Middleware
     const errorHandler = require('./middleware/error');

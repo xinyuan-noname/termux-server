@@ -13,7 +13,7 @@ module.exports = (req, res, next) => {
         const { statusCode } = res;
         logger.info(`${method} ${originalUrl} ${statusCode} (${duration}ms)`, {
             ip: req.headers['cf-connecting-ip'] ?? req.ip,
-            userAgent: req.headers["user-agent"],
+            userAgent:req.headers["user-agent"],
         });
     });
     next();

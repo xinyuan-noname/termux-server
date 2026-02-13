@@ -6,3 +6,5 @@ const router = express.Router();
 router.use('/', access);
 
 router.post('/avatar', avatarUpload.single("avatar"), ProfilesController.uploadAvatar);
+
+module.exports = router;
