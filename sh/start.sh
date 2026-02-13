@@ -25,6 +25,9 @@ ERROR_LOG="logs/prod/error.log"
 CLOUDFLARED_LOG="logs/prod/cloudflared.log"
 [ "$NODE_ENV" == "development" ] && CLOUDFLARED_LOG="logs/dev/cloudflared.log"
 
+WORKER_LOG="logs/prod/worker.log"
+[ "$NODE_ENV" == "development" ] && WORKER_LOG="logs/dev/worker.log"
+
 kill -9 $(lsof -ti:49999) $(lsof -ti:$PORT) $(lsof -ti:6379) || true
 echo "Starting application in $NODE_ENV mode on port $PORT..."
 
@@ -35,11 +38,10 @@ if [[ "$NODE_ENV" == "development" ]]; then
     > "$ERROR_LOG"
     > "$CLOUDFLARED_LOG"
     > "$REDIS_LOG"
+    > "$WORKER_LOG"
 fi
 
-# 启动 Redis（后台运行）
-echo "Starting redis-server..."
-redis-server --daemonize yes --loglevel notice --logfile "$REDIS_LOG"
+
 
 # 函数：清理并退出
 cleanup() {
@@ -48,6 +50,11 @@ cleanup() {
         pkill -f "nodemon.*src/server.js"
         elif [[ "$NODE_ENV" != "development" ]] && pgrep -f "node.*src/server.js" > /dev/null; then
         pkill -f "node.*src/server.js"
+    fi
+    if [[ "$NODE_ENV" == "development" ]] && pgrep -f "nodemon.*src/worker.js" > /dev/null; then
+        pkill -f "nodemon.*src/worker.js"
+        elif [[ "$NODE_ENV" != "development" ]] && pgrep -f "node.*src/worker.js" > /dev/null; then
+        pkill -f "node.*src/worker.js"
     fi
     if pgrep redis-server > /dev/null; then
         redis-cli shutdown
@@ -58,18 +65,31 @@ cleanup() {
     exit 0
 }
 
+# 启动 Redis（后台运行）
+echo "Starting redis-server..."
+redis-server --daemonize yes --loglevel notice --logfile "$REDIS_LOG"
+
 # 注册退出信号处理
 trap cleanup SIGINT SIGTERM
 
 # 启动应用服务器（根据 NODE_ENV 选择 nodemon 或 node）
+# 启动应用服务器
 if [[ "$NODE_ENV" == "development" ]]; then
     echo "Starting server with nodemon..."
     nodemon src/server.js &
     SERVER_PID=$!
+    
+    echo "Starting worker with nodemon..."
+    nodemon src/worker/worker.index.js &          # ← 假设 worker.js 在 src/
+    WORKER_PID=$!
 else
     echo "Starting server with node..."
     node src/server.js &
     SERVER_PID=$!
+    
+    echo "Starting worker with node..."
+    node src/worker/worker.index.js &
+    WORKER_PID=$!
 fi
 
 # 等待服务器启动（简单等待5秒，可根据需要调整）
