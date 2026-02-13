@@ -18,7 +18,7 @@ async function deleteFile(filename) {
     const fullPath = path.resolve(AVATAR_DIR, filename);
     try {
         await fs.unlink(fullPath);
-        workerLogger.log(`[Delete] 成功删除: ${filename}`);
+        workerLogger.info(`[Delete] 成功删除: ${filename}`);
     } catch (err) {
         if (err.code === 'ENOENT') {
             workerLogger.warn(`[Delete] 文件不存在: ${filename}`);
@@ -29,7 +29,7 @@ async function deleteFile(filename) {
 }
 
 async function consumeQueue() {
-    workerLogger.log('[Worker] 文件删除消费者已启动...');
+    workerLogger.info('[Worker] 文件删除消费者已启动...');
 
     while (true) {
         try {

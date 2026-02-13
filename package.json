@@ -7,7 +7,6 @@
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
-    "link": "npm link ../grofc_utils",
     "start": "./sh/start.sh"
   },
   "dependencies": {

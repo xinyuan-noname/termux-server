@@ -29,8 +29,8 @@ const workerLogger = winston.createLogger({
             new winston.transports.File({ filename: 'logs/dev/worker.log' }) :
             new winston.transports.File({ filename: 'logs/prod/worker.log' }),
         RUN_IN_DEV ?
-            new winston.transports.File({ filename: 'logs/dev/worker.log', level: 'error' }) :
-            new winston.transports.File({ filename: 'logs/prod/worker.log', level: 'error' })
+            new winston.transports.File({ filename: 'logs/dev/error.worker.log', level: 'error' }) :
+            new winston.transports.File({ filename: 'logs/prod/error.worker.log', level: 'error' })
     ]
 });
 if (RUN_IN_DEV) {

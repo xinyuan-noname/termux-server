@@ -41,8 +41,6 @@ if [[ "$NODE_ENV" == "development" ]]; then
     > "$WORKER_LOG"
 fi
 
-
-
 # 函数：清理并退出
 cleanup() {
     echo "Shutting down services..."
@@ -51,10 +49,10 @@ cleanup() {
         elif [[ "$NODE_ENV" != "development" ]] && pgrep -f "node.*src/server.js" > /dev/null; then
         pkill -f "node.*src/server.js"
     fi
-    if [[ "$NODE_ENV" == "development" ]] && pgrep -f "nodemon.*src/worker.js" > /dev/null; then
-        pkill -f "nodemon.*src/worker.js"
-        elif [[ "$NODE_ENV" != "development" ]] && pgrep -f "node.*src/worker.js" > /dev/null; then
-        pkill -f "node.*src/worker.js"
+    if [[ "$NODE_ENV" == "development" ]] && pgrep -f "nodemon.*src/workers/index.worker.js" > /dev/null; then
+        pkill -f "nodemon.*src/workers/index.worker.js"
+        elif [[ "$NODE_ENV" != "development" ]] && pgrep -f "node.*src/workers/index.worker.js" > /dev/null; then
+        pkill -f "node.*src/workers/index.worker.js"
     fi
     if pgrep redis-server > /dev/null; then
         redis-cli shutdown
@@ -80,7 +78,7 @@ if [[ "$NODE_ENV" == "development" ]]; then
     SERVER_PID=$!
     
     echo "Starting worker with nodemon..."
-    nodemon src/worker/worker.index.js &          # ← 假设 worker.js 在 src/
+    nodemon src/workers/index.worker.js &          
     WORKER_PID=$!
 else
     echo "Starting server with node..."
@@ -88,7 +86,7 @@ else
     SERVER_PID=$!
     
     echo "Starting worker with node..."
-    node src/worker/worker.index.js &
+    node src/workers/index.worker.js &
     WORKER_PID=$!
 fi
 
