@@ -18,12 +18,8 @@ try {
     app.use(createRateLimiter(1, 70, void 0)) // 60s w=70
 
     // Parser Device Middleware
-    const parseDeviceMiddleware = require("./middleware/parserDevice");
-
-    // Routes
-    app.get('/device', parseDeviceMiddleware, (req, res) => res.status(200).json(req.deviceDescription)); //本行用于测试设备是否能够正常识别
     const authRoutes = require('./routes/auth.routes');
-    app.use('/auth', parseDeviceMiddleware, authRoutes);
+    app.use('/auth', authRoutes);
 
     // Error Handling Middleware
     const errorHandler = require('./middleware/error');

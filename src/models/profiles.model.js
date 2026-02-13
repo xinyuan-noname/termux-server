@@ -9,9 +9,13 @@ class ProfilesModel {
         const stmt = db.prepare("UPDATE profiles SET gender = ? WHERE id = ?");
         stmt.run(gender, id);
     }
-    static updateAvatarPath(id, avatar_path) {
-        const stmt = db.prepare("UPDATE profiles SET avatar_path = ? WHERE id = ?");
-        stmt.run(id, avatar_path);
+    static updateAvatarName(id, avatar_name) {
+        const stmt = db.prepare("UPDATE profiles SET avatar_name = ? WHERE id = ?");
+        stmt.run(id, avatar_name);
+    }
+    static getAvatarName(id) {
+        const stmt = db.prepare("SELECT avatar_name FROM profiles WHERE id = ?");
+        return stmt.get(id);
     }
 }
 module.exports = ProfilesModel;

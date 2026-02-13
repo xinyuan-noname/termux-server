@@ -2,6 +2,8 @@ const express = require('express');
 const createRateLimiter = require('../middleware/rateLimit');
 const AuthController = require('../controllers/auth.controller');
 const router = express.Router();
+const parseDeviceMiddleware = require("./middleware/parserDevice");
+router.use('/', parseDeviceMiddleware);
 /// 需要字段 id, username, password
 router.post(
   '/login',

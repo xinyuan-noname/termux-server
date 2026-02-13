@@ -64,6 +64,14 @@ class TokenIssueError extends Error {
         Error?.captureStackTrace?.(this, TokenIssueError);
     }
 }
+class FileUploadError extends Error {
+    constructor(message = "Failed to upload file", code = "FILE_UPLOAD_FAILED") {
+        super(message);
+        this.name = "FileUploadError";
+        this.code = code;
+        Error?.captureStackTrace?.(this, FileUploadError);
+    }
+}
 module.exports = {
     ValidationError,
     UnauthorizedError,
@@ -72,5 +80,6 @@ module.exports = {
     ConflictError,
     TimeoutError,
     RateLimitError,
-    TokenIssueError
+    TokenIssueError,
+    FileUploadError
 }

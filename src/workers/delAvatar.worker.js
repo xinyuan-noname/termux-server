@@ -3,27 +3,27 @@ const redis = require('../redis'); // 你的 Redis 客户端
 const fs = require('fs').promises;
 const path = require('path');
 const dirConfig = require("../../config/paths");
+const queueConfig = require("../../config/queue");
 const workerLogger = require("./logger.worker");
 const AVATAR_DIR = dirConfig.AVATAR_DIR;
 async function deleteFile(filename) {
-    if (!filename) return;
+    if (!filename || typeof filename !== 'string') return;
 
-    // 安全检查：防止路径穿越
-    if (filename.includes('..') || filename.includes('/')) {
+    // 防止路径穿越：只允许纯文件名
+    if (path.basename(filename) !== filename) {
         workerLogger.warn(`[Delete] 跳过非法文件名: ${filename}`);
         return;
     }
 
-    const fullPath = path.join(AVATAR_DIR, filename);
+    const fullPath = path.resolve(AVATAR_DIR, filename);
     try {
-        await fs.access(fullPath); // 检查文件是否存在
         await fs.unlink(fullPath);
         workerLogger.log(`[Delete] 成功删除: ${filename}`);
     } catch (err) {
         if (err.code === 'ENOENT') {
-            workerLogger.warn(`[Delete] 文件不存在: ${filename}`, err);
+            workerLogger.warn(`[Delete] 文件不存在: ${filename}`);
         } else {
-            workerLogger.error(`[Delete] 删除失败 ${filename}:${err.message}`, err);
+            workerLogger.error(`[Delete] 删除失败 ${filename}: ${err.message}`, err);
         }
     }
 }
@@ -33,8 +33,7 @@ async function consumeQueue() {
 
     while (true) {
         try {
-            const result = await redis.brPop('delete_queue', 5);
-
+            const result = await redis.brPop(queueConfig.DEL_AVATAR_KEY, 5);
             if (result) {
                 const filename = result[1];
                 await deleteFile(filename);
