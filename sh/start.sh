@@ -25,6 +25,7 @@ ERROR_LOG="logs/prod/error.log"
 CLOUDFLARED_LOG="logs/prod/cloudflared.log"
 [ "$NODE_ENV" == "development" ] && CLOUDFLARED_LOG="logs/dev/cloudflared.log"
 
+kill -9 $(lsof -ti:49999) $(lsof -ti:$PORT) $(lsof -ti:6379) || true
 echo "Starting application in $NODE_ENV mode on port $PORT..."
 
 # 清理开发日志（仅在开发模式下）
@@ -82,7 +83,7 @@ fi
 
 # 启动 cloudflared tunnel 并获取临时 URL
 echo "Starting cloudflared tunnel on localhost:$PORT..."
-cloudflared tunnel --url "http://localhost:$PORT" --metrics 127.0.0.1:49999 > "$CLOUDFLARED_LOG" 2>&1 &
+cloudflared tunnel --url "http://localhost:$PORT" --metrics 127.0.0.1:49999 --protocol http2 > "$CLOUDFLARED_LOG" 2>&1 &
 TUNNEL_PID=$!
 
 # 等待 cloudflared 初始化并提取临时 URL

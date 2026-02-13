@@ -51,7 +51,7 @@ class AuthService {
             return payload;
         } catch (error) {
             logger.warn("校验access token失效", error);
-            throw new UnauthorizedError();
+            throw new UnauthorizedError("Invalid Access Token");
         }
     }
     static async useAccessToken(token) {
@@ -112,7 +112,7 @@ class AuthService {
         }
         return { id: result.id, userType: result.userType };
     }
-    static revokeRefreshToken(id, token) {
+    static revokeRefreshTokenMatchId(id, token) {
         const tokenHash = convertToHash(token);
         AuthModel.deleteRefreshTokenMatchId(id, tokenHash);
     }

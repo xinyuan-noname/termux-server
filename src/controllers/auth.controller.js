@@ -57,7 +57,7 @@ class AuthController {
         const accessToken = getAccessTokenFromReq(req);
         const payload = await AuthService.verifyAccessToken(accessToken);
         switch (true) {
-            case deviceDescription.startsWith(authConfig.FLUTTER_DEVICE_LABEL):{
+            case deviceDescription.startsWith(authConfig.FLUTTER_DEVICE_LABEL): {
                 refreshToken = req.body.refreshToken;
             } break;
             default: {
@@ -67,7 +67,7 @@ class AuthController {
         }
         if (payload.id && refreshToken) {
             await AuthService.revokeAccessToken(accessToken);
-            AuthService.revokeRefreshToken(payload.id, refreshToken);
+            AuthService.revokeRefreshTokenMatchId(payload.id, refreshToken);
         }
         logger.info(`用户${payload.id}从${req.deviceDescription}登出成功, 废止访问令牌`);
         return res.status(204).end();
