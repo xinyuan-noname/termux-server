@@ -20,6 +20,7 @@ class ProfilesServer {
     }
     static getAvatarName({ id } = {}) {
         const user = ProfilesModel.getAvatarName(id);
+        if (user?.avatar_name == null) return null;
         return user.avatar_name;
     }
 }

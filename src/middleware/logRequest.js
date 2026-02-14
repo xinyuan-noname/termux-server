@@ -1,4 +1,5 @@
 const logger = require("../logger");
+const { generateRandomSafeString } = require("../utils/verification");
 /**
  * 
  * @param {import("express").Request} req 
@@ -7,6 +8,8 @@ const logger = require("../logger");
  */
 module.exports = (req, res, next) => {
     const start = Date.now();
+    const requestId = generateRandomSafeString(16);
+    logger.info(`收到请求${requestId}`)
     res.on('finish', () => {
         const duration = Date.now() - start;
         const { method, originalUrl } = req;
@@ -14,6 +17,7 @@ module.exports = (req, res, next) => {
         logger.info(`${method} ${originalUrl} ${statusCode} (${duration}ms)`, {
             ip: req.headers['cf-connecting-ip'] ?? req.ip,
             userAgent:req.headers["user-agent"],
+            request:requestId
         });
     });
     next();
