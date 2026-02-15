@@ -1,11 +1,14 @@
 const multer = require("multer");
 const { ValidationError, UnauthorizedError, ForbiddenError, NotFoundError, ConflictError, TimeoutError, RateLimitError, TokenIssueError } = require("../error");
 const logger = require("../logger");
-
+const authConfig = require("../../config/auth")
 // eslint-disable-next-line no-unused-vars
 module.exports = (error, req, res, next) => {
     let code, errorJSON;
     if (error instanceof UnauthorizedError) {
+        if (error.code === "INVALID_SIGNATURE") {
+            logger.warn(`收到高危操作请求, 来自:${authConfig.BAD_SIGNATURE_USER_ID}`);
+        }
         code = 401;
         errorJSON = { error: error.message, code: error.code };
     } else if (error instanceof ForbiddenError) {

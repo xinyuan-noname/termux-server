@@ -28,7 +28,7 @@ class AuthService {
                 throw "";
             }
         } catch {
-            throw new UnauthorizedError();
+            throw new UnauthorizedError("Invalid Signature", "INVALID_SIGNATURE");
         }
     }
     static issueAccessToken(payload) {
@@ -161,6 +161,37 @@ class AuthService {
         }
         const passwordHash = typeof password === "string" ? await bcrypt.hash(password.normalize("NFC"), 10) : null,
             isAdmin = 0;
+        try {
+            AuthModel.createUser(id, username, passwordHash, passwordRequired, isAdmin);
+        } catch (err) {
+            if (err.message?.includes("UNIQUE constraint failed")) {
+                throw new ConflictError("User already exists", "id/username");
+            }
+            throw err;
+        }
+    }
+    static async createAdmin({ id, username, password, passwordRequired = 0 } = {}) {
+        if (!isUnsignedIntegerString(id) || !isCnNameString(username)) {
+            throw new ValidationError("Invalid user ID or username", "id/username");
+        }
+        if (![0, 1].includes(passwordRequired)) {
+            throw new ValidationError("Invalid password required value", "passwordRequired")
+        }
+
+        if (typeof password !== "string") {
+            throw new ValidationError("Password is required but not provided.", "password");
+        }
+
+        if (typeof password === 'string') {
+            if (password.length < authConfig.PASSWORD_MIN_LENGTH) {
+                throw new ValidationError(`Password must be at least ${authConfig.PASSWORD_MIN_LENGTH} characters long.`, "password");
+            }
+            if (password.length > authConfig.PASSWORD_MAX_LENGTH) {
+                throw new ValidationError(`Password must be at most ${authConfig.PASSWORD_MAX_LENGTH} characters long.`, "password");
+            }
+        }
+        const passwordHash = typeof password === "string" ? await bcrypt.hash(password.normalize("NFC"), 10) : null,
+            isAdmin = 1;
         try {
             AuthModel.createUser(id, username, passwordHash, passwordRequired, isAdmin);
         } catch (err) {
