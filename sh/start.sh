@@ -28,6 +28,9 @@ CLOUDFLARED_LOG="logs/prod/cloudflared.log"
 WORKER_LOG="logs/prod/worker.log"
 [ "$NODE_ENV" == "development" ] && WORKER_LOG="logs/dev/worker.log"
 
+WORKER_ERROR_LOG="logs/prod/error.worker.log"
+[ "$NODE_ENV" == "development" ] && WORKER_LOG="logs/dev/error.worker.log"
+
 kill -9 $(lsof -ti:49999) $(lsof -ti:$PORT) $(lsof -ti:6379) || true
 echo "Starting application in $NODE_ENV mode on port $PORT..."
 
@@ -39,6 +42,7 @@ if [[ "$NODE_ENV" == "development" ]]; then
     > "$CLOUDFLARED_LOG"
     > "$REDIS_LOG"
     > "$WORKER_LOG"
+    > "$WORKER_ERROR_LOG"
 fi
 
 # 函数：清理并退出
@@ -78,7 +82,7 @@ if [[ "$NODE_ENV" == "development" ]]; then
     SERVER_PID=$!
     
     echo "Starting worker with nodemon..."
-    nodemon src/workers/index.worker.js &          
+    nodemon src/workers/index.worker.js &
     WORKER_PID=$!
 else
     echo "Starting server with node..."
