@@ -227,6 +227,17 @@ class AuthService {
         AuthModel.addPasswordKey(id, passwordKeyHash, createdAt, expiresAt);
         return { passwordKey };
     }
+    static async changePassword({ id, newPassword } = {}) {
+        if (!isUnsignedIntegerString(id)) {
+            throw new ValidationError("Invalid user ID", "id");
+        }
+        if (typeof newPassword !== "string") {
+            throw new ValidationError("Invalid new password.", "newPassword");
+        }
+        checkPasswordValidation(newPassword);
+        const newPasswordHash = await bcrypt.hash(newPassword.normalize("NFC"), 10);
+        AuthModel.changePassword(id, newPasswordHash);
+    }
     static async resetPassword({ id, passwordKey, newPassword } = {}) {
         if (!isUnsignedIntegerString(id)) {
             throw new ValidationError("Invalid user ID", "id");

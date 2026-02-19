@@ -81,7 +81,11 @@ class AuthController {
         logger.info(`用户${id}刷新访问令牌`);
         return res.json({ accessToken });
     }
-
+    /**
+     * @param {import("express").Request} req 
+     * @param {import("express").Response} res 
+     * @returns 
+     */
     static async issuePasswordKey(req, res) {
         const { id } = req.body;
         const payload = req.accessPayload;
@@ -99,14 +103,35 @@ class AuthController {
             throw error;
         }
     }
-    static async resetPassword(req, res) {
-        const { passwordKey, newPassword } = req.body;
+    /**
+     * @param {import("express").Request} req 
+     * @param {import("express").Response} res 
+     * @returns 
+     */
+    static async changePassword(req, res) {
+        const { newPassword } = req.body;
         const payload = req.accessPayload;
         const { id } = payload;
-        await AuthService.resetPassword({ id, passwordKey, newPassword });
-        logger.info(`用户${id}更换密码成功`)
+        await AuthService.changePassword({ id, newPassword });
+        logger.info(`用户${id}更换密码成功`);
         return res.status(204).end();
     }
+    /**
+     * @param {import("express").Request} req 
+     * @param {import("express").Response} res 
+     * @returns 
+     */
+    static async resetPassword(req, res) {
+        const { id, passwordKey, newPassword } = req.body;
+        await AuthService.resetPassword({ id, passwordKey, newPassword });
+        logger.info(`用户${id}重置密码成功`)
+        return res.status(204).end();
+    }
+    /**
+     * @param {import("express").Request} req 
+     * @param {import("express").Response} res 
+     * @returns 
+     */
     static async changePasswordRequired(req, res) {
         const { passwordRequired } = req.body;
         const payload = req.accessPayload;

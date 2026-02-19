@@ -1,7 +1,7 @@
 const AuthService = require("../service/auth.service");
 const authConfig = require("../../config/auth");
 const logger = require("../logger");
-const { ValidationError} = require("../error");
+const { ValidationError } = require("../error");
 const formatBatchResult = (user, error) => {
     return error ? {
         success: false,
@@ -97,16 +97,12 @@ class AdminController {
         return res.json({ result })
     }
     static async issuePasswordKey(req, res) {
-        const { id, signature } = req.body;
+        const { id } = req.body;
         let passwordKey;
-        if (signature) {
-            const result = await AuthService.issuePasswordKey({ id });
-            passwordKey = result.passwordKey
-            logger.info(`已为用户${id}签发pswd-key, 来自:${authConfig.SIGNATURE_USER_ID}`);
-        } 
-        if (passwordKey) {
-            return res.json({ passwordKey });
-        } 
+        const result = await AuthService.issuePasswordKey({ id });
+        passwordKey = result.passwordKey
+        logger.info(`已为用户${id}签发pswd-key, 来自:${authConfig.SIGNATURE_USER_ID}`);
+        return res.json({ passwordKey });
     }
 }
 module.exports = AdminController;

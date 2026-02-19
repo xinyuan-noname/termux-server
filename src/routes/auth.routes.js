@@ -27,10 +27,15 @@ router.post(
   access,
   AuthController.issuePasswordKey
 )
-/// 需要字段passwordKey, newPassword
+/// 需要字段 newPassword
 router.patch(
-  "/reset_password",
+  "/password",
   access,
+  AuthController.resetPassword
+)
+/// 需要字段id, passwordKey, newPassword
+router.patch(
+  "/password/reset",
   AuthController.resetPassword
 )
 
