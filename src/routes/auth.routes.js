@@ -31,7 +31,7 @@ router.post(
 router.patch(
   "/password",
   access,
-  AuthController.resetPassword
+  AuthController.changePassword
 )
 /// 需要字段id, passwordKey, newPassword
 router.patch(
