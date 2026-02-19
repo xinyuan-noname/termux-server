@@ -7,7 +7,10 @@ const queueConfig = require("../../config/queue");
 const workerLogger = require("./logger.worker");
 const AVATAR_DIR = dirConfig.AVATAR_DIR;
 async function deleteFile(filename) {
-    if (!filename || typeof filename !== 'string') return;
+    if (!filename || typeof filename !== 'string') {
+        workerLogger.warn(`[Delete] 未正确传入文件名: ${filename}`);
+        return;
+    }
 
     // 防止路径穿越：只允许纯文件名
     if (path.basename(filename) !== filename) {
@@ -35,7 +38,7 @@ async function consumeQueue() {
         try {
             const result = await redis.brPop(queueConfig.DEL_AVATAR_KEY, 5);
             if (result) {
-                const filename = result[1];
+                const filename = result.element;
                 await deleteFile(filename);
             }
         } catch (err) {

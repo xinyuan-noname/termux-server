@@ -11,7 +11,7 @@ class ProfilesModel {
     }
     static updateAvatarName(id, avatar_name) {
         const stmt = db.prepare("UPDATE profiles SET avatar_name = ? WHERE id = ?");
-        stmt.run(id, avatar_name);
+        stmt.run(avatar_name, id);
     }
     static getAvatarName(id) {
         const stmt = db.prepare("SELECT avatar_name FROM profiles WHERE id = ?");

@@ -14,10 +14,9 @@ class ProfilesController {
             throw new FileUploadError();
         }
         const { id } = accessPayload;
-        // 将旧的头像文件加入删除队列中
-        const oldAvatarPath = ProfilesServer.getAvatarName({ id });
-        if (oldAvatarPath) {
-            enqueueAvatarDelete(oldAvatarPath);
+        const oldAvatarName = ProfilesServer.getAvatarName({ id });
+        if (oldAvatarName) {
+            enqueueAvatarDelete(oldAvatarName);
         }
         ProfilesServer.uploadAvatar({ id, avatarName: file.filename });
         return res.status(204).end();
