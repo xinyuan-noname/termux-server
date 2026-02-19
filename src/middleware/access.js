@@ -9,6 +9,7 @@ const { getAccessTokenFromReq } = require("../utils/verification");
 module.exports = async (req, res, next) => {
     const token = getAccessTokenFromReq(req);
     const payload = await AuthService.verifyAccessToken(token);
-    req.access = payload;
+    req.accessPayload = payload;
+    req.accessToken = token;
     next();
 }

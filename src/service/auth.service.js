@@ -227,7 +227,7 @@ class AuthService {
         AuthModel.addPasswordKey(id, passwordKeyHash, createdAt, expiresAt);
         return { passwordKey };
     }
-    static async changePassword({ id, passwordKey, newPassword } = {}) {
+    static async resetPassword({ id, passwordKey, newPassword } = {}) {
         if (!isUnsignedIntegerString(id)) {
             throw new ValidationError("Invalid user ID", "id");
         }

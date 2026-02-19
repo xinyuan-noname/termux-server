@@ -9,11 +9,11 @@ class ProfilesController {
      * @returns 
      */
     static uploadAvatar(req, res) {
-        const { access, file } = req;
+        const { accessPayload, file } = req;
         if (!file) {
             throw new FileUploadError();
         }
-        const { id } = access;
+        const { id } = accessPayload;
         // 将旧的头像文件加入删除队列中
         const oldAvatarPath = ProfilesServer.getAvatarName({ id });
         if (oldAvatarPath) {

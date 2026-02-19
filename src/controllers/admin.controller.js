@@ -1,6 +1,19 @@
 const AuthService = require("../service/auth.service");
 const authConfig = require("../../config/auth");
 const logger = require("../logger");
+const { ValidationError} = require("../error");
+const formatBatchResult = (user, error) => {
+    return error ? {
+        success: false,
+        id: user.id || null,
+        username: user.username || null,
+        error: { message: error.message, code: error.code, field: error.field || null }
+    } : {
+        success: true,
+        id: user.id,
+        username: user.username,
+    }
+}
 class AdminController {
     /**
      * POST auth/register
@@ -15,9 +28,85 @@ class AdminController {
             logger.info(`用户${id}注册成功, 来自:${authConfig.SIGNATURE_USER_ID}`);
         } else {
             await AuthService.createAdmin({ id, username, passwordRequired, password });
-            logger.info(`用户${id}注册成功, 来自:${authConfig.SIGNATURE_USER_ID}`);
+            logger.info(`管理员${id}注册成功, 来自:${authConfig.SIGNATURE_USER_ID}`);
         }
         return res.status(204).end();
+    }
+    /**
+     * POST auth/register/batch
+     * @param {import("express").Request} req 
+     * @param {import("express").Response} res 
+     * @returns 
+     */
+    static async registerBatch(req, res) {
+        const { userList } = req.body;
+        if (!Array.isArray(userList)) {
+            throw new ValidationError("Invalid userList, expected userList to be an array", "userList")
+        }
+        if (userList.length > authConfig.ADDITION_USER_MAX_LENGTH) {
+            throw new ValidationError(`Batch registration is limited to ${authConfig.ADDITION_USER_MAX_LENGTH} users per request.`, "userList")
+        }
+        const result = [];
+        for (const user of userList) {
+            try {
+                const { id, username, isAdmin } = user
+                await AuthService.createUser({ id, username, isAdmin });
+                result.push(formatBatchResult(user))
+                logger.info(`注册用户${id}成功, 来自:${authConfig.SIGNATURE_USER_ID}`);
+            } catch (error) {
+                logger.warn(`注册用户${user.id}失败, 来自:${authConfig.BAD_SIGNATURE_USER_ID}`, error);
+                result.push(formatBatchResult(user, error))
+            }
+        }
+        return res.json({ result })
+    }
+    static async changeAdminStatus(req, res) {
+        const { id, isAdmin } = req.body;
+        AuthService.changeAdminStatus({ id, isAdmin });
+        AuthService.revokeRefreshTokenAll(id);
+        isAdmin === 1 ?
+            logger.info(`已授予用户${id}的管理员权限, 已吊销其全部刷新令牌, 来自:${authConfig.SIGNATURE_USER_ID}`) :
+            logger.info(`已撤销用户${id}的管理员权限, 已吊销其全部刷新令牌, 来自:${authConfig.SIGNATURE_USER_ID}`);
+        return res.status(204).end();
+    }
+    static async delete(req, res) {
+        const { id } = req.body;
+        AuthService.deleteUser({ id });
+        return res.status(204).end();
+    }
+    static async deleteBatch(req, res) {
+        const { userList } = req.body;
+        if (!Array.isArray(userList)) {
+            throw new ValidationError("Invalid userList, expected userList to be an array", "userList")
+        }
+        if (userList.length > authConfig.DELETION_USER_MAX_LENGTH) {
+            throw new ValidationError(`Batch deletion is limited to ${authConfig.DELETION_USER_MAX_LENGTH} users per request.`, "userList")
+        }
+        const result = [];
+        for (const user of userList) {
+            const { id } = user
+            try {
+                AuthService.deleteUser({ id });
+                logger.info(`删除用户${id}成功, 来自:${authConfig.SIGNATURE_USER_ID}`)
+                result.push(formatBatchResult({ id }))
+            } catch (error) {
+                logger.error(`删除用户${id}失败, 来自:${authConfig.BAD_SIGNATURE_USER_ID}`, error);
+                result.push(formatBatchResult({ id }, error))
+            }
+        }
+        return res.json({ result })
+    }
+    static async issuePasswordKey(req, res) {
+        const { id, signature } = req.body;
+        let passwordKey;
+        if (signature) {
+            const result = await AuthService.issuePasswordKey({ id });
+            passwordKey = result.passwordKey
+            logger.info(`已为用户${id}签发pswd-key, 来自:${authConfig.SIGNATURE_USER_ID}`);
+        } 
+        if (passwordKey) {
+            return res.json({ passwordKey });
+        } 
     }
 }
 module.exports = AdminController;

@@ -13,7 +13,7 @@ module.exports = {
             next();
         }
     },
-    patch: (entry, ...words) => {
+    batch: (entry, ...words) => {
         return (req, res, next) => {
             if (!req.body[entry]) {
                 throw new UnauthorizedError("Invalid Signature", "INVALID_SIGNATURE");
