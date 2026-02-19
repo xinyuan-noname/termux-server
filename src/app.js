@@ -17,10 +17,10 @@ try {
     const createRateLimiter = require("./middleware/rateLimit");
     app.use(createRateLimiter(1, 70, void 0)) // 60s w=70
 
-    // Parser Device Middleware
+    const adminRoutes = require('./routes/admin.routes');
+    app.use('/admin', adminRoutes);
     const authRoutes = require('./routes/auth.routes');
     app.use('/auth', authRoutes);
-    // Parser Device Middleware
     const profilesRoutes = require('./routes/profiles.routes');
     app.use('/profiles', profilesRoutes);
 

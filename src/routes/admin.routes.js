@@ -3,6 +3,12 @@ const signature = require('../middleware/signature');
 const AdminController = require('../controllers/admin.controller');
 const router = express.Router();
 
+router.get(
+    "/",
+    signature.single(["word"]),
+    (req, res) => res.status(204).end()
+)
+
 router.post(
     "/register",
     signature.single(["id", "username", "isAdmin"]),
