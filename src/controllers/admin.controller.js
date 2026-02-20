@@ -15,6 +15,9 @@ const formatBatchResult = (user, error) => {
     }
 }
 class AdminController {
+    static async check(req, res) {
+        return res.status(204).end();
+    }
     /**
      * POST auth/register
      * @param {import("express").Request} req 

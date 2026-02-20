@@ -12,10 +12,10 @@ module.exports = (error, req, res, next) => {
             logger.warn(`收到高危操作请求, 来自:${authConfig.BAD_SIGNATURE_USER_ID}`);
         } else if (error.code === "INVALID_PASSWORD") {
             logger.warn(error.message)
-            res.status(code).json(errorJSON);
-        }else if(error.code==="INVALID_ACCESS_TOKEN"){
+            return res.status(code).json(errorJSON);
+        } else if (error.code === "INVALID_ACCESS_TOKEN") {
             logger.warn(error.message);
-            res.status(code).json(errorJSON);
+            return res.status(code).json(errorJSON);
         }
     } else if (error instanceof ForbiddenError) {
         code = 403;

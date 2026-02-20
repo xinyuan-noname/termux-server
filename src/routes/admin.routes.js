@@ -4,6 +4,12 @@ const AdminController = require('../controllers/admin.controller');
 const router = express.Router();
 
 router.post(
+    '/check',
+    signature.single(["word"]),
+    AdminController.check
+);
+
+router.post(
     "/register",
     signature.single(["id", "username", "isAdmin"]),
     AdminController.register
