@@ -6,11 +6,17 @@ const authConfig = require("../../config/auth")
 module.exports = (error, req, res, next) => {
     let code, errorJSON;
     if (error instanceof UnauthorizedError) {
-        if (error.code === "INVALID_SIGNATURE") {
-            logger.warn(`收到高危操作请求, 来自:${authConfig.BAD_SIGNATURE_USER_ID}`);
-        }
         code = 401;
         errorJSON = { error: error.message, code: error.code };
+        if (error.code === "INVALID_SIGNATURE") {
+            logger.warn(`收到高危操作请求, 来自:${authConfig.BAD_SIGNATURE_USER_ID}`);
+        } else if (error.code === "INVALID_PASSWORD") {
+            logger.warn(error.message)
+            res.status(code).json(errorJSON);
+        }else if(error.code==="INVALID_ACCESS_TOKEN"){
+            logger.warn(error.message);
+            res.status(code).json(errorJSON);
+        }
     } else if (error instanceof ForbiddenError) {
         code = 403;
         errorJSON = { error: error.message, code: error.code };

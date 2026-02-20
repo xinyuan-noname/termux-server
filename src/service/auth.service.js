@@ -49,9 +49,8 @@ class AuthService {
                 throw `收到已禁用的accessToken, jti:${payload.jti}, 来源:${payload.id || authConfig.UNKNOWN_USER_ID}`;
             }
             return payload;
-        } catch (error) {
-            logger.warn("校验access token失效", error);
-            throw new UnauthorizedError("Invalid Access Token");
+        } catch (err) {
+            throw new UnauthorizedError(`校验access token失效, 因为:${err.message}`, "INVALID_ACCESS_TOKEN");
         }
     }
     static async useAccessToken(token) {
@@ -125,17 +124,17 @@ class AuthService {
         }
         const user = AuthModel.findUserByIdAndUsername(id, username);
         if (!user) {
-            throw new UnauthorizedError("Invalid credentials");
+            throw "未找到用户";
         }
         if (user.password_required === 0 && (password == null || password === "")) {
             return { userType: "guest" };
         }
         if (typeof password !== "string") {
-            throw new UnauthorizedError("Invalid credentials");
+            throw new UnauthorizedError(`登陆时密码出错, 来自:${id}`, "INVALID_PASSWORD");
         }
         const passwordMatch = await bcrypt.compare(password.normalize("NFC"), user.password_hash);
         if (!passwordMatch) {
-            throw new UnauthorizedError("Invalid credentials");
+            throw new UnauthorizedError(`登陆时密码出错, 来自:${id}`, "INVALID_PASSWORD");
         }
         return { userType: user.is_admin === 1 ? "admin" : "user" };
     }

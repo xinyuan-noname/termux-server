@@ -7,4 +7,6 @@ router.use('/', access);
 
 router.post('/avatar', avatarUpload.single("avatar"), ProfilesController.uploadAvatar);
 
+router.get('/avatar/:id', ProfilesController.getAvatar)
+
 module.exports = router;

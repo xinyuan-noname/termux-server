@@ -1,5 +1,6 @@
-const { FileUploadError } = require("../error");
+const { FileUploadError, NotFoundError } = require("../error");
 const ProfilesServer = require("../service/profiles.service");
+const { safeGetAvatarPath } = require("../utils/profiles");
 const { enqueueAvatarDelete } = require("../utils/queue");
 
 class ProfilesController {
@@ -20,6 +21,29 @@ class ProfilesController {
         }
         ProfilesServer.uploadAvatar({ id, avatarName: file.filename });
         return res.status(204).end();
+    }
+    /**
+    * @param {import("express").Request} req 
+    * @param {import("express").Response} res 
+    * @returns 
+    */
+    static getAvatar(req, res) {
+        const params = req.params;
+        if (!params.id) {
+            throw new NotFoundError("未指定头像id");
+        }
+        const id = params.id
+        const avatarName = ProfilesServer.getAvatarName({ id });
+        const avatarPath = safeGetAvatarPath(avatarName);
+        if (avatarPath == null) {
+            throw new NotFoundError(`未找到${id}头像`);
+        }
+         res.setHeader('Cache-Control', 'public, max-age=86400');
+        return res.sendFile(avatarPath, err => {
+            if (err && !res.headersSent) {
+                return res.status(500).end();
+            }
+        })
     }
 }
 module.exports = ProfilesController;
