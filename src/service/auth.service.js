@@ -25,10 +25,10 @@ class AuthService {
     static verifyRSASignature(args, createdAt, signatureBase64) {
         try {
             if (!verifyRSASignature(args, createdAt, signatureBase64)) {
-                throw "";
+                throw  new Error("校验失败");
             }
-        } catch {
-            throw new UnauthorizedError("Invalid Signature", "INVALID_SIGNATURE");
+        } catch (err){
+            throw new UnauthorizedError(err.message, "INVALID_SIGNATURE");
         }
     }
     static issueAccessToken(payload) {
