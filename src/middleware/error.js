@@ -10,6 +10,8 @@ module.exports = (error, req, res, next) => {
         errorJSON = { error: error.message, code: error.code };
         if (error.code === "INVALID_SIGNATURE") {
             logger.warn(`收到高危操作请求, 来自:${authConfig.BAD_SIGNATURE_USER_ID}`);
+            logger.warn(error.message);
+            return res.status(code).json(errorJSON);
         } else if (error.code === "INVALID_PASSWORD") {
             logger.warn(error.message)
             return res.status(code).json(errorJSON);
