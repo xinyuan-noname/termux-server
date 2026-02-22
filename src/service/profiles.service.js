@@ -42,7 +42,7 @@ class ProfilesServer {
     }
     static getUserInfo({ id, config = {} } = {}) {
         if (!isUnsignedIntegerString(id)) {
-            throw new ValidationError("Invalid user ID", "id");
+            throw new ValidationError("无效的ID", "id");
         }
         const userInfo = ProfilesModel.getUserInfo(id);
         if (userInfo == null) return {};
@@ -74,6 +74,15 @@ class ProfilesServer {
             resultList.push(result);
         }
         return resultList;
+    }
+    static changeGender({ id, gender } = {}) {
+        if (["male", "female", null].includes(gender)) {
+            throw new ValidationError("无效的性别");
+        }
+        if (!isUnsignedIntegerString(id)) {
+            throw new ValidationError("无效的ID", "id");
+        }
+        ProfilesModel.updateGender(id, gender);
     }
 }
 module.exports = ProfilesServer;

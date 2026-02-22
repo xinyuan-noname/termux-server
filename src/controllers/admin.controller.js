@@ -26,7 +26,7 @@ class AdminController {
      * @returns 
      */
     static async register(req, res) {
-        const { id, username, password, passwordRequired, isAdmin } = req.body;
+        const { id, username, password, gender, passwordRequired, isAdmin } = req.body;
         if (isAdmin === 0) {
             await AuthService.createUser({ id, username, password, passwordRequired });
             logger.info(`用户${id}注册成功, 来自:${authConfig.SIGNATURE_USER_ID}`);
@@ -34,6 +34,7 @@ class AdminController {
             await AuthService.createAdmin({ id, username, passwordRequired, password });
             logger.info(`管理员${id}注册成功, 来自:${authConfig.SIGNATURE_USER_ID}`);
         }
+        ProfilesServer.changeGender({ id, gender });
         return res.status(204).end();
     }
     /**
