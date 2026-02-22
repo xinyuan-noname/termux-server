@@ -17,11 +17,16 @@ router.get(
     ProfilesController.getAvatar
 )
 
+
+// 需要字段: idList config
+// config:
+// gender userType username passwordRequired
 router.post(
     '/search/user',
     ProfilesController.getUserInfoBatch
 )
 
+// 需要query 和config一致
 router.get(
     '/user/:id',
     query.boolean,

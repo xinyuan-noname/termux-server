@@ -64,6 +64,11 @@ class AdminController {
         }
         return res.json({ result })
     }
+    /**
+    * @param {import("express").Request} req 
+    * @param {import("express").Response} res 
+    * @returns 
+    */
     static async changeAdminStatus(req, res) {
         const { id, isAdmin } = req.body;
         AuthService.changeAdminStatus({ id, isAdmin });
@@ -73,11 +78,21 @@ class AdminController {
             logger.info(`已撤销用户${id}的管理员权限, 已吊销其全部刷新令牌, 来自:${authConfig.SIGNATURE_USER_ID}`);
         return res.status(204).end();
     }
+    /**
+    * @param {import("express").Request} req 
+    * @param {import("express").Response} res 
+    * @returns 
+    */
     static async delete(req, res) {
         const { id } = req.body;
         AuthService.deleteUser({ id });
         return res.status(204).end();
     }
+    /**
+    * @param {import("express").Request} req 
+    * @param {import("express").Response} res 
+    * @returns 
+    */
     static async deleteBatch(req, res) {
         const { userList } = req.body;
         if (!Array.isArray(userList)) {
@@ -100,6 +115,11 @@ class AdminController {
         }
         return res.json({ result })
     }
+    /**
+    * @param {import("express").Request} req 
+    * @param {import("express").Response} res 
+    * @returns 
+    */
     static async issuePasswordKey(req, res) {
         const { id } = req.body;
         let passwordKey;

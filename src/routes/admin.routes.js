@@ -9,6 +9,9 @@ router.post(
     AdminController.check
 );
 
+// 需要字段: idList config
+// config:
+// gender userType username passwordRequired
 router.post(
     '/search/user',
     signature.single(['word']),
@@ -47,6 +50,10 @@ router.delete(
     AdminController.deleteBatch
 );
 
-
+router.post(
+    "/issue/password_key",
+    signature.single(["id"]),
+    AdminController.issuePasswordKey
+)
 
 module.exports = router;

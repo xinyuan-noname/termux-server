@@ -4,7 +4,7 @@ const { checkAvatarExist } = require("../utils/profiles");
 const { isUnsignedIntegerString } = require("../utils/validation");
 
 const genUserInfoResult = (config, userInfo) => {
-    const result = { id: config.id };
+    const result = { id: userInfo.id };
     if (config.gender === true) {
         result.gender = userInfo.gender;
     }
