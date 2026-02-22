@@ -17,5 +17,13 @@ class ProfilesModel {
         const stmt = db.prepare("SELECT avatar_name FROM profiles WHERE id = ?");
         return stmt.get(id);
     }
+    static getUserInfo(id) {
+        const stmt = db.prepare("SELECT * FROM user_info WHERE id = ?");
+        return stmt.get(id);
+    }
+    static getAllUserInfo() {
+        const stmt = db.prepare("SELECT * FROM user_info");
+        return stmt.all();
+    }
 }
 module.exports = ProfilesModel;

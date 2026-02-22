@@ -10,6 +10,12 @@ router.post(
 );
 
 router.post(
+    '/search/user',
+    signature.single(['word']),
+    AdminController.getUserInfoBatch
+)
+
+router.post(
     "/register",
     signature.single(["id", "username", "isAdmin"]),
     AdminController.register

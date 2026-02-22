@@ -2,6 +2,7 @@ const AuthService = require("../service/auth.service");
 const authConfig = require("../../config/auth");
 const logger = require("../logger");
 const { ValidationError } = require("../error");
+const ProfilesServer = require("../service/profiles.service");
 const formatBatchResult = (user, error) => {
     return error ? {
         success: false,
@@ -106,6 +107,16 @@ class AdminController {
         passwordKey = result.passwordKey
         logger.info(`已为用户${id}签发pswd-key, 来自:${authConfig.SIGNATURE_USER_ID}`);
         return res.json({ passwordKey });
+    }
+    /**
+    * @param {import("express").Request} req 
+    * @param {import("express").Response} res 
+    * @returns 
+    */
+    static getUserInfoBatch(req, res) {
+        const { idList, config } = req.body;
+        const result = ProfilesServer.getUserInfoBatch({ idList, config });
+        return res.json(result);
     }
 }
 module.exports = AdminController;

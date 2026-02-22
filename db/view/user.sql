@@ -3,7 +3,8 @@ CREATE VIEW user_info AS
 SELECT 
     a.id,
     a.username,
-    p.gender,
-    (SELECT COUNT(*) FROM refresh_tokens AS r WHERE r.id = a.id) AS online_devices_count
+    a.password_required,
+    a.is_admin,
+    p.gender
 FROM auth AS a
 LEFT JOIN profiles AS p ON a.id = p.id;
