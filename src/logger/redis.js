@@ -29,12 +29,6 @@ const redisLogger = winston.createLogger({
             filename: path.resolve(LOG_DIR, "redis.log"),
             maxsize: LOG_MAX_SIZE,
             maxFiles: LOG_MAX_FILES
-        }),
-        new winston.transports.File({
-            filename: path.resolve(LOG_DIR, "redis.error.log"),
-            maxsize: LOG_MAX_SIZE,
-            maxFiles: LOG_MAX_FILES,
-            level: 'error'
         })
     ]
 });
