@@ -32,7 +32,7 @@ async function deleteFile(filename) {
 }
 
 async function consumeQueue() {
-    workerLogger.info('[Worker] 文件删除消费者已启动...');
+    workerLogger.info('文件删除消费者已启动...');
 
     while (true) {
         try {
@@ -42,7 +42,7 @@ async function consumeQueue() {
                 await deleteFile(filename);
             }
         } catch (err) {
-            workerLogger.error('[Worker] 消费队列出错:', err);
+            workerLogger.error('消费队列出错:', err);
             await new Promise(r => setTimeout(r, 1000));
         }
     }

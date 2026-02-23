@@ -8,22 +8,22 @@ const logger = require('../logger');
 
 const processes = new Map([
     ['redis', {
-       startRedis,
+        start: startRedis,
         maxRestarts: 5,
         restartTimes: []
     }],
     ['server', {
-        startServer,
+        start: startServer,
         maxRestarts: 3,
         restartTimes: []
     }],
     ['worker', {
-        startWorker,
+        start: startWorker,
         maxRestarts: 5,
         restartTimes: []
     }],
     ['cloudflared', {
-        startCloudflaredTunnel,
+        start: startCloudflaredTunnel,
         maxRestarts: 10,
         restartTimes: []
     }],

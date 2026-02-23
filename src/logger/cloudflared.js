@@ -4,8 +4,8 @@ const { LOGS_DEV_DIR, LOGS_PROD_DIR } = require('../config/paths');
 const { LOG_MAX_SIZE, LOG_MAX_FILES } = require('../config/logger');
 const RUN_IN_DEV = process.env.NODE_ENV === 'development';
 const LOG_DIR = RUN_IN_DEV ? LOGS_DEV_DIR : LOGS_PROD_DIR;
-const tRegx = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z/;
-const clRegx = /\r?\n/;
+const tRegx = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z/g;
+const clRegx = /\r?\n$/;
 const cloudflaredLogger = winston.createLogger({
     level: 'info',
     format: winston.format.combine(

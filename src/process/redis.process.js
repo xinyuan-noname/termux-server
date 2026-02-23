@@ -3,7 +3,6 @@ const redisLogger = require('../logger/redis');
 function startRedis() {
     const child = spawn("redis-server", [
         '--port', process.env.PORT_REDIS,
-        "--daemonize", "yes",
         "--loglevel", "notice",
         '--appendonly', 'yes',
         '--maxmemory', '256mb',

@@ -77,7 +77,6 @@ function execGetCommonCols(db, newTableName, oldTableName) {
     const commonCols = oldCols
         .filter(old => newCols.find(newCol => newCol.name === old.name))
         .map(c => c.name);
-    console.log(oldCols, newCols)
     return commonCols;
 }
 function execMigrateCommonCols(db, newTableName,  oldTableName,commonCols) {

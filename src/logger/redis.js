@@ -4,6 +4,8 @@ const { LOGS_DEV_DIR, LOGS_PROD_DIR } = require('../config/paths');
 const { LOG_MAX_SIZE, LOG_MAX_FILES } = require('../config/logger');
 const RUN_IN_DEV = process.env.NODE_ENV === 'development';
 const LOG_DIR = RUN_IN_DEV ? LOGS_DEV_DIR : LOGS_PROD_DIR;
+const redisTimeRegex = /(\d{1,2})\s+([A-Za-z]{3})\s+(\d{4})\s+(\d{2}):(\d{2}):(\d{2})\.(\d{3})/g;
+const clRegx = /\r?\n$/;
 const redisLogger = winston.createLogger({
     level: 'info',
     format: winston.format.combine(
@@ -16,12 +18,8 @@ const redisLogger = winston.createLogger({
             }
         }),
         winston.format.printf((info) => {
-            const { timestamp, level, message, ...meta } = info;
-            let output = `${timestamp} [${level.toUpperCase()}]: ${message}`;
-            if (Object.keys(meta).length > 0) {
-                output += JSON.stringify(meta);
-            }
-            return output;
+            const { timestamp, message } = info;
+            return message.replace(redisTimeRegex, timestamp).replace(clRegx, "");
         })
     ),
     transports: [
