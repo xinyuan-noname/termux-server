@@ -1,6 +1,7 @@
 const { spawn } = require('child_process');
 const { WORKER_INDEX_FILE } = require('../config/paths');
-function startWorker() {
+// eslint-disable-next-line no-unused-vars
+function startWorker(logger) {
     const child = spawn("node", [WORKER_INDEX_FILE], {
         stdio: 'inherit'
     });

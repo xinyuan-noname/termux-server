@@ -1,6 +1,5 @@
 const { spawn } = require('child_process');
-const cloudflaredLogger = require('../logger/cloudflared');
-function startCloudflaredTunnel() {
+function startCloudflaredTunnel(logger) {
     const child = spawn("cloudflared", [
         "tunnel",
         "--url", `http://localhost:${process.env.PORT}`,
@@ -10,11 +9,11 @@ function startCloudflaredTunnel() {
         stdio: ['ignore', 'pipe', 'pipe']
     });
     child.stdout.on('data', (data) => {
-        cloudflaredLogger.info(data.toString());
+        logger.info(data.toString());
     });
 
     child.stderr.on('data', (data) => {
-        cloudflaredLogger.warn(data.toString());
+        logger.warn(data.toString());
     });
     return child;
 }

@@ -1,19 +1,35 @@
 const clear = require('./clear.dev');
 const startCloudflaredTunnel = require('./cloudflared.process');
 const startRedis = require('./redis.process');
-const redisConnect = require('./redis_connect');
 const startServer = require('./server.process');
 const startWorker = require('./worker.process');
-const logger = require('../logger');
-
 require('dotenv').config();
-
+const logger = require('../logger');
+const workerLogger = require('../logger/worker');
+const redisLogger = require('../logger/redis');
+const cloudflaredLogger = require('../logger/cloudflared');
 
 const processes = new Map([
-    ['redis', { start: startRedis, maxRestarts: 5, restartTimes: [] }],
-    ['server', { start: startServer, maxRestarts: 3, restartTimes: [] }],
-    ['worker', { start: startWorker, maxRestarts: 5, restartTimes: [] }],
-    ['cloudflared', { start: startCloudflaredTunnel, maxRestarts: 10, restartTimes: [] }],
+    ['redis', {
+        start: () => startRedis(redisLogger),
+        maxRestarts: 5,
+        restartTimes: []
+    }],
+    ['server', {
+        start: () => startServer(logger),
+        maxRestarts: 3,
+        restartTimes: []
+    }],
+    ['worker', {
+        start: () => startWorker(workerLogger),
+        maxRestarts: 5,
+        restartTimes: []
+    }],
+    ['cloudflared', {
+        start: () => startCloudflaredTunnel(cloudflaredLogger),
+        maxRestarts: 10,
+        restartTimes: []
+    }],
 ]);
 
 const RESTART_WINDOW = 60000;
@@ -70,7 +86,6 @@ async function start() {
     logger.info('🚀 启动服务...');
 
     startProcess('redis');
-    await redisConnect();
 
     startWorker("worker");
     startProcess("server");

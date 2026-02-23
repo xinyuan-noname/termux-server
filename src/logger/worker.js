@@ -30,12 +30,12 @@ const workerLogger = winston.createLogger({
     ),
     transports: [
         new winston.transports.File({
-            filename: path.resolve(LOG_DIR, "app.log"),
+            filename: path.resolve(LOG_DIR, "woker.log"),
             maxsize: LOG_MAX_SIZE,
             maxFiles: LOG_MAX_FILES
         }),
         new winston.transports.File({
-            filename: path.resolve(LOG_DIR, "app.error.log"),
+            filename: path.resolve(LOG_DIR, "woker.error.log"),
             maxsize: LOG_MAX_SIZE,
             maxFiles: LOG_MAX_FILES,
             level: 'error'

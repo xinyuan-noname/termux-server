@@ -7,7 +7,7 @@
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
-    "start": "./sh/start.sh",
+    "start": "node ./src/process/index.js",
     "upgrade": "node ./src/database/upgrade.js"
   },
   "dependencies": {

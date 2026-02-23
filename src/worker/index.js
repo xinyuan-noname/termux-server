@@ -1,12 +1,12 @@
 const workerLogger = require('../logger/worker');
 const redis = require("../redis");
-require('dotenv').config();
-async function start(){
-    try{
+async function start() {
+    try {
         await redis.connect();
         require('./delAvatar.worker');
-    }catch{
+    } catch {
         workerLogger.error("worker启动失败");
+        process.exit(1);
     }
 }
 start();

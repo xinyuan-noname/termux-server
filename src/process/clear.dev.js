@@ -22,7 +22,7 @@ async function clear() {
         }
         console.log("删除Redis开发缓存成功");
     } catch (err) {
-        console.log("删除Redis开发缓存是啊比", err.message);
+        console.log("删除Redis开发缓存", err.message);
     }
 }
 module.exports = clear;

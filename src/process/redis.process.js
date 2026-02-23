@@ -1,6 +1,5 @@
 const { spawn } = require('child_process');
-const redisLogger = require('../logger/redis');
-function startRedis() {
+function startRedis(logger) {
     const child = spawn("redis-server", [
         '--port', process.env.PORT_REDIS,
         "--daemonize", "yes",
@@ -12,11 +11,11 @@ function startRedis() {
         stdio: ['ignore', 'pipe', 'pipe']
     });
     child.stdout.on('data', (data) => {
-        redisLogger.info(data.toString());
+        logger.info(data.toString());
     });
 
     child.stderr.on('data', (data) => {
-        redisLogger.warn(data.toString());
+        logger.warn(data.toString());
     });
     return child;
 }
