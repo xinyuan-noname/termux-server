@@ -1,7 +1,7 @@
 const multer = require("multer");
 const { ValidationError, UnauthorizedError, ForbiddenError, NotFoundError, ConflictError, TimeoutError, RateLimitError, TokenIssueError } = require("../error");
 const logger = require("../logger");
-const authConfig = require("../../config/auth")
+const authConfig = require("../config/auth")
 // eslint-disable-next-line no-unused-vars
 module.exports = (error, req, res, next) => {
     let code, errorJSON;

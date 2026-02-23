@@ -1,5 +1,5 @@
 const AuthService = require("../service/auth.service");
-const authConfig = require("../../config/auth");
+const authConfig = require("../config/auth");
 const logger = require("../logger");
 const { ValidationError } = require("../error");
 const ProfilesServer = require("../service/profiles.service");

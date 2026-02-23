@@ -1,6 +1,6 @@
 const fs = require("fs");
 const path = require("path");
-const { DATA_DIR } = require("../../config/paths");
+const { DATA_DIR } = require("../config/paths");
 const Database = require("better-sqlite3");
 const { execOpenForeignKeys, execSqlFiles, execGetAllTableNames, execGenTableBackup, execDropTables, execGetCommonCols, execMigrateCommonCols } = require("./execSql");
 require("dotenv").config();

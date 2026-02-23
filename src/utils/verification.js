@@ -1,7 +1,7 @@
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const logger = require('../logger');
-const authConfig = require('../../config/auth');
+const authConfig = require('../config/auth');
 const { isExpired } = require('./validation');
 const publicKeyPem = process.env.SUPER_ADMIN_PUBLIC_KEY;
 const jwtSecret = process.env.JWT_SECRET;

@@ -1,6 +1,6 @@
 const multer = require('multer');
 const fs = require('fs');
-const dirConfig = require('../../config/paths');
+const dirConfig = require('../config/paths');
 const logger = require('../logger');
 const path = require('path');
 const { generateRandomSafeString } = require('../utils/verification');

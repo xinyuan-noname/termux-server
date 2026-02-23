@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const DataBase = require("better-sqlite3");
-const pathsConfig = require("../../config/paths");
+const pathsConfig = require("../config/paths");
 const logger = require("../logger");
 const { execSqlFiles, execOpenForeignKeys } = require("./execSql");
 // 确保数据目录存在

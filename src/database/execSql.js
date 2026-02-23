@@ -1,6 +1,6 @@
 const fs = require("fs");
 const path = require("path");
-const pathsConfig = require("../../config/paths");
+const pathsConfig = require("../config/paths");
 const logger = require("../logger");
 /**
  * 

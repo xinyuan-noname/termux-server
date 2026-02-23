@@ -1,6 +1,6 @@
 const { UnauthorizedError } = require("../error");
 const AuthService = require("../service/auth.service");
-const authConfig = require("../../config/auth");
+const authConfig = require("../config/auth");
 const logger = require("../logger");
 
 class AuthController {

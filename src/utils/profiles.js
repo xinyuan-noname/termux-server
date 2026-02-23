@@ -1,6 +1,6 @@
 const fs = require("fs");
 const path = require("path")
-const dirConfig = require("../../config/paths")
+const dirConfig = require("../config/paths")
 function checkAvatarExist(filename) {
     try {
         const avatarPath = getAvatarPath(filename);

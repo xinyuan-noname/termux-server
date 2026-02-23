@@ -1,4 +1,4 @@
-const queueConfig = require("../../config/queue");
+const queueConfig = require("../config/queue");
 const logger = require("../logger");
 const redis = require('../redis');
 
