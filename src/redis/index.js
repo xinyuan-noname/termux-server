@@ -1,5 +1,5 @@
 const { createClient } = require("redis");
-const logger = require("./logger");
+const logger = require("../logger");
 
 const redis = createClient();
 

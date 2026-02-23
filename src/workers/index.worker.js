@@ -1,4 +1,4 @@
-const workerLogger = require('./logger.worker');
+const workerLogger = require('../logger/worker');
 const redis = require("../redis");
 require('dotenv').config();
 async function start(){

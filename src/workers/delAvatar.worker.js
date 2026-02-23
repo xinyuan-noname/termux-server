@@ -4,7 +4,7 @@ const fs = require('fs').promises;
 const path = require('path');
 const dirConfig = require("../../config/paths");
 const queueConfig = require("../../config/queue");
-const workerLogger = require("./logger.worker");
+const workerLogger = require("../logger/worker");
 const AVATAR_DIR = dirConfig.AVATAR_DIR;
 async function deleteFile(filename) {
     if (!filename || typeof filename !== 'string') {
