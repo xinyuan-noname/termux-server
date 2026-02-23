@@ -20,13 +20,13 @@ router.post(
 
 router.post(
     "/register",
-    signature.single(["id", "username", "isAdmin"]),
+    signature.single(["id", "isAdmin"]),
     AdminController.register
 );
 
 router.post(
     '/register/batch',
-    signature.batch("userList", ["id", "username", "isAdmin"]),
+    signature.batch("userList", ["id", "isAdmin"]),
     AdminController.registerBatch
 )
 

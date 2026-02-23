@@ -76,7 +76,7 @@ class ProfilesServer {
         return resultList;
     }
     static changeGender({ id, gender } = {}) {
-        if (["male", "female", null].includes(gender)) {
+        if (!["male", "female", null].includes(gender)) {
             throw new ValidationError("无效的性别");
         }
         if (!isUnsignedIntegerString(id)) {
