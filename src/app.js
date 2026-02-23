@@ -1,10 +1,9 @@
 const express = require('express');
 const cookieParser = require("cookie-parser");
 const logger = require('./logger');
-require('dotenv').config();
-
-const app = express();
+const PORT = process.env.PORT || 3000;
 try {
+    const app = express();
     app.disable('x-powered-by');
     // Global Middleware
     app.use(express.json());
@@ -27,9 +26,12 @@ try {
     // Error Handling Middleware
     const errorHandler = require('./middleware/error');
     app.use("/", errorHandler);
-} catch (err) {
-    logger.error('服务初始化失败', err);
+
+
+    app.listen(PORT, () => {
+        logger.info(`服务运行在端口:${PORT}`);
+    });
+} catch (error) {
+    logger.error("服务器启动失败:", error);
+    process.exit(1);
 }
-
-
-module.exports = app;

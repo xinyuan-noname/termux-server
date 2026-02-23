@@ -97,7 +97,7 @@ fi
 # 等待服务器启动（简单等待5秒，可根据需要调整）
 sleep 5
 
-# 检查服务器是否成功启动
+# 检查服务器是否成功启动f
 if ! kill -0 "$SERVER_PID" 2>/dev/null; then
     echo "Error: Server failed to start." >&2
     cleanup
