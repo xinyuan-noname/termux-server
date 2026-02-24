@@ -8,12 +8,8 @@ function startRedis() {
         '--maxmemory', '256mb',
         '--maxmemory-policy', 'allkeys-lru'
     ], {
-        stdio: ['ignore', 'pipe', 'pipe']
+        stdio: ['ignore', 'ignore', 'pipe']
     });
-    child.stdout.on('data', (data) => {
-        redisLogger.info(data.toString());
-    });
-
     child.stderr.on('data', (data) => {
         redisLogger.warn(data.toString());
     });

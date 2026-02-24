@@ -1,9 +1,9 @@
 const path = require("path");
-const { LOGS_DEV_DIR } = require("../config/paths");
+const { LOGS_DEV_DIR, URL_TXT_FILE } = require("../config/paths");
 const redis = require("../redis");
-const logger = require("../config/logger");
+const logger = require("../logger");
 const fs = require("fs").promises;
-async function clear() {
+async function clearLogs() {
     try {
         const logFileNameList = await fs.readdir(LOGS_DEV_DIR);
         await Promise.all(logFileNameList.map(async (logFileName) => {
@@ -15,7 +15,7 @@ async function clear() {
         }))
         logger.info("删除开发日志文件成功");
     } catch (err) {
-        console.error("删除开发日志文件失败", err.message);
+        logger.warn("删除开发日志文件失败", err.message);
     }
     try {
         if (process.env.NODE_ENV === "development") {
@@ -23,7 +23,14 @@ async function clear() {
         }
         logger.info("删除Redis开发缓存成功");
     } catch (err) {
-        logger.info("删除Redis开发缓存", err.message);
+        logger.warn("删除Redis开发缓存失败", err.message);
     }
 }
-module.exports = clear;
+
+async function writeUrl(url) {
+    await fs.writeFile(URL_TXT_FILE, url, "utf8");
+}
+module.exports = {
+    clearLogs,
+    writeUrl
+};

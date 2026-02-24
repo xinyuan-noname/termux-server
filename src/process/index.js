@@ -1,11 +1,11 @@
 require('dotenv').config();
-const clear = require('./clear.dev');
 const startCloudflaredTunnel = require('./cloudflared.process');
 const startRedis = require('./redis.process');
 const startServer = require('./server.process');
 const startWorker = require('./worker.process');
 const logger = require('../logger');
-
+const { clearLogs, writeUrl } = require('../utils/file');
+const startGit = require('./git.process');
 const processes = new Map([
     ['redis', {
         start: startRedis,
@@ -38,12 +38,12 @@ function shouldRestart(proc) {
     return proc.restartTimes.length < proc.maxRestarts;
 }
 
-function startProcess(name) {
+function startProcess(name, config) {
     const proc = processes.get(name);
     if (!proc || proc.stopped) return;
 
     logger.info(`[${name}] 启动`);
-    proc.child = proc.start();
+    proc.child = proc.start(config);
     const handleExit = (name, code) => {
         proc.restartTimes.push(Date.now());
 
@@ -65,16 +65,14 @@ function startProcess(name) {
 
     proc.child.on('close', (code) => {
         if (proc.stopped) return;
-
         if (hasError) return;
-
         handleExit(name, code);
     });
 }
 
 async function start() {
     if (process.env.NODE_ENV === 'development') {
-        await clear();
+        await clearLogs();
     }
 
     logger.info('🚀 启动服务...');
@@ -82,8 +80,13 @@ async function start() {
     startProcess('redis');
     startProcess("worker");
     startProcess("server");
-    startProcess("cloudflared");
-
+    startProcess("cloudflared", {
+        async onUrl(url) {
+            logger.info(`暴露公网地址: ${url}`);
+            await writeUrl(url);
+            startGit();
+        }
+    });
     logger.info('✅ 所有服务启动完成');
 }
 
