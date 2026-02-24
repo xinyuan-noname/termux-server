@@ -1,17 +1,17 @@
 const { exec } = require('child_process');
-const logger = require('../logger');
+const gitLogger = require('../logger/git');
 function startGit() {
     let errorSignal = false;
     exec('git add url.txt', (error, stdout, stderr) => {
         if (error) {
-            logger.error("提交url失效", error);
+            gitLogger.error("提交url失效, 操作: add");
             errorSignal = true;
         }
         if(stdout){
-            logger.info(stdout);
+            gitLogger.info(stdout);
         }
         if(stderr){
-            logger.info(stderr);
+            gitLogger.info(stderr);
         }
     })
     if(errorSignal){
@@ -20,14 +20,14 @@ function startGit() {
     }
     exec('git commit -m "change url"', (error, stdout, stderr) => {
         if (error) {
-            logger.error("提交url失效", error);
+            gitLogger.error("提交url失效, 操作: commit");
             errorSignal = true;
         }
         if(stdout){
-            logger.info(stdout);
+            gitLogger.info(stdout);
         }
         if(stderr){
-            logger.info(stderr);
+            gitLogger.info(stderr);
         }
     })
     if(errorSignal){
@@ -36,14 +36,14 @@ function startGit() {
     }
     exec('git push -u origin main', (error, stdout, stderr) => {
         if (error) {
-            logger.error("提交url失效", error);
+            gitLogger.error("提交url失效, 操作: push");
             errorSignal = true;
         }
         if(stdout){
-            logger.info(stdout);
+            gitLogger.info(stdout);
         }
         if(stderr){
-            logger.info(stderr);
+            gitLogger.info(stderr);
         }
     })
     if(errorSignal){
