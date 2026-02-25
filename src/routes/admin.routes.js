@@ -38,7 +38,7 @@ router.post(
 
 router.post(
     '/register/excel',
-    signature.batch("userList", ["id", "isAdmin"]),
+    signature.single(['word']),
     excelUpload.single("register"),
     AdminController.registerFromExcel
 )

@@ -45,11 +45,11 @@ function startProcess(name, config) {
 
     logger.info(`[${name}] 启动`);
     proc.child = proc.start(config);
-    const handleExit = (name, code) => {
+    const handleExit = (name, code, signal) => {
         proc.restartTimes.push(Date.now());
 
         if (shouldRestart(proc)) {
-            logger.warn(`[${name}] 退出 | 代码：${code} | 重启 (${proc.restartTimes.length}/${proc.maxRestarts})`);
+            logger.warn(`[${name}] 退出 | 代码：${code} | 信号：${signal} | 重启 (${proc.restartTimes.length}/${proc.maxRestarts})`);
             setTimeout(() => startProcess(name, config), RESTART_DELAY);
         } else {
             logger.error(`[${name}] 1 分钟内重启 ${proc.maxRestarts} 次，退出`);
@@ -64,10 +64,11 @@ function startProcess(name, config) {
         handleExit(name, err.code);
     });
 
-    proc.child.on('close', (code) => {
+    proc.child.on('close', (code, signal) => {
         if (proc.stopped) return;
         if (hasError) return;
-        handleExit(name, code);
+        if (name === "cloudflared" && proc.child.url && !proc.child.loseConnection) return;
+        handleExit(name, code, signal);
     });
 }
 
@@ -101,6 +102,7 @@ async function start() {
                 if (child.killed) clearInterval(timer);
                 const success = await startChecker(`${url}/test`);
                 if (!success) {
+                    child.loseConnection = true;
                     clearInterval(timer);
                     child.kill("SIGTERM");
                 }

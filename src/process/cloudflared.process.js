@@ -15,7 +15,9 @@ function startCloudflaredTunnel(config) {
         const msg = data.toString();
         const match = msg.match(urlRegx);
         if (match != null && match[0].length) {
-            config?.onUrl?.(match[0], child);
+            const url = match[0];
+            child.url = url;
+            config?.onUrl?.(url, child);
         }
         cloudflaredLogger.info(msg);
     });
