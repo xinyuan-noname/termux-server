@@ -8,10 +8,6 @@ const { generateRandomSafeString } = require("../utils/verification");
  */
 module.exports = (req, res, next) => {
     const { method, originalUrl, headers, ip } = req;
-    if (headers['user-agent'].startsWith("curl") && originalUrl === "/test") {
-        next();
-        return;
-    }
     const start = Date.now();
     const requestId = generateRandomSafeString(16);
     logger.info(`收到请求${requestId}`)

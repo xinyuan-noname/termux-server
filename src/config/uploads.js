@@ -2,6 +2,10 @@ const EXCEL_MIMES = [
   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
   'application/vnd.ms-excel' // .xls
 ];
+const EXCEL_EXTS = [
+  "xlsx",
+  "xls"
+]
 const IMAGE_MIMES = [
   'image/jpeg',
   'image/png',
@@ -13,4 +17,5 @@ const IMAGE_MIMES = [
 module.exports = {
   EXCEL_MIMES,
   IMAGE_MIMES,
+  EXCEL_EXTS
 }

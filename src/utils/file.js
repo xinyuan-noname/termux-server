@@ -32,13 +32,17 @@ async function writeUrl(url) {
     await fs.writeFile(URL_TXT_FILE, url, "utf8");
 }
 
-async function readExcelAsJson(data) {
-    await XLSX.read(data, {
-        type: "binary"
-    })
+function readExcelBufferAsJson(data) {
+    const workbook = XLSX.read(data, {
+        type: "buffer"
+    });
+    const firstSheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[firstSheetName];
+    const jsonData = XLSX.utils.sheet_to_json(worksheet);
+    return jsonData;
 }
 module.exports = {
     clearLogs,
     writeUrl,
-    readExcelAsJson
+    readExcelBufferAsJson
 };

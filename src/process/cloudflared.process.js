@@ -16,7 +16,6 @@ function startCloudflaredTunnel(config) {
         const match = msg.match(urlRegx);
         if (match != null && match[0].length) {
             const url = match[0];
-            child.url = url;
             config?.onUrl?.(url, child);
         }
         cloudflaredLogger.info(msg);

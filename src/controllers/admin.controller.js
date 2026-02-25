@@ -3,7 +3,7 @@ const authConfig = require("../config/auth");
 const logger = require("../logger");
 const { ValidationError, FileUploadError } = require("../error");
 const ProfilesServer = require("../service/profiles.service");
-const { readExcelAsJson } = require("../utils/file");
+const { readExcelBufferAsJson } = require("../utils/file");
 const formatBatchResult = (user, error) => {
     return error ? {
         success: false,
@@ -44,9 +44,10 @@ class AdminController {
      * @returns 
      */
     static async registerBatch(req, res) {
+        req.file.fieldname
         const { userList } = req.body;
         const result = AuthService.createUserBatch({ userList });
-        return res.json({ result })
+        return res.json(result)
     }
     /**
      * @param {import("express").Request} req 
@@ -58,10 +59,15 @@ class AdminController {
         if (!file) {
             throw new FileUploadError();
         }
-        const data = readExcelAsJson(file.buffer);
-        console.log(data);
-        // AuthService.createUserBatch(data);
-        return res.status(204).end();
+        const data = readExcelBufferAsJson(file.buffer);
+        const userList = [];
+        for (const user of data) {
+            const { id, password, ...rest } = user;
+            userList.push({ id: String(id), password: String(password), ...rest })
+        }
+        logger.info("将excel转化为json, 信息为: ", userList);
+        const result = await AuthService.createUserBatch({ userList });
+        return res.json(result);
     }
     /**
     * @param {import("express").Request} req 

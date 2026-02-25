@@ -67,7 +67,6 @@ function startProcess(name, config) {
     proc.child.on('close', (code, signal) => {
         if (proc.stopped) return;
         if (hasError) return;
-        if (name === "cloudflared" && proc.child.url && !proc.child.loseConnection) return;
         handleExit(name, code, signal);
     });
 }
@@ -98,15 +97,21 @@ async function start() {
                 logger.info('git推送地址失败');
                 shutdown("GIT_ERROR");
             }
+            let tryTimes = 0;
             const timer = setInterval(async () => {
                 if (child.killed) clearInterval(timer);
                 const success = await startChecker(`${url}/test`);
                 if (!success) {
-                    child.loseConnection = true;
-                    clearInterval(timer);
-                    child.kill("SIGTERM");
+                    tryTimes++;
+                    if (tryTimes >= 5) {
+                        child.loseConnection = true;
+                        clearInterval(timer);
+                        child.kill("SIGTERM");
+                    } else {
+                        tryTimes = 0;
+                    }
                 }
-            }, 750);
+            }, 30_000);
         }
     });
     logger.info('✅ 所有服务启动完成');

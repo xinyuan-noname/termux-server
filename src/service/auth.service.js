@@ -168,10 +168,9 @@ class AuthService {
                 throw new ValidationError(`Password must be at most ${authConfig.PASSWORD_MAX_LENGTH} characters long.`, "password");
             }
         }
-        const passwordHash = typeof password === "string" ? await bcrypt.hash(password.normalize("NFC"), 10) : null,
-            isAdmin = 0;
+        const passwordHash = typeof password === "string" ? await bcrypt.hash(password.normalize("NFC"), 10) : null;
         try {
-            AuthModel.createUser(id, username, passwordHash, passwordRequired, isAdmin);
+            AuthModel.createUser(id, username, passwordHash, passwordRequired, 0);
         } catch (err) {
             if (err.message?.includes("UNIQUE constraint failed")) {
                 throw new ConflictError("User already exists", "id/username");
@@ -199,10 +198,9 @@ class AuthService {
                 throw new ValidationError(`Password must be at most ${authConfig.PASSWORD_MAX_LENGTH} characters long.`, "password");
             }
         }
-        const passwordHash = typeof password === "string" ? await bcrypt.hash(password.normalize("NFC"), 10) : null,
-            isAdmin = 1;
+        const passwordHash = typeof password === "string" ? await bcrypt.hash(password.normalize("NFC"), 10) : null;
         try {
-            AuthModel.createUser(id, username, passwordHash, passwordRequired, isAdmin);
+            AuthModel.createUser(id, username, passwordHash, passwordRequired, 1);
         } catch (err) {
             if (err.message?.includes("UNIQUE constraint failed")) {
                 throw new ConflictError("User already exists", "id/username");
@@ -220,8 +218,13 @@ class AuthService {
         const result = [];
         for (const user of userList) {
             try {
-                const { id, username, isAdmin } = user
-                await AuthService.createUser({ id, username, isAdmin });
+                const { id, username, isAdmin, password, passwordRequired } = user;
+                if (isAdmin) {
+                    await AuthService.createAdmin({ id, username, passwordRequired, password });
+
+                } else {
+                    await AuthService.createUser({ id, username, passwordRequired, password })
+                }
                 result.push(formatBatchResult(user))
                 logger.info(`注册用户${id}成功, 来自:${authConfig.SIGNATURE_USER_ID}`);
             } catch (error) {

@@ -4,7 +4,7 @@ const dirConfig = require('../config/paths');
 const logger = require('../logger');
 const path = require('path');
 const { generateRandomSafeString } = require('../utils/verification');
-const { EXCEL_MIMES, IMAGE_MIMES } = require('../config/uploads');
+const { EXCEL_MIMES, IMAGE_MIMES, EXCEL_EXTS } = require('../config/uploads');
 const avatarStorage = multer.diskStorage({
     destination: (req, file, cb) => {
         const uploadDir = dirConfig.AVATAR_DIR;
@@ -19,7 +19,7 @@ const avatarStorage = multer.diskStorage({
         cb(null, filename);
     }
 });
-const memoryStorage = multer({ storage: multer.memoryStorage() });
+const memoryStorage = multer.memoryStorage();
 const avatarFileFilter = (req, file, cb) => {
     if (IMAGE_MIMES.includes(file?.mimetype)) {
         logger.info(`收到上传的头像, 来自${req?.access?.id}`, file);
@@ -29,7 +29,8 @@ const avatarFileFilter = (req, file, cb) => {
     }
 };
 const excelFileFilter = (req, file, cb) => {
-    if (EXCEL_MIMES.includes(file?.mimetype)) {
+    const extension = path.extname(file.originalname).slice(1);
+    if (EXCEL_MIMES.includes(file.mimetype) || EXCEL_EXTS.some(ext => ext === extension)) {
         logger.info(`收到上传的excel文件`, file);
         cb(null, true);
     } else {

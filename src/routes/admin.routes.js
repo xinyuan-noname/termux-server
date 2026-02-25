@@ -38,8 +38,8 @@ router.post(
 
 router.post(
     '/register/excel',
-    signature.single(['word']),
     excelUpload.single("register"),
+    signature.single(['word']),
     AdminController.registerFromExcel
 )
 
