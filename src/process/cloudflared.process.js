@@ -15,7 +15,7 @@ function startCloudflaredTunnel(config) {
         const msg = data.toString();
         const match = msg.match(urlRegx);
         if (match != null && match[0].length && match !== "https://api.trycloudflare.com") {
-            config?.onUrl?.(match[0]);
+            config?.onUrl?.(match[0], child);
         }
         cloudflaredLogger.info(msg);
     });

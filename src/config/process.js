@@ -1,0 +1,8 @@
+const RESTART_WINDOW = 60000;
+const RESTART_DELAY = 2000;
+const GIT_TRY_MAX_TIMES = 5;
+module.exports = {
+    RESTART_DELAY,
+    RESTART_WINDOW,
+    GIT_TRY_MAX_TIMES
+}

@@ -7,17 +7,21 @@ const { generateRandomSafeString } = require("../utils/verification");
  * @param {*} next 
  */
 module.exports = (req, res, next) => {
+    const { method, originalUrl, headers, ip } = req;
+    if (headers['user-agent'].startsWith("curl") && originalUrl === "/test") {
+        next();
+        return;
+    }
     const start = Date.now();
     const requestId = generateRandomSafeString(16);
     logger.info(`收到请求${requestId}`)
     res.on('finish', () => {
         const duration = Date.now() - start;
-        const { method, originalUrl } = req;
         const { statusCode } = res;
         logger.info(`${method} ${originalUrl} ${statusCode} (${duration}ms)`, {
-            ip: req.headers['cf-connecting-ip'] ?? req.ip,
-            userAgent:req.headers["user-agent"],
-            request:requestId
+            ip: headers['cf-connecting-ip'] ?? ip,
+            userAgent: headers["user-agent"],
+            request: requestId
         });
     });
     next();

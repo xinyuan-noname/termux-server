@@ -30,7 +30,4 @@ const gitLogger = winston.createLogger({
         }),
     ]
 });
-if (RUN_IN_DEV) {
-    gitLogger.add(new winston.transports.Console());
-}
 module.exports = gitLogger;

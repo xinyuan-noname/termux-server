@@ -6,6 +6,8 @@ const startWorker = require('./worker.process');
 const logger = require('../logger');
 const { clearLogs, writeUrl } = require('../utils/file');
 const startGit = require('./git.process');
+const { RESTART_WINDOW, RESTART_DELAY, GIT_TRY_MAX_TIMES } = require('../config/process');
+const { startChecker } = require('./checker.process');
 const processes = new Map([
     ['redis', {
         start: startRedis,
@@ -29,8 +31,7 @@ const processes = new Map([
     }],
 ]);
 
-const RESTART_WINDOW = 60000;
-const RESTART_DELAY = 2000;
+
 
 function shouldRestart(proc) {
     const now = Date.now();
@@ -49,7 +50,7 @@ function startProcess(name, config) {
 
         if (shouldRestart(proc)) {
             logger.warn(`[${name}] 退出 | 代码：${code} | 重启 (${proc.restartTimes.length}/${proc.maxRestarts})`);
-            setTimeout(() => startProcess(name), RESTART_DELAY);
+            setTimeout(() => startProcess(name, config), RESTART_DELAY);
         } else {
             logger.error(`[${name}] 1 分钟内重启 ${proc.maxRestarts} 次，退出`);
             shutdown('TOO_MANY_RESTARTS');
@@ -81,10 +82,29 @@ async function start() {
     startProcess("worker");
     startProcess("server");
     startProcess("cloudflared", {
-        async onUrl(url) {
+        async onUrl(url, child) {
             logger.info(`暴露公网地址: ${url}`);
             await writeUrl(url);
-            startGit();
+            let success = false;
+            for (let i = 0; i < GIT_TRY_MAX_TIMES; i++) {
+                success = await startGit();
+                if (success) {
+                    logger.info(`git成功推送地址`);
+                    break;
+                }
+            }
+            if (!success) {
+                logger.info('git推送地址失败');
+                shutdown("GIT_ERROR");
+            }
+            const timer = setInterval(async () => {
+                if (child.killed) clearInterval(timer);
+                const success = await startChecker(`${url}/test`);
+                if (!success) {
+                    clearInterval(timer);
+                    child.kill("SIGTERM");
+                }
+            }, 750);
         }
     });
     logger.info('✅ 所有服务启动完成');
