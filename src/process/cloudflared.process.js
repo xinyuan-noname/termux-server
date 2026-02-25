@@ -1,6 +1,6 @@
 const { spawn } = require('child_process');
 const cloudflaredLogger = require('../logger/cloudflared');
-const urlRegx = /https:\/\/[a-zA-Z0-9.-]*\.trycloudflare\.com/
+const urlRegx = /(?<=\s)https:\/\/[a-zA-Z0-9.-]*\.trycloudflare\.com(?=\s)/
 function startCloudflaredTunnel(config) {
     const child = spawn("cloudflared", [
         "tunnel",
@@ -14,7 +14,7 @@ function startCloudflaredTunnel(config) {
     child.stderr.on('data', (data) => {
         const msg = data.toString();
         const match = msg.match(urlRegx);
-        if (match != null && match[0].length && match !== "https://api.trycloudflare.com") {
+        if (match != null && match[0].length) {
             config?.onUrl?.(match[0], child);
         }
         cloudflaredLogger.info(msg);

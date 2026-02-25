@@ -26,7 +26,7 @@ const processes = new Map([
     }],
     ['cloudflared', {
         start: startCloudflaredTunnel,
-        maxRestarts: 10,
+        maxRestarts: 5,
         restartTimes: []
     }],
 ]);
