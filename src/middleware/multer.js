@@ -4,6 +4,7 @@ const dirConfig = require('../config/paths');
 const logger = require('../logger');
 const path = require('path');
 const { generateRandomSafeString } = require('../utils/verification');
+const { EXCEL_MIMES, IMAGE_MIMES } = require('../config/uploads');
 const avatarStorage = multer.diskStorage({
     destination: (req, file, cb) => {
         const uploadDir = dirConfig.AVATAR_DIR;
@@ -18,16 +19,39 @@ const avatarStorage = multer.diskStorage({
         cb(null, filename);
     }
 });
+const memoryStorage = multer({ storage: multer.memoryStorage() });
 const avatarFileFilter = (req, file, cb) => {
-    if (file?.mimetype?.startsWith?.('image')) {
+    if (IMAGE_MIMES.includes(file?.mimetype)) {
         logger.info(`收到上传的头像, 来自${req?.access?.id}`, file);
         cb(null, true);
     } else {
         cb(new Error('头像仅支持 image 文件'), false);
     }
 };
-const avatarUpload = multer({ storage: avatarStorage, fileFilter: avatarFileFilter, limits: { fileSize: 2 * 1024 * 1024 } });
+const excelFileFilter = (req, file, cb) => {
+    if (EXCEL_MIMES.includes(file?.mimetype)) {
+        logger.info(`收到上传的excel文件`, file);
+        cb(null, true);
+    } else {
+        cb(new Error('错误的excel文件'), false);
+    }
+};
+const normalLimits = { fileSize: 2 * 1024 * 1024 };
+const createMulter = ({ storage, fileFilter, limits = normalLimits }) => {
+    return multer({ storage, fileFilter, limits })
+}
 
 module.exports = {
-    avatarUpload,
+    MulterStorage: {
+        avatarStorage,
+        memoryStorage
+    },
+    MulterFileFilter: {
+        avatarFileFilter,
+        excelFileFilter
+    },
+    MulterLimits: {
+        normalLimits
+    },
+    createMulter
 };

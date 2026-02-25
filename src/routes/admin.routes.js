@@ -1,7 +1,13 @@
 const express = require('express');
 const signature = require('../middleware/signature');
 const AdminController = require('../controllers/admin.controller');
+const { createMulter, MulterStorage, MulterFileFilter } = require('../middleware/multer');
 const router = express.Router();
+
+const excelUpload = createMulter({
+    storage: MulterStorage.memoryStorage,
+    fileFilter: MulterFileFilter.excelFileFilter
+})
 
 router.post(
     '/check',
@@ -28,6 +34,13 @@ router.post(
     '/register/batch',
     signature.batch("userList", ["id", "isAdmin"]),
     AdminController.registerBatch
+)
+
+router.post(
+    '/register/excel',
+    signature.batch("userList", ["id", "isAdmin"]),
+    excelUpload.single("register"),
+    AdminController.registerFromExcel
 )
 
 

@@ -13,6 +13,16 @@ const checkPasswordValidation = (password) => {
         throw new ValidationError(`Password must be at most ${authConfig.PASSWORD_MAX_LENGTH} characters long.`, "password");
     }
 }
+const formatBatchResult = (user, error) => {
+    return error ? {
+        success: false,
+        id: user.id || null,
+        error: { message: error.message, code: error.code, field: error.field || null }
+    } : {
+        success: true,
+        id: user.id,
+    }
+}
 class AuthService {
     static isAdmin(id) {
         try {
@@ -199,6 +209,27 @@ class AuthService {
             }
             throw err;
         }
+    }
+    static async createUserBatch({ userList } = {}) {
+        if (!Array.isArray(userList)) {
+            throw new ValidationError("Invalid userList, expected userList to be an array", "userList")
+        }
+        if (userList.length > authConfig.ADDITION_USER_MAX_LENGTH) {
+            throw new ValidationError(`Batch registration is limited to ${authConfig.ADDITION_USER_MAX_LENGTH} users per request.`, "userList")
+        }
+        const result = [];
+        for (const user of userList) {
+            try {
+                const { id, username, isAdmin } = user
+                await AuthService.createUser({ id, username, isAdmin });
+                result.push(formatBatchResult(user))
+                logger.info(`注册用户${id}成功, 来自:${authConfig.SIGNATURE_USER_ID}`);
+            } catch (error) {
+                logger.warn(`注册用户${user.id}失败, 来自:${authConfig.BAD_SIGNATURE_USER_ID}`, error);
+                result.push(formatBatchResult(user, error))
+            }
+        }
+        return result;
     }
     //delete user
     static deleteUser({ id } = {}) {

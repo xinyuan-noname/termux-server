@@ -3,6 +3,7 @@ const { LOGS_DEV_DIR, URL_TXT_FILE } = require("../config/paths");
 const redis = require("../redis");
 const logger = require("../logger");
 const fs = require("fs").promises;
+const XLSX = require("xlsx");
 async function clearLogs() {
     try {
         const logFileNameList = await fs.readdir(LOGS_DEV_DIR);
@@ -30,7 +31,14 @@ async function clearLogs() {
 async function writeUrl(url) {
     await fs.writeFile(URL_TXT_FILE, url, "utf8");
 }
+
+async function readExcelAsJson(data) {
+    await XLSX.read(data, {
+        type: "binary"
+    })
+}
 module.exports = {
     clearLogs,
-    writeUrl
+    writeUrl,
+    readExcelAsJson
 };

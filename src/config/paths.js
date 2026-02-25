@@ -18,8 +18,10 @@ module.exports = {
     ROOT_DIR,
     DATA_DIR,
     DB_DIR,
+
     UPLOADS_DIR,
     AVATAR_DIR,
+    
     SRC_DIR,
     LOGS_DIR,
     LOGS_DEV_DIR,

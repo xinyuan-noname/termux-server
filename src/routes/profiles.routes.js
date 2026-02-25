@@ -2,9 +2,14 @@ const express = require('express');
 const access = require('../middleware/access');
 const query = require('../middleware/query');
 const ProfilesController = require('../controllers/profiles.controller');
-const { avatarUpload } = require('../middleware/multer');
+const { createMulter, MulterStorage, MulterFileFilter } = require('../middleware/multer');
 const router = express.Router();
 router.use('/', access);
+
+const avatarUpload = createMulter({
+    storage: MulterStorage.avatarStorage,
+    fileFilter: MulterFileFilter.avatarFileFilter
+});
 
 router.post(
     '/avatar',

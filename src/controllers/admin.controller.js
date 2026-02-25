@@ -1,8 +1,9 @@
 const AuthService = require("../service/auth.service");
 const authConfig = require("../config/auth");
 const logger = require("../logger");
-const { ValidationError } = require("../error");
+const { ValidationError, FileUploadError } = require("../error");
 const ProfilesServer = require("../service/profiles.service");
+const { readExcelAsJson } = require("../utils/file");
 const formatBatchResult = (user, error) => {
     return error ? {
         success: false,
@@ -38,32 +39,29 @@ class AdminController {
         return res.status(204).end();
     }
     /**
-     * POST auth/register/batch
      * @param {import("express").Request} req 
      * @param {import("express").Response} res 
      * @returns 
      */
     static async registerBatch(req, res) {
         const { userList } = req.body;
-        if (!Array.isArray(userList)) {
-            throw new ValidationError("Invalid userList, expected userList to be an array", "userList")
-        }
-        if (userList.length > authConfig.ADDITION_USER_MAX_LENGTH) {
-            throw new ValidationError(`Batch registration is limited to ${authConfig.ADDITION_USER_MAX_LENGTH} users per request.`, "userList")
-        }
-        const result = [];
-        for (const user of userList) {
-            try {
-                const { id, username, isAdmin } = user
-                await AuthService.createUser({ id, username, isAdmin });
-                result.push(formatBatchResult(user))
-                logger.info(`注册用户${id}成功, 来自:${authConfig.SIGNATURE_USER_ID}`);
-            } catch (error) {
-                logger.warn(`注册用户${user.id}失败, 来自:${authConfig.BAD_SIGNATURE_USER_ID}`, error);
-                result.push(formatBatchResult(user, error))
-            }
-        }
+        const result = AuthService.createUserBatch({ userList });
         return res.json({ result })
+    }
+    /**
+     * @param {import("express").Request} req 
+     * @param {import("express").Response} res 
+     * @returns 
+     */
+    static async registerFromExcel(req, res) {
+        const { file } = req;
+        if (!file) {
+            throw new FileUploadError();
+        }
+        const data = readExcelAsJson(file.buffer);
+        console.log(data);
+        // AuthService.createUserBatch(data);
+        return res.status(204).end();
     }
     /**
     * @param {import("express").Request} req 

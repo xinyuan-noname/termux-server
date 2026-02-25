@@ -8,6 +8,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node ./src/process/index.js",
+    "dev": "nodemon ./src/app.js & nodemon ./src/worker/index.js",
     "upgrade": "node ./src/database/upgrade.js"
   },
   "dependencies": {
@@ -22,7 +23,8 @@
     "rate-limit-redis": "^4.3.1",
     "redis": "^5.10.0",
     "ua-parser-js": "^2.0.8",
-    "winston": "^3.19.0"
+    "winston": "^3.19.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",
