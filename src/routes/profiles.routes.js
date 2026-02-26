@@ -1,6 +1,5 @@
 const express = require('express');
 const access = require('../middleware/access');
-const query = require('../middleware/query');
 const ProfilesController = require('../controllers/profiles.controller');
 const { createMulter, MulterStorage, MulterFileFilter } = require('../middleware/multer');
 const router = express.Router();
@@ -30,11 +29,15 @@ router.post(
     ProfilesController.getUserInfoBatch
 )
 
-// 需要query 和config一致
-router.get(
+// 需要config一致
+router.post(
     '/user/:id',
-    query.boolean,
     ProfilesController.getUserInfo
+)
+
+router.get(
+    '/my',
+    ProfilesController.myProfile
 )
 
 module.exports = router;

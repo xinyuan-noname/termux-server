@@ -98,7 +98,7 @@ function generateCDKey(groups, sizePerGroup) {
     return result;
 }
 function convertToHash(str) {
-    return crypto.createHash("sha256").update(str).digest("hex")
+    return crypto.createHash("sha256").update(str).digest("hex");
 }
 module.exports = {
     getAccessTokenFromReq,

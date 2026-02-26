@@ -91,7 +91,7 @@ class AuthController {
         const { id } = req.body;
         const payload = req.accessPayload;
         let passwordKey;
-        if (payload?.userType === "admin") {
+        if (payload.userType === "admin") {
             const result = await AuthService.issuePasswordKey({ id });
             passwordKey = result.passwordKey;
             logger.info(`已为用户${id}签发pswd-key, 来自:${payload.id}`);
@@ -147,9 +147,8 @@ class AuthController {
      * @returns 
      */
     static getAdminList(req, res) {
-        const config = { username: true, gender: true, userType: true }
+        const config = { username: true, gender: true, userType: true };
         const result = ProfilesServer.getAllAdminInfo({ config });
-        console.log(result);
         res.set('Cache-Control', 'public, max-age=300, s-maxage=600');
         return res.json(result);
     }

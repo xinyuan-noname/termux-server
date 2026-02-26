@@ -51,7 +51,9 @@ class ProfilesController {
     * @returns 
     */
     static getUserInfoBatch(req, res) {
+        const payload = req.accessPayload;
         const { idList, config } = req.body;
+        if (config.passwordRequired && payload.userType !== "admin") config.passwordRequired = false;
         const result = ProfilesServer.getUserInfoBatch({ idList, config });
         return res.json(result);
     }
@@ -61,8 +63,22 @@ class ProfilesController {
     * @returns 
     */
     static getUserInfo(req, res) {
+        const payload = req.accessPayload;
         const { id } = req.params;
-        const config = req.query;
+        const { config } = req.body;
+        if (config.passwordRequired && payload.userType !== "admin") config.passwordRequired = false;
+        const result = ProfilesServer.getUserInfo({ id, config });
+        return res.json(result);
+    }
+    /**
+   * @param {import("express").Request} req 
+   * @param {import("express").Response} res 
+   * @returns 
+   */
+    static myProfile(req, res) {
+        const payload = req.accessPayload;
+        const { id } = payload;
+        const config = { username: true, gender: true, userType: true, passwordRequired: true };
         const result = ProfilesServer.getUserInfo({ id, config });
         return res.json(result);
     }
