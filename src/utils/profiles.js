@@ -14,8 +14,8 @@ function getAvatarPath(filename) {
     return path.resolve(dirConfig.AVATAR_DIR, filename);
 }
 function safeGetAvatarPath(filename) {
-    const avatarPath = getAvatarPath(filename);
     try {
+        const avatarPath = getAvatarPath(filename);
         fs.accessSync(avatarPath);
         return avatarPath
     } catch {
