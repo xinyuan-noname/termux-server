@@ -4,6 +4,10 @@ const parseDeviceMiddleware = require("../middleware/parserDevice");
 const access = require('../middleware/access');
 const router = express.Router();
 router.use('/', parseDeviceMiddleware);
+router.get(
+  '/admin',
+  AuthController.getAdminList
+)
 /// 需要字段 id, username, password
 router.post(
   '/login',

@@ -2,6 +2,7 @@ const { UnauthorizedError } = require("../error");
 const AuthService = require("../service/auth.service");
 const authConfig = require("../config/auth");
 const logger = require("../logger");
+const ProfilesServer = require("../service/profiles.service");
 
 class AuthController {
     /**
@@ -139,6 +140,16 @@ class AuthController {
         AuthService.changePasswordRequired({ id, passwordRequired });
         logger.info(`用户${id}已将登录密码要求切换为${passwordRequired === 1 ? "" : "不"}要求密码`)
         return res.status(204).end();
+    }
+    /**
+     * @param {import("express").Request} req 
+     * @param {import("express").Response} res 
+     * @returns 
+     */
+    static getAdminList(req, res) {
+        const result = ProfilesServer.getAllAdminInfo({ userType: true, username: true, gender: true });
+        res.set('Cache-Control', 'public, max-age=300, s-maxage=600');
+        return res.json(result);
     }
 }
 module.exports = AuthController

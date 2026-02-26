@@ -22,7 +22,6 @@ router.get(
     ProfilesController.getAvatar
 )
 
-
 // 需要字段: idList config
 // config:
 // gender userType username passwordRequired

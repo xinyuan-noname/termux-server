@@ -108,7 +108,9 @@ async function start() {
                         logger.info(`第${tryTimes}次cloudflared重连失败, 正在重试断开重置连接`);
                         clearInterval(timer);
                         child.kill("SIGTERM");
-                    } 
+                    }
+                } else {
+                    tryTimes = 0;
                 }
             }, 30_000);
         }
