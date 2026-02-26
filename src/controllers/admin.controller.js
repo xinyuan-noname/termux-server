@@ -61,12 +61,16 @@ class AdminController {
         }
         const data = readExcelBufferAsJson(file.buffer);
         const userList = [];
+        const genderList = [];
         for (const user of data) {
-            const { id, password, ...rest } = user;
+            const { id, password, gender, ...rest } = user;
             userList.push({ id: String(id), password: String(password), ...rest })
+            genderList.push({ id: String(id), gender });
         }
-        logger.info("将excel转化为json, 信息为: ", userList);
         const result = await AuthService.createUserBatch({ userList });
+        for (const { id, gender } of genderList) {
+            ProfilesServer.changeGender({ id, gender });
+        }
         return res.json(result);
     }
     /**
@@ -118,7 +122,7 @@ class AdminController {
                 result.push(formatBatchResult({ id }, error))
             }
         }
-        return res.json({ result })
+        return res.json(result)
     }
     /**
     * @param {import("express").Request} req 

@@ -53,9 +53,11 @@ class ProfilesServer {
         let result = [];
         if (idList === "all") {
             result = ProfilesServer.getAllUserInfo({ config });
+        } else if (idList === "admin") {
+            result = ProfilesServer.getAllAdminInfo({ config })
         } else {
             if (!Array.isArray(idList)) {
-                throw new ValidationError(`id列表必须是"all"字段或者id列表`);
+                throw new ValidationError(`id列表必须是特定字段或者id列表`);
             }
             for (const id of idList) {
                 if (!isUnsignedIntegerString(id)) {
@@ -75,6 +77,16 @@ class ProfilesServer {
         }
         return resultList;
     }
+    static getAllAdminInfo({ config = {} } = {}) {
+        const userInfoList = ProfilesModel.getAllAdminInfo();
+        const resultList = [];
+        for (const userInfo of userInfoList) {
+            const result = genUserInfoResult(config, userInfo);
+            resultList.push(result);
+        }
+        return resultList;
+    }
+
     static changeGender({ id, gender } = {}) {
         if (!["male", "female", null].includes(gender)) {
             throw new ValidationError("无效的性别");

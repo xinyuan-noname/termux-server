@@ -25,5 +25,9 @@ class ProfilesModel {
         const stmt = db.prepare("SELECT * FROM user_info");
         return stmt.all();
     }
+    static getAllAdminInfo() {
+        const stmt = db.prepare("SELECT * FROM user_info WHERE is_admin=1");
+        return stmt.all();
+    }
 }
 module.exports = ProfilesModel;
