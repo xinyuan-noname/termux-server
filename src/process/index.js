@@ -96,6 +96,7 @@ async function start() {
             if (!success) {
                 logger.info('git推送地址失败');
                 shutdown("GIT_ERROR");
+                return;
             }
             let tryTimes = 0;
             const timer = setInterval(async () => {
@@ -103,13 +104,16 @@ async function start() {
                 const success = await startChecker(`${url}/test`);
                 if (!success) {
                     tryTimes++;
-                    logger.info(`第${tryTimes}次cloudflared重连失败`);
+                    logger.info(`第${tryTimes}次cloudflared连接失败`);
                     if (tryTimes >= 10) {
-                        logger.info(`第${tryTimes}次cloudflared重连失败, 正在重试断开重置连接`);
+                        logger.info(`正在断开连接`);
                         clearInterval(timer);
                         child.kill("SIGTERM");
                     }
                 } else {
+                    if (tryTimes > 0) {
+                        logger.info(`在第${tryTimes + 1}次cloudflared连接成功`);
+                    }
                     tryTimes = 0;
                 }
             }, 30_000);

@@ -79,6 +79,7 @@ class ProfilesServer {
     }
     static getAllAdminInfo({ config = {} } = {}) {
         const userInfoList = ProfilesModel.getAllAdminInfo();
+        console.log(userInfoList,config);
         const resultList = [];
         for (const userInfo of userInfoList) {
             const result = genUserInfoResult(config, userInfo);

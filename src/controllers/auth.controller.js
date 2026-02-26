@@ -147,7 +147,9 @@ class AuthController {
      * @returns 
      */
     static getAdminList(req, res) {
-        const result = ProfilesServer.getAllAdminInfo({ userType: true, username: true, gender: true });
+        const config = { username: true, gender: true, userType: true }
+        const result = ProfilesServer.getAllAdminInfo({ config });
+        console.log(result);
         res.set('Cache-Control', 'public, max-age=300, s-maxage=600');
         return res.json(result);
     }

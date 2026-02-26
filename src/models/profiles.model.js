@@ -26,7 +26,7 @@ class ProfilesModel {
         return stmt.all();
     }
     static getAllAdminInfo() {
-        const stmt = db.prepare("SELECT * FROM user_info WHERE is_admin=1");
+        const stmt = db.prepare("SELECT * FROM user_info WHERE is_admin = 1");
         return stmt.all();
     }
 }
