@@ -40,4 +40,9 @@ router.get(
     ProfilesController.myProfile
 )
 
+router.get(
+    '/my/avatar',
+    ProfilesController.myAvatar
+)
+
 module.exports = router;

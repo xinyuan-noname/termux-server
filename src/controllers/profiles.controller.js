@@ -1,6 +1,5 @@
 const { FileUploadError, NotFoundError } = require("../error");
 const ProfilesServer = require("../service/profiles.service");
-const { safeGetAvatarPath } = require("../utils/profiles");
 const { enqueueAvatarDelete } = require("../utils/queue");
 
 class ProfilesController {
@@ -33,11 +32,7 @@ class ProfilesController {
             throw new NotFoundError("未指定头像id");
         }
         const id = params.id
-        const avatarName = ProfilesServer.getAvatarName({ id });
-        const avatarPath = safeGetAvatarPath(avatarName);
-        if (avatarPath == null) {
-            throw new NotFoundError(`未找到${id}头像`);
-        }
+        const avatarPath = ProfilesServer.getAvatarPath({ id });
         res.setHeader('Cache-Control', 'public, max-age=86400');
         return res.sendFile(avatarPath, err => {
             if (err && !res.headersSent) {
@@ -81,6 +76,22 @@ class ProfilesController {
         const config = { username: true, gender: true, userType: true, passwordRequired: true };
         const result = ProfilesServer.getUserInfo({ id, config });
         return res.json(result);
+    }
+    /**
+   * @param {import("express").Request} req 
+   * @param {import("express").Response} res 
+   * @returns 
+   */
+    static myAvatar(req, res) {
+        const payload = req.accessPayload;
+        const { id } = payload;
+        const avatarPath = ProfilesServer.getAvatarPath({ id });
+        res.setHeader('Cache-Control', 'public, max-age=86400');
+        return res.sendFile(avatarPath, err => {
+            if (err && !res.headersSent) {
+                return res.status(500).end();
+            }
+        })
     }
 }
 module.exports = ProfilesController;

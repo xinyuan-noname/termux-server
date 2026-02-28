@@ -1,6 +1,6 @@
-const { ValidationError } = require("../error");
+const { ValidationError, NotFoundError } = require("../error");
 const ProfilesModel = require("../models/profiles.model");
-const { checkAvatarExist } = require("../utils/profiles");
+const { checkAvatarExist, safeGetAvatarPath } = require("../utils/profiles");
 const { isUnsignedIntegerString } = require("../utils/validation");
 
 const genUserInfoResult = (config, userInfo) => {
@@ -39,6 +39,14 @@ class ProfilesServer {
         const user = ProfilesModel.getAvatarName(id);
         if (user?.avatar_name == null) return null;
         return user.avatar_name;
+    }
+    static getAvatarPath({ id } = {}) {
+        const avatarName = ProfilesServer.getAvatarName({ id });
+        const avatarPath = safeGetAvatarPath(avatarName);
+        if (avatarPath == null) {
+            throw new NotFoundError(`未找到${id}头像`);
+        }
+        return avatarPath;
     }
     static getUserInfo({ id, config = {} } = {}) {
         if (!isUnsignedIntegerString(id)) {
