@@ -5,7 +5,7 @@ const { LOG_MAX_SIZE, LOG_MAX_FILES } = require('../config/logger');
 const { LOGS_DEV_DIR, LOGS_PROD_DIR } = require('../config/paths');
 const LOG_DIR = RUN_IN_DEV ? LOGS_DEV_DIR : LOGS_PROD_DIR;
 const workerLogger = winston.createLogger({
-    level: 'info',
+    level: 'debug',
     format: winston.format.combine(
         winston.format.timestamp({
             format: () => {
@@ -32,7 +32,8 @@ const workerLogger = winston.createLogger({
         new winston.transports.File({
             filename: path.resolve(LOG_DIR, "woker.log"),
             maxsize: LOG_MAX_SIZE,
-            maxFiles: LOG_MAX_FILES
+            maxFiles: LOG_MAX_FILES,
+            level: "info"
         }),
         new winston.transports.File({
             filename: path.resolve(LOG_DIR, "woker.error.log"),

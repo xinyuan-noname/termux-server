@@ -5,7 +5,7 @@ const { LOGS_DEV_DIR, LOGS_PROD_DIR } = require('../config/paths');
 const RUN_IN_DEV = process.env.NODE_ENV === 'development';
 const LOG_DIR = RUN_IN_DEV ? LOGS_DEV_DIR : LOGS_PROD_DIR;
 const logger = winston.createLogger({
-    level: 'info',
+    level: 'debug',
     format: winston.format.combine(
         winston.format.timestamp({
             format: () => {
@@ -32,7 +32,8 @@ const logger = winston.createLogger({
         new winston.transports.File({
             filename: path.resolve(LOG_DIR, "app.log"),
             maxsize: LOG_MAX_SIZE,
-            maxFiles: LOG_MAX_FILES
+            maxFiles: LOG_MAX_FILES,
+            level:"info"
         }),
         new winston.transports.File({
             filename: path.resolve(LOG_DIR, "app.error.log"),
