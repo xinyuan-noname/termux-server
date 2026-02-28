@@ -26,7 +26,8 @@ const cloudflaredLogger = winston.createLogger({
         new winston.transports.File({
             filename: path.resolve(LOG_DIR, "cloudflared.log"),
             maxsize: LOG_MAX_SIZE,
-            maxFiles: LOG_MAX_FILES
+            maxFiles: LOG_MAX_FILES,
+            level: "info"
         })
     ]
 });
