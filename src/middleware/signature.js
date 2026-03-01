@@ -9,7 +9,9 @@ module.exports = {
                 throw new UnauthorizedError("没有找到签名", "INVALID_SIGNATURE");
             }
             const toVerifyWords = Object.keys(req.body).filter(k => words.includes(k)).map(k => req.body[k]);
-            logger.info(`签名字段${words}分别为:${toVerifyWords}`);
+            logger.info(`签名字段${words}分别为:${toVerifyWords}`, {
+                request: req.requestId
+            });
             AuthService.verifyRSASignature(toVerifyWords, createdAt, signature);
             next();
         }

@@ -18,7 +18,7 @@ const access = async (ws, req, next) => {
         const payload = await AuthService.verifyAccessToken(token);
         req.accessPayload = payload;
         req.accessToken = token;
-        logger.info(`${payload.id}建立连接`);
+        logger.info(`${payload.id}建立连接`, { req: req.requestId });
         next();
     } catch (error) {
         logger.error(`WebSocket 认证失败:, ${error.message}`);

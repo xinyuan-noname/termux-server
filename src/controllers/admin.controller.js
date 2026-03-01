@@ -30,10 +30,10 @@ class AdminController {
         const { id, username, password, gender, passwordRequired, isAdmin } = req.body;
         if (isAdmin === 0) {
             await AuthService.createUser({ id, username, password, passwordRequired });
-            logger.info(`用户${id}注册成功, 来自:${authConfig.SIGNATURE_USER_ID}`);
+            logger.info(`用户${id}注册成功, 来自:${authConfig.SIGNATURE_USER_ID}`, { req: req.requestId });
         } else {
             await AuthService.createAdmin({ id, username, passwordRequired, password });
-            logger.info(`管理员${id}注册成功, 来自:${authConfig.SIGNATURE_USER_ID}`);
+            logger.info(`管理员${id}注册成功, 来自:${authConfig.SIGNATURE_USER_ID}`, { req: req.requestId });
         }
         ProfilesServer.changeGender({ id, gender });
         return res.status(204).end();
@@ -83,8 +83,8 @@ class AdminController {
         AuthService.changeAdminStatus({ id, isAdmin });
         AuthService.revokeRefreshTokenAll(id);
         isAdmin === 1 ?
-            logger.info(`已授予用户${id}的管理员权限, 已吊销其全部刷新令牌, 来自:${authConfig.SIGNATURE_USER_ID}`) :
-            logger.info(`已撤销用户${id}的管理员权限, 已吊销其全部刷新令牌, 来自:${authConfig.SIGNATURE_USER_ID}`);
+            logger.info(`已授予用户${id}的管理员权限, 已吊销其全部刷新令牌, 来自:${authConfig.SIGNATURE_USER_ID}`, { req: req.requestId }) :
+            logger.info(`已撤销用户${id}的管理员权限, 已吊销其全部刷新令牌, 来自:${authConfig.SIGNATURE_USER_ID}`, { req: req.requestId });
         return res.status(204).end();
     }
     /**
@@ -115,7 +115,7 @@ class AdminController {
             const { id } = user
             try {
                 AuthService.deleteUser({ id });
-                logger.info(`删除用户${id}成功, 来自:${authConfig.SIGNATURE_USER_ID}`)
+                logger.info(`删除用户${id}成功, 来自:${authConfig.SIGNATURE_USER_ID}`, { req: req.requestId })
                 result.push(formatBatchResult({ id }))
             } catch (error) {
                 logger.error(`删除用户${id}失败, 来自:${authConfig.BAD_SIGNATURE_USER_ID}`, error);
@@ -134,7 +134,7 @@ class AdminController {
         let passwordKey;
         const result = await AuthService.issuePasswordKey({ id });
         passwordKey = result.passwordKey
-        logger.info(`已为用户${id}签发pswd-key, 来自:${authConfig.SIGNATURE_USER_ID}`);
+        logger.info(`已为用户${id}签发pswd-key, 来自:${authConfig.SIGNATURE_USER_ID}`, { req: req.requestId });
         return res.json({ passwordKey });
     }
     /**

@@ -22,7 +22,7 @@ const avatarStorage = multer.diskStorage({
 const memoryStorage = multer.memoryStorage();
 const avatarFileFilter = (req, file, cb) => {
     if (IMAGE_MIMES.includes(file?.mimetype)) {
-        logger.info(`收到上传的头像, 来自${req?.access?.id}`, file);
+        logger.info(`收到上传的头像, 来自${req?.access?.id}`, { ...file, req: req.requestId });
         cb(null, true);
     } else {
         cb(new Error('头像仅支持 image 文件'), false);
@@ -31,7 +31,7 @@ const avatarFileFilter = (req, file, cb) => {
 const excelFileFilter = (req, file, cb) => {
     const extension = path.extname(file.originalname).slice(1);
     if (EXCEL_MIMES.includes(file.mimetype) || EXCEL_EXTS.some(ext => ext === extension)) {
-        logger.info(`收到上传的excel文件`, file);
+        logger.info(`收到上传的excel文件`,  { ...file, req: req.requestId });
         cb(null, true);
     } else {
         cb(new Error('错误的excel文件'), false);

@@ -17,6 +17,7 @@ module.exports = (req, res, next) => {
     const { method, originalUrl, headers, ip } = req;
     const start = Date.now();
     const requestId = generateRandomSafeString(16);
+    req.requestId = requestId;
     const rl = getRequestLevel(req);
     logger[rl](`收到请求${requestId}`);
     res.on('finish', () => {
@@ -25,7 +26,7 @@ module.exports = (req, res, next) => {
         logger[rl](`${method} ${originalUrl} ${statusCode} (${duration}ms)`, {
             ip: fullIpToSafeIp(headers['cf-connecting-ip'] ?? ip),
             userAgent: headers["user-agent"],
-            request: requestId,
+            req: requestId,
             rateLimit: {
                 remaining: req.rateLimit?.remaining,
                 reset: new Date(req.rateLimit?.resetTime).toLocaleString('zh-CN', {
