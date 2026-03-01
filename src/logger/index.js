@@ -33,7 +33,7 @@ const logger = winston.createLogger({
             filename: path.resolve(LOG_DIR, "app.log"),
             maxsize: LOG_MAX_SIZE,
             maxFiles: LOG_MAX_FILES,
-            level:"info"
+            level: "info"
         }),
         new winston.transports.File({
             filename: path.resolve(LOG_DIR, "app.error.log"),
@@ -43,7 +43,5 @@ const logger = winston.createLogger({
         })
     ]
 });
-if (RUN_IN_DEV) {
-    logger.add(new winston.transports.Console());
-}
+logger.add(new winston.transports.Console());
 module.exports = logger;

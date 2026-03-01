@@ -43,7 +43,5 @@ const workerLogger = winston.createLogger({
         })
     ]
 });
-if (RUN_IN_DEV) {
-    workerLogger.add(new winston.transports.Console());
-}
+workerLogger.add(new winston.transports.Console());
 module.exports = workerLogger;
