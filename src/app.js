@@ -15,7 +15,7 @@ async function start() {
         app.use(cookieParser());
         const logRequest = require('./middleware/logRequest');
         app.use(logRequest);
-
+        
         // Rate Limit Middleware
         const createRateLimiter = require("./middleware/rateLimit");
         app.get("/test", createRateLimiter(1, 150), (req, res) => {

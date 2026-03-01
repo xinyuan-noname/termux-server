@@ -2,8 +2,8 @@ const WebSocketController = require("../controllers/ws.controller");
 const { onMessage, onClose } = require("../utils/ws");
 const access = require("../ws_middleware/access");
 /**
- * 
- * @param {*} app 
+ * @import 
+ * @param {import("express").Express} app 
  */
 module.exports = (app) => {
     app.ws(

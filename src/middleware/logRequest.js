@@ -25,7 +25,14 @@ module.exports = (req, res, next) => {
         logger[rl](`${method} ${originalUrl} ${statusCode} (${duration}ms)`, {
             ip: fullIpToSafeIp(headers['cf-connecting-ip'] ?? ip),
             userAgent: headers["user-agent"],
-            request: requestId
+            request: requestId,
+            rateLimit: {
+                remaining: req.rateLimit?.remaining,
+                reset: new Date(req.rateLimit?.resetTime).toLocaleString('zh-CN', {
+                    timeZone: 'Asia/Shanghai',
+                    hour12: false
+                })
+            }
         });
     });
     next();
