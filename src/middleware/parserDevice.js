@@ -1,5 +1,5 @@
 const UAParser = require('ua-parser-js');
-const logger = require('../logger');
+const { UnauthorizedError } = require('../error');
 /**
  * 
  * @param {import("express").Request} req 
@@ -25,7 +25,7 @@ function parseDeviceMiddleware(req, res, next) {
         appVersion ? `v${appVersion}` : ''
       ].filter(Boolean).join(' · ');
     } else {
-      logger.warn('疑似伪造头：UA 声称是 Dart/IO，但缺少或无效自定义设备头');
+      throw new UnauthorizedError('疑似伪造头：UA 声称是 Dart/IO，但缺少或无效自定义设备头');
     }
   } else {
     const parser = new UAParser(userAgent);

@@ -4,6 +4,7 @@ const logger = require("../logger");
 const authConfig = require("../config/auth")
 // eslint-disable-next-line no-unused-vars
 module.exports = (error, req, res, next) => {
+    error.req = req.requestId;
     let code, errorJSON;
     if (error instanceof UnauthorizedError) {
         code = 401;
@@ -25,6 +26,7 @@ module.exports = (error, req, res, next) => {
     } else if (error instanceof NotFoundError) {
         code = 404;
         errorJSON = { error: error.message, code: error.code };
+        return res.status(code).json(errorJSON);
     } else if (error instanceof ValidationError) {
         code = 400;
         errorJSON = { error: error.message, field: error.field, code: error.code };
