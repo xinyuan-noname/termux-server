@@ -23,8 +23,8 @@ async function start() {
         }); // 60s w=150
         app.use(createRateLimiter(1, 70)) // 60s w=70
 
-        const webSocketRouters = require("./routes/socket.routes");
-        app.use('/ws', webSocketRouters);
+        const addWebSocketRouters = require("./routes/ws.routes");
+        addWebSocketRouters(app);
         const adminRoutes = require('./routes/admin.routes');
         app.use('/admin', adminRoutes);
         const authRoutes = require('./routes/auth.routes');
