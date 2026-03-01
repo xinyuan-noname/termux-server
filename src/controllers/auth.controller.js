@@ -30,7 +30,7 @@ class AuthController {
                 })
             }; break;
         }
-        logger.info(`用户${id}登录成功, 签发访问令牌和刷新令牌`, { req: req.request.id });
+        logger.info(`用户${id}登录成功, 签发访问令牌和刷新令牌`, { req: req.requestId });
         return res.json(data);
     }
     /**
@@ -57,7 +57,7 @@ class AuthController {
             await AuthService.revokeAccessToken(accessToken);
             AuthService.revokeRefreshTokenMatchId(payload.id, refreshToken);
         }
-        logger.info(`用户${payload.id}从${req.deviceDescription}登出成功, 废止访问令牌`, { req: req.request.id });
+        logger.info(`用户${payload.id}从${req.deviceDescription}登出成功, 废止访问令牌`, { req: req.requestId });
         return res.status(204).end();
     }
     /**
@@ -79,7 +79,7 @@ class AuthController {
         }
         const { id, userType } = AuthService.verifyRefreshToken(refreshToken, deviceDescription);
         const accessToken = AuthService.issueAccessToken({ id, userType });
-        logger.info(`用户${id}刷新访问令牌`, { req: req.request.id });
+        logger.info(`用户${id}刷新访问令牌`, { req: req.requestId });
         return res.json({ accessToken });
     }
     /**
@@ -94,7 +94,7 @@ class AuthController {
         if (payload.userType === "admin") {
             const result = await AuthService.issuePasswordKey({ id });
             passwordKey = result.passwordKey;
-            logger.info(`已为用户${id}签发pswd-key, 来自:${payload.id}`, { req: req.request.id });
+            logger.info(`已为用户${id}签发pswd-key, 来自:${payload.id}`, { req: req.requestId });
         }
         if (passwordKey) {
             return res.json({ passwordKey });
@@ -114,7 +114,7 @@ class AuthController {
         const payload = req.accessPayload;
         const { id } = payload;
         await AuthService.changePassword({ id, newPassword });
-        logger.info(`用户${id}更换密码成功`, { req: req.request.id });
+        logger.info(`用户${id}更换密码成功`, { req: req.requestId });
         return res.status(204).end();
     }
     /**
@@ -125,7 +125,7 @@ class AuthController {
     static async resetPassword(req, res) {
         const { id, passwordKey, newPassword } = req.body;
         await AuthService.resetPassword({ id, passwordKey, newPassword });
-        logger.info(`用户${id}重置密码成功`, { req: req.request.id })
+        logger.info(`用户${id}重置密码成功`, { req: req.requestId })
         return res.status(204).end();
     }
     /**
@@ -138,7 +138,7 @@ class AuthController {
         const payload = req.accessPayload;
         const { id } = payload;
         AuthService.changePasswordRequired({ id, passwordRequired });
-        logger.info(`用户${id}已将登录密码要求切换为${passwordRequired === 1 ? "" : "不"}要求密码`, { req: req.request.id })
+        logger.info(`用户${id}已将登录密码要求切换为${passwordRequired === 1 ? "" : "不"}要求密码`, { req: req.requestId })
         return res.status(204).end();
     }
     /**
