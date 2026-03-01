@@ -1,4 +1,5 @@
 const express = require('express');
+const expressWs = require('express-ws');
 const cookieParser = require("cookie-parser");
 const logger = require('./logger');
 const redis = require('./redis');
@@ -7,6 +8,7 @@ async function start() {
     try {
         await redis.connect();
         const app = express();
+        expressWs(app);
         app.disable('x-powered-by');
         // Global Middleware
         app.use(express.json());
@@ -21,6 +23,8 @@ async function start() {
         }); // 60s w=150
         app.use(createRateLimiter(1, 70)) // 60s w=70
 
+        const webSocketRouters = require("./routes/socket.routes");
+        app.use('/ws', webSocketRouters);
         const adminRoutes = require('./routes/admin.routes');
         app.use('/admin', adminRoutes);
         const authRoutes = require('./routes/auth.routes');
@@ -31,7 +35,6 @@ async function start() {
         // Error Handling Middleware
         const errorHandler = require('./middleware/error');
         app.use("/", errorHandler);
-
 
         app.listen(PORT, () => {
             logger.info(`服务运行在端口:${PORT}`);
