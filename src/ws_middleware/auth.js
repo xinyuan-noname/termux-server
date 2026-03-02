@@ -1,5 +1,6 @@
-const logger = require("../config/logger");
+const logger = require("../logger");
 const AuthService = require("../service/auth.service");
+const { fullIpToSafeIp } = require("../utils/ip");
 const { getAccessTokenFromReq } = require("../utils/verification");
 
 /**
@@ -8,16 +9,20 @@ const { getAccessTokenFromReq } = require("../utils/verification");
  * @param {import("express").Request} req 
  * @param {Function} next 
  */
-const access = async (ws, req, next) => {
+const auth = async (ws, req, next) => {
+    const { headers, ip } = req;
+    const sIp = fullIpToSafeIp(headers['cf-connecting-ip'] ?? ip);
+    logger.info(`收到webSocket请求`, { ip: sIp })
     try {
         const token = getAccessTokenFromReq(req);
         if (!token) {
-            ws.close(4401, 'Missing access token');
+            logger.warn(`无效的token`, { ip: sIp });
+            ws.close(4401, 'Missing token');
             return;
         }
         const payload = await AuthService.verifyAccessToken(token);
-        req.accessPayload = payload;
-        req.accessToken = token;
+        req.payload = payload;
+        req.token = token;
         logger.info(`${payload.id}建立连接`, { req: req.requestId });
         next();
     } catch (error) {
@@ -25,4 +30,4 @@ const access = async (ws, req, next) => {
         ws.close(4403, 'Invalid or expired token');
     }
 };
-module.exports = access;
+module.exports = auth;

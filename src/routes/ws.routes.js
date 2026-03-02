@@ -1,13 +1,15 @@
 const WebSocketController = require("../controllers/ws.controller");
+const access = require("../middleware/access");
 const { onMessage, onClose } = require("../utils/ws");
-const access = require("../ws_middleware/access");
+const auth = require("../ws_middleware/auth");
 /**
  * @import 
  * @param {import("express").Express} app 
  */
 module.exports = (app) => {
+    app.get("/ws", access, WebSocketController.issueToken);
     app.ws(
-        "/ws/task", access,
+        "/ws/task", auth,
         /**
          * 
          * @param {import("ws").WebSocket} ws 
