@@ -17,6 +17,9 @@ const genUserInfoResult = (config, userInfo) => {
     if (config.passwordRequired === true) {
         result.passwordRequired = Boolean(userInfo.password_required);
     }
+    if (config.position === true) {
+        result.position = userInfo.position;
+    }
     return result
 }
 
@@ -87,7 +90,6 @@ class ProfilesServer {
     }
     static getAllAdminInfo({ config = {} } = {}) {
         const userInfoList = ProfilesModel.getAllAdminInfo();
-        console.log(userInfoList,config);
         const resultList = [];
         for (const userInfo of userInfoList) {
             const result = genUserInfoResult(config, userInfo);
@@ -104,6 +106,12 @@ class ProfilesServer {
             throw new ValidationError("无效的ID", "id");
         }
         ProfilesModel.updateGender(id, gender);
+    }
+    static changePosition({ id, position } = {}) {
+        if (!isUnsignedIntegerString(id)) {
+            throw new ValidationError("无效的ID", "id");
+        }
+        ProfilesModel.updatePosition(position);
     }
 }
 module.exports = ProfilesServer;

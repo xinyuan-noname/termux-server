@@ -92,6 +92,17 @@ class AdminController {
     * @param {import("express").Response} res 
     * @returns 
     */
+    static async changePosition(req, res) {
+        const { id, position } = req.body;
+        ProfilesServer.changePosition({ id, position });
+        logger.info(`将用户${id}的职位设置为${position}, 来自:${authConfig.SIGNATURE_USER_ID}`, { req: req.requestId });
+        return res.status(204).end();
+    }
+    /**
+    * @param {import("express").Request} req 
+    * @param {import("express").Response} res 
+    * @returns 
+    */
     static async delete(req, res) {
         const { id } = req.body;
         AuthService.deleteUser({ id });

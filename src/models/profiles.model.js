@@ -9,6 +9,10 @@ class ProfilesModel {
         const stmt = db.prepare("UPDATE profiles SET gender = ? WHERE id = ?");
         stmt.run(gender, id);
     }
+    static updatePosition(id, position) {
+        const stmt = db.prepare("UPDATE profiles SET position = ? WHERE id = ?");
+        stmt.run(position, id);
+    }
     static updateAvatarName(id, avatar_name) {
         const stmt = db.prepare("UPDATE profiles SET avatar_name = ? WHERE id = ?");
         stmt.run(avatar_name, id);

@@ -1,3 +1,4 @@
+const { MY_PROFILE_SEARCH_CONFIG } = require("../config/profiles");
 const { FileUploadError, NotFoundError } = require("../error");
 const ProfilesServer = require("../service/profiles.service");
 const { enqueueAvatarDelete } = require("../utils/queue");
@@ -73,8 +74,7 @@ class ProfilesController {
     static myProfile(req, res) {
         const payload = req.accessPayload;
         const { id } = payload;
-        const config = { username: true, gender: true, userType: true, passwordRequired: true };
-        const result = ProfilesServer.getUserInfo({ id, config });
+        const result = ProfilesServer.getUserInfo({ id, config: MY_PROFILE_SEARCH_CONFIG });
         return res.json(result);
     }
     /**

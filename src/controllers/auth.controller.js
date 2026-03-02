@@ -3,6 +3,7 @@ const AuthService = require("../service/auth.service");
 const authConfig = require("../config/auth");
 const logger = require("../logger");
 const ProfilesServer = require("../service/profiles.service");
+const { BASICE_PROFILES_SEARCH_CONFGI } = require("../config/profiles");
 
 class AuthController {
     /**
@@ -147,8 +148,7 @@ class AuthController {
      * @returns 
      */
     static getAdminList(req, res) {
-        const config = { username: true, gender: true, userType: true };
-        const result = ProfilesServer.getAllAdminInfo({ config });
+        const result = ProfilesServer.getAllAdminInfo({ config: BASICE_PROFILES_SEARCH_CONFGI });
         res.set('Cache-Control', 'public, max-age=300, s-maxage=600');
         return res.json(result);
     }

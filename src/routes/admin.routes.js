@@ -50,6 +50,12 @@ router.patch(
     AdminController.changeAdminStatus
 )
 
+router.patch(
+    "/position",
+    signature.single(["id"]),
+    AdminController.changePosition
+)
+
 
 router.delete(
     '/delete',
