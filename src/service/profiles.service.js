@@ -111,7 +111,7 @@ class ProfilesServer {
         if (!isUnsignedIntegerString(id)) {
             throw new ValidationError("无效的ID", "id");
         }
-        ProfilesModel.updatePosition(position);
+        ProfilesModel.updatePosition(id, position);
     }
 }
 module.exports = ProfilesServer;
