@@ -1,4 +1,5 @@
-const AuthService = require("../service/auth.service");
+const { WS_TOKEN_AGE } = require("../config/ws");
+const { signJWT, generateRandomSafeString } = require("../utils/verification");
 
 class WebSocketController {
     // eslint-disable-next-line no-unused-vars
@@ -11,8 +12,12 @@ class WebSocketController {
     }
 
     static issueToken(req, res) {
-        const payload = req.accessPayload;
-        const token = AuthService.issueAccessToken(payload);
+        // eslint-disable-next-line no-unused-vars
+        const { exp, jti, iat, ...payload } = req.accessPayload;
+        const token = signJWT(payload, {
+            expiresIn: WS_TOKEN_AGE,
+            jwtid: generateRandomSafeString()
+        })
         return res.json({ token });
     }
 }

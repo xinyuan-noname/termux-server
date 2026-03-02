@@ -9,9 +9,9 @@ const { fullIpToSafeIp } = require("../utils/ip");
  * @param {Function} next 
  */
 const auth = async (ws, req, next) => {
-    const { headers, ip, query } = req;
+    const { headers, ip, query, originalUrl } = req;
     const sIp = fullIpToSafeIp(headers['cf-connecting-ip'] ?? ip);
-    logger.info(`收到webSocket请求`, { ip: sIp })
+    logger.info(`收到webSocket请求${originalUrl}`, { ip: sIp, })
     try {
         const token = query.token;
         if (!token) {

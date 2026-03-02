@@ -7,7 +7,7 @@ const auth = require("../ws_middleware/auth");
  * @param {import("express").Express} app 
  */
 module.exports = (app) => {
-    app.get("/ws", access, WebSocketController.issueToken);
+    app.get("/ws/token", access, WebSocketController.issueToken);
     app.ws(
         "/ws/task", auth,
         /**
