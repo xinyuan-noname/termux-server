@@ -1,7 +1,6 @@
 const logger = require("../logger");
 const AuthService = require("../service/auth.service");
 const { fullIpToSafeIp } = require("../utils/ip");
-const { getAccessTokenFromReq } = require("../utils/verification");
 
 /**
  * 
@@ -10,11 +9,11 @@ const { getAccessTokenFromReq } = require("../utils/verification");
  * @param {Function} next 
  */
 const auth = async (ws, req, next) => {
-    const { headers, ip } = req;
+    const { headers, ip, query } = req;
     const sIp = fullIpToSafeIp(headers['cf-connecting-ip'] ?? ip);
     logger.info(`收到webSocket请求`, { ip: sIp })
     try {
-        const token = getAccessTokenFromReq(req);
+        const token = query.token;
         if (!token) {
             logger.warn(`无效的token`, { ip: sIp });
             ws.close(4401, 'Missing token');
