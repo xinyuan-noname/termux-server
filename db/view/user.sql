@@ -6,5 +6,6 @@ SELECT
     a.password_required,
     a.is_admin,
     p.gender
+    p.position
 FROM auth AS a
 LEFT JOIN profiles AS p ON a.id = p.id;
