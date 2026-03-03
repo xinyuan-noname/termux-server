@@ -81,5 +81,5 @@ module.exports = {
     TimeoutError,
     RateLimitError,
     TokenIssueError,
-    FileUploadError
+    FileUploadError,
 }

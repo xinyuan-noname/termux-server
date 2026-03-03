@@ -15,16 +15,19 @@ async function start() {
         app.use(cookieParser());
         const logRequest = require('./middleware/logRequest');
         app.use(logRequest);
-        
+
         // Rate Limit Middleware
         const createRateLimiter = require("./middleware/rateLimit");
         app.get("/test", createRateLimiter(1, 150), (req, res) => {
             return res.status(200).end("Shine Yarn!");
         }); // 60s w=150
+
         app.use(createRateLimiter(1, 70)) // 60s w=70
 
         const addWebSocketRouters = require("./routes/ws.routes");
         addWebSocketRouters(app);
+        const groupRoutes = require('./routes/group.routes');
+        app.use('/group', groupRoutes);
         const adminRoutes = require('./routes/admin.routes');
         app.use('/admin', adminRoutes);
         const authRoutes = require('./routes/auth.routes');

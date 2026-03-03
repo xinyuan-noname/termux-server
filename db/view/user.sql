@@ -6,6 +6,6 @@ SELECT
     a.password_required,
     a.is_admin,
     p.gender,
-    p.position
+    NULLIF(TRIM(p.position), '') AS position
 FROM auth AS a
 LEFT JOIN profiles AS p ON a.id = p.id;
