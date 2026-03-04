@@ -5,6 +5,8 @@ const router = express.Router();
 
 router.use('/', access);
 
+router.get('/entire', GroupController.getEntireGroup);
+
 router.get('/admin', GroupController.getAdminGroup);
 
 router.get('/male', GroupController.getMaleGroup);

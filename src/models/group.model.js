@@ -2,6 +2,10 @@ const db = require("../database/db");
 
 // group只关心该组里有哪些人
 class GroupModel {
+    static getEntireGroup(){
+        const stmt = db.prepare("SELECT id, username FROM user_info");
+        return stmt.all();
+    }
     static  getAdminGroup() {
         const stmt = db.prepare("SELECT id, username FROM user_info WHERE is_admin = 1");
         return stmt.all();

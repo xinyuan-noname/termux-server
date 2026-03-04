@@ -1,6 +1,9 @@
 const GroupModel = require("../models/group.model");
 
 class GroupServer {
+    static getEntireGroup(){
+        return GroupModel.getEntireGroup();
+    }
     static getMaleGroup() {
         return GroupModel.getMaleGroup();
     }

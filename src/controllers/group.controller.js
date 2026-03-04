@@ -1,30 +1,34 @@
 const GroupService = require('../service/group.service');
 
 class GroupController {
+    getEntireGroup(req, res) {
+        const entireGroup = GroupService.getEntireGroup();
+        return res.json(entireGroup);
+    }
     getAdminGroup(req, res) {
         const adminGroup = GroupService.getAdminGroup();
-        res.json(adminGroup);
+        return res.json(adminGroup);
     }
 
     getMaleGroup(req, res) {
         const maleGroup = GroupService.getMaleGroup();
-        res.json(maleGroup);
+        return res.json(maleGroup);
 
     }
 
     getFemaleGroup(req, res) {
         const femaleGroup = GroupService.getFemaleGroup();
-        res.json(femaleGroup);
+        return res.json(femaleGroup);
     }
 
     getNoGenderGroup(req, res) {
         const noGenderGroup = GroupService.getNoGenderGroup();
-        res.json(noGenderGroup);
+        return res.json(noGenderGroup);
     }
 
     getHavePositionGroup(req, res) {
         const havePositionGroup = GroupService.getHavePositionGroup();
-        res.json(havePositionGroup);
+        return res.json(havePositionGroup);
     }
 
     getUserGroup(req, res) {
