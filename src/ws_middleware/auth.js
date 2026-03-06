@@ -1,6 +1,7 @@
 const logger = require("../logger");
 const AuthService = require("../service/auth.service");
 const { fullIpToSafeIp } = require("../utils/ip");
+const { generateRandomSafeString } = require("../utils/verification");
 
 /**
  * 
@@ -9,9 +10,11 @@ const { fullIpToSafeIp } = require("../utils/ip");
  * @param {Function} next 
  */
 const auth = async (ws, req, next) => {
-    const { headers, ip, query, originalUrl } = req;
+    const { headers, ip, query, } = req;
+    const requestId = generateRandomSafeString(16);
+    req.requestId = requestId;
     const sIp = fullIpToSafeIp(headers['cf-connecting-ip'] ?? ip);
-    logger.info(`收到webSocket请求${originalUrl}`, { ip: sIp, })
+    logger.info(`收到webSocket请求${req.path}`, { ip: sIp, req: requestId });
     try {
         const token = query.token;
         if (!token) {
@@ -22,7 +25,7 @@ const auth = async (ws, req, next) => {
         const payload = await AuthService.verifyAccessToken(token);
         req.payload = payload;
         req.token = token;
-        logger.info(`${payload.id}建立连接`, { req: req.requestId });
+        logger.info(`${payload.id}建立WebSocket连接`, { req: req.requestId });
         next();
     } catch (error) {
         logger.error(`WebSocket 认证失败:, ${error.message}`);

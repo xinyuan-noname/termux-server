@@ -13,7 +13,6 @@ class GroupController {
     getMaleGroup(req, res) {
         const maleGroup = GroupService.getMaleGroup();
         return res.json(maleGroup);
-
     }
 
     getFemaleGroup(req, res) {
