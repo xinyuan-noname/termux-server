@@ -18,6 +18,9 @@ async function start() {
 
         // Rate Limit Middleware
         const createRateLimiter = require("./middleware/rateLimit");
+        app.get('/', createRateLimiter(1, 5), (req, res) => {
+            res.status(200).end();
+        });
         app.get("/test", createRateLimiter(1, 5), (req, res) => {
             return res.status(200).end("Shine Yarn!");
         }); // 60s w=5

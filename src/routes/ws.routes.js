@@ -16,8 +16,10 @@ module.exports = (app) => {
          * @param {import("express").Request} req 
          */
         (ws, req) => {
+            WebSocketController.TaskClientSet.add(ws);
             onMessage(ws, req, WebSocketController.handleTask);
-            onClose(ws, req, WebSocketController.handleClose)
+            onClose(ws, req, WebSocketController.handleClose);
+            WebSocketController.openHeartbeat(ws, req);
         }
     );
 };
