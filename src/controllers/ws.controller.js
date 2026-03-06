@@ -4,7 +4,10 @@ const logger = require("../logger");
 const { signJWT, generateRandomSafeString } = require("../utils/verification");
 
 class WebSocketController {
-    static TaskClientSet = new Set();
+    /**
+     * @type {Map<string,import("ws").WebSocket[]>}
+     */
+    static TaskClientMap = new Map();
     /**
      * 处理 WebSocket 连接关闭事件
      * @param {import("ws").WebSocket} ws - WebSocket 实例
@@ -12,6 +15,7 @@ class WebSocketController {
     */
     // eslint-disable-next-line no-unused-vars
     static handleTask(ws, req, data, isBinary) {
+        const id = req?.payload?.id ?? UNKNOWN_USER_ID
         if (typeof data === "string") {
             const msg = JSON.parse(data);
             switch (msg["type"]) {
@@ -19,7 +23,17 @@ class WebSocketController {
                     const wsi = msg["wsi"], targetList = msg["targetList"];
                     const backJson = { type: "ack", wsi: wsi, ts: Date.now() };
                     ws.send(JSON.stringify(backJson));
-                    logger.info(`收到${req?.payload?.id ?? UNKNOWN_USER_ID}的请求, 向指定用户发送提醒`, { req: req.requestId, targetList })
+                    const clientList = WebSocketController.getClientFromIdList(WebSocketController.TaskClientMap, targetList);
+                    for (const client of clientList) {
+                        const messageJson = {
+                            type: "remind",
+                            content: msg["content"],
+                            from: id,
+                            ts: Date.now()
+                        }
+                        client.send(JSON.stringify(messageJson));
+                    }
+                    logger.info(`收到${id}的请求, 向指定用户发送提醒`, { req: req.requestId, targetList })
                 }; break;
             }
         }
@@ -69,6 +83,33 @@ class WebSocketController {
         })
     }
 
+    /**
+     * 根据ID列表从集合中获取客户端
+     * @param {Map<string,import("ws").WebSocket[]>} map - 包含客户端的集合
+     * @param {Array<string>} idList - 要查找的客户端ID列表
+     * @returns {Array<import("ws").WebSocket>} 匹配的客户端数组
+     */
+    static getClientFromIdList(map, idList) {
+        const clientList = [];
+        for (const id of idList) {
+            const wsList = map.get(id);
+            if (!Array.isArray(wsList)) continue;
+            clientList.push(...wsList.filter(e => e.OPEN))
+        }
+    }
+
+    static addClient(type, id, ws) {
+        switch (type) {
+            case "task": {
+                let wsList = WebSocketController.TaskClientMap.get(id);
+                if (!Array.isArray(wsList)) {
+                    wsList = [];
+                    wsList.set(id, wsList);
+                }
+                wsList.push(ws);
+            }; break;
+        }
+    }
     static issueToken(req, res) {
         // eslint-disable-next-line no-unused-vars
         const { exp, jti, iat, ...payload } = req.accessPayload;
