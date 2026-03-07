@@ -25,7 +25,7 @@ async function start() {
             return res.status(200).end("Shine Yarn!");
         }); // 60s w=5
 
-        app.use(createRateLimiter(1, 50)) // 60s w=50
+        app.use(createRateLimiter(1, 70)) // 60s w=70
 
         const addWebSocketRouters = require("./routes/ws.routes");
         addWebSocketRouters(app);
