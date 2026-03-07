@@ -29,7 +29,7 @@ class WebSocketController {
                             type: "remind",
                             content: msg["content"],
                             level,
-                            from: id,
+                            source: id,
                             ts: Date.now()
                         }
                         client.send(JSON.stringify(messageJson));
@@ -97,6 +97,7 @@ class WebSocketController {
             if (!Array.isArray(wsList)) continue;
             clientList.push(...wsList.filter(e => e.OPEN))
         }
+        return clientList;
     }
 
     static addClient(type, id, ws) {
@@ -105,7 +106,7 @@ class WebSocketController {
                 let wsList = WebSocketController.TaskClientMap.get(id);
                 if (!Array.isArray(wsList)) {
                     wsList = [];
-                    wsList.set(id, wsList);
+                    WebSocketController.TaskClientMap.set(id, wsList);
                 }
                 wsList.push(ws);
             }; break;

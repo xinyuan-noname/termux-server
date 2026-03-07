@@ -16,7 +16,7 @@ module.exports = (app) => {
          * @param {import("express").Request} req 
          */
         (ws, req) => {
-            WebSocketController.TaskClientMap.set(req.payload.id, ws);
+            WebSocketController.addClient("task", req.payload.id, ws);
             onMessage(ws, req, WebSocketController.handleTask);
             onClose(ws, req, WebSocketController.handleClose);
             WebSocketController.openHeartbeat(ws, req);
