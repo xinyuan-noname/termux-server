@@ -1,6 +1,7 @@
 const { UNKNOWN_USER_ID } = require("../config/auth");
 const { WS_TOKEN_AGE, PING_WINDOW, OUTTIME_WINDOW } = require("../config/ws");
 const logger = require("../logger");
+const AuthService = require("../service/auth.service");
 const { signJWT, generateRandomSafeString } = require("../utils/verification");
 
 class WebSocketController {
@@ -29,7 +30,7 @@ class WebSocketController {
                             type: "remind",
                             content: msg["content"],
                             level,
-                            source: id,
+                            source: JSON.stringify({ id, username: AuthService.getUsernameById(id) }),
                             ts: Date.now()
                         }
                         client.send(JSON.stringify(messageJson));

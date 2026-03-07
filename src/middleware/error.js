@@ -19,6 +19,9 @@ module.exports = (error, req, res, next) => {
         } else if (error.code === "INVALID_ACCESS_TOKEN") {
             logger.warn(error.message);
             return res.status(code).json(errorJSON);
+        } else if (error.code === "INVALID_REFRESH_TOKEN") {
+            logger.warn(error.message);
+            return res.status(code).json(errorJSON);
         }
     } else if (error instanceof ForbiddenError) {
         code = 403;

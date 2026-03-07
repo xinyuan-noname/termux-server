@@ -32,6 +32,14 @@ class AuthService {
             return false;
         }
     }
+    static getUsernameById(id) {
+        try {
+            const user = AuthModel.findUser(id);
+            return user.username;
+        } catch {
+            return "未知用户";
+        }
+    }
     static verifyRSASignature(args, createdAt, signatureBase64) {
         try {
             if (!verifyRSASignature(args, createdAt, signatureBase64)) {
@@ -108,16 +116,16 @@ class AuthService {
     }
     static verifyRefreshToken(token, deviceDescription = "Unknow Device") {
         if (typeof token !== "string") {
-            throw new UnauthorizedError();
+            throw new UnauthorizedError("无效的刷新令牌", "INVALID_REFRESH_TOKEN");
         }
         const tokenHash = convertToHash(token);
         const result = AuthModel.findRefreshTokenMatchDevice(tokenHash, deviceDescription);
         if (!result) {
-            throw new UnauthorizedError();
+            throw new UnauthorizedError("未找到刷新令牌", "INVALID_REFRESH_TOKEN");
         }
         if (result.expires_at < Math.ceil(Date.now() / 1000)) {
             logger.info(`Refresh token expired for user ID ${result.id}`);
-            throw new UnauthorizedError();
+            throw new UnauthorizedError("刷新令牌过期", "INVALID_REFRESH_TOKEN");
         }
         return { id: result.id, userType: result.userType };
     }
