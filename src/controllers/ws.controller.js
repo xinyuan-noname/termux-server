@@ -20,7 +20,7 @@ class WebSocketController {
             const msg = JSON.parse(data);
             switch (msg["type"]) {
                 case "remind": {
-                    const wsi = msg["wsi"], targetList = msg["targetList"];
+                    const { wsi, level, targetList } = msg;
                     const backJson = { type: "ack", wsi: wsi, ts: Date.now() };
                     ws.send(JSON.stringify(backJson));
                     const clientList = WebSocketController.getClientFromIdList(WebSocketController.TaskClientMap, targetList);
@@ -28,6 +28,7 @@ class WebSocketController {
                         const messageJson = {
                             type: "remind",
                             content: msg["content"],
+                            level,
                             from: id,
                             ts: Date.now()
                         }
