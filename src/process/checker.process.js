@@ -11,7 +11,7 @@ function startChecker(url) {
         ]);
         let code = '';
         curl.stdout.on('data', d => code += d);
-        curl.on('close', () => resolve(code.trim() === '200'));
+        curl.on('close', () => resolve(['200', '429'].includes(code.trim())));
     });
 }
 

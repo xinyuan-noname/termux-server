@@ -37,7 +37,9 @@ class WebSocketController {
      * @param {string} reason - 关闭连接的原因
      */
     static handleClose(ws, req, code, reason) {
-        logger.info(`WebSocket断开连接${req?.payload?.id ?? UNKNOWN_USER_ID} `, { req: req.requestId, code, reason });
+        const id = req?.payload?.id ?? UNKNOWN_USER_ID
+        WebSocketController.deleteClient("task", id, ws);
+        logger.info(`WebSocket断开连接${id} `, { req: req.requestId, code, reason });
     }
     /**
      * 发送提醒消息给指定用户列表
@@ -65,8 +67,8 @@ class WebSocketController {
         }
         for (const userId of offlineIdList) {
             const key = PENDING_REMIND_KEY.replace('{userId}', userId);
-            await redis.lpush(key, messageStr);
-            await redis.ltrim(key, 0, 49);
+            await redis.lPush(key, messageStr);
+            await redis.lTrim(key, 0, 49);
             await redis.expire(key, 3 * 24 * 3600);
         }
         logger.info(`收到${id}的请求, 向指定用户发送提醒`, {
@@ -79,42 +81,35 @@ class WebSocketController {
 
     /**
     * 用户上线时，拉取并清空离线提醒队列
+    * @param {import("ws").WebSocket} ws - WebSocket实例
+    * @param {import("express").Request} req - HTTP请求对象
     * @param {string} userId - 用户 ID
     */
     static async deliverPendingReminds(ws, req, { id } = {}) {
         if (!id) return;
-
         const key = PENDING_REMIND_KEY.replace('{userId}', id);
         let pendingCount = 0;
-
         try {
-            const messages = await redis.lrange(key, 0, -1);
-            if (messages.length === 0) return;
-
             const wsList = WebSocketController.TaskClientMap.get(id) || [];
-            const activeClients = wsList.filter(ws =>
-                ws.readyState === WebSocket.OPEN
-            );
-
+            const activeClients = wsList.filter(ws => ws.readyState === ws.OPEN);
             if (activeClients.length === 0) {
                 logger.warn(`用户 ${id} 上线但无活跃连接，跳过提醒推送`, { req: req.requestId });
                 return;
             }
-            for (let i = messages.length - 1; i >= 0; i--) {
-                const msgStr = messages[i];
+            let msg;
+            while ((msg = await redis.lpop(key)) !== null) {
                 for (const client of activeClients) {
                     try {
-                        client.send(msgStr);
+                        client.send(msg);
                     } catch (err) {
-                        logger.warn(`向用户 ${id} 发送离线提醒失败`, { err, req: req.requestId });
+                        logger.warn(`发送失败`, { userId: id, error: err.message });
                     }
                 }
+                pendingCount++;
             }
-            pendingCount = messages.length;
-            await redis.del(key);
-            logger.info(`向用户 ${id} 补发 ${pendingCount} 条离线提醒`, { req: req.requestId });
+            logger.info(`向用户${id}补发${pendingCount} 条离线提醒`, { req: req.requestId });
         } catch (err) {
-            logger.error(`拉取离线提醒失败`, { id, err, req: req.requestId });
+            logger.error(`${id}拉取离线提醒失败`, err);
         }
     }
     /**
@@ -169,7 +164,7 @@ class WebSocketController {
                 offlineIdList.push(id);
                 continue;
             }
-            clientList.push(...wsList.filter(e => e.OPEN))
+            clientList.push(...wsList.filter(e => e.readyState === e.OPEN))
         }
         return {
             clientList,
@@ -186,6 +181,28 @@ class WebSocketController {
                     WebSocketController.TaskClientMap.set(id, wsList);
                 }
                 wsList.push(ws);
+            }; break;
+        }
+    }
+    /**
+     * 从指定类型的客户端集合中删除特定用户的WebSocket连接
+     * @param {string} type - 客户端类型 ("task")
+     * @param {string} id - 用户ID
+     * @param {import("ws").WebSocket} ws - WebSocket实例
+     */
+    static deleteClient(type, id, ws) {
+        switch (type) {
+            case "task": {
+                const wsList = WebSocketController.TaskClientMap.get(id);
+                if (Array.isArray(wsList)) {
+                    const index = wsList.indexOf(ws);
+                    if (index !== -1) {
+                        wsList.splice(index, 1);
+                        if (wsList.length === 0) {
+                            WebSocketController.TaskClientMap.delete(id);
+                        }
+                    }
+                }
             }; break;
         }
     }
