@@ -127,7 +127,7 @@ class AuthService {
             logger.info(`Refresh token expired for user ID ${result.id}`);
             throw new UnauthorizedError("刷新令牌过期", "INVALID_REFRESH_TOKEN");
         }
-        return { id: result.id, userType: result.userType };
+        return { id: result.id, userType: result.user_type };
     }
     static revokeRefreshTokenMatchId(id, token) {
         const tokenHash = convertToHash(token);
