@@ -17,8 +17,8 @@ module.exports = (app) => {
          */
         (ws, req) => {
             const id = req.payload.id;
-            WebSocketController.deliverPendingReminds(ws, req, { id: id });
             WebSocketController.addClient("task", id, ws);
+            WebSocketController.deliverPendingReminds(ws, req, { id: id });
             onMessage(ws, req, WebSocketController.handleTask);
             onClose(ws, req, WebSocketController.handleClose);
             WebSocketController.openHeartbeat(ws, req);

@@ -3,6 +3,7 @@ const { WS_TOKEN_AGE, PING_WINDOW, OUTTIME_WINDOW, PENDING_REMIND_KEY } = requir
 const logger = require("../logger");
 const redis = require("../redis");
 const AuthService = require("../service/auth.service");
+const MessageServer = require("../service/message.service");
 const { signJWT, generateRandomSafeString } = require("../utils/verification");
 
 class WebSocketController {
@@ -59,17 +60,18 @@ class WebSocketController {
             content,
             level,
             source: JSON.stringify({ id, username: AuthService.getUsernameById(id) }),
-            ts
+            ts,
         }
         const messageStr = JSON.stringify(messageJson);
         for (const client of clientList) {
-            client.send(messageStr);
+            const { wsList, id } = client;
+            for (const socket of wsList) {
+                socket.send(messageStr);
+            }
+            MessageServer.cacheRemind({ data: messageStr, userId: id, sent: true });
         }
         for (const userId of offlineIdList) {
-            const key = PENDING_REMIND_KEY.replace('{userId}', userId);
-            await redis.lPush(key, messageStr);
-            await redis.lTrim(key, 0, 49);
-            await redis.expire(key, 3 * 24 * 3600);
+            MessageServer.cacheRemind({ data: messageStr, userId, sent: false });
         }
         logger.info(`收到${id}的请求, 向指定用户发送提醒`, {
             req: req.requestId,
@@ -96,15 +98,19 @@ class WebSocketController {
                 logger.warn(`用户 ${id} 上线但无活跃连接，跳过提醒推送`, { req: req.requestId });
                 return;
             }
-            let msg;
-            while ((msg = await redis.lpop(key)) !== null) {
+            while (true) {
+                const msg = await redis.lPop(key);
+                if (msg === null) break;
+                let sent = false;
                 for (const client of activeClients) {
                     try {
                         client.send(msg);
+                        sent = true;
                     } catch (err) {
                         logger.warn(`发送失败`, { userId: id, error: err.message });
                     }
                 }
+                MessageServer.cacheRemind({ data: msg, userId: id, sent });
                 pendingCount++;
             }
             logger.info(`向用户${id}补发${pendingCount} 条离线提醒`, { req: req.requestId });
@@ -150,7 +156,7 @@ class WebSocketController {
      * 根据ID列表从集合中获取客户端
      * @param {Map<string,import("ws").WebSocket[]>} map - 包含客户端的集合
      * @param {Array<string>} idList - 要查找的客户端ID列表
-     * @returns {{clientList: import("ws").WebSocket[],offlineIdList:string[]}} 
+     * @returns {{clientList: {wsList:import("ws").WebSocket[],id:string}[],offlineIdList:string[]}} 
      */
     static getClientFromIdList(map, idList) {
         const clientList = [], offlineIdList = [];
@@ -164,11 +170,11 @@ class WebSocketController {
                 offlineIdList.push(id);
                 continue;
             }
-            clientList.push(...wsList.filter(e => e.readyState === e.OPEN))
+            clientList.push({ id, wsList: wsList.filter(ws => ws.readyState === ws.OPEN) });
         }
         return {
             clientList,
-            offlineIdList
+            offlineIdList,
         };
     }
 

@@ -9,7 +9,8 @@
   "scripts": {
     "start": "node ./src/process/index.js",
     "dev": "nodemon ./src/app.js & nodemon ./src/worker/index.js",
-    "upgrade": "node ./src/database/upgrade.js"
+    "upgrade": "node ./src/upgrade/index.js",
+    "watch:env": "nodemon --watch .env.local --watch .env.development.local --ext \"\" --exec \"node scripts/merge_env.js\""
   },
   "dependencies": {
     "@node-rs/bcrypt": "^1.10.7",

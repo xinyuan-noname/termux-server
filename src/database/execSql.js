@@ -1,7 +1,6 @@
 const fs = require("fs");
 const path = require("path");
 const pathsConfig = require("../config/paths");
-const logger = require("../logger");
 /**
  * 
  * @param {import("better-sqlite3").Database} db 
@@ -23,7 +22,7 @@ function execSqlFiles(db, ...paths) {
             const sql = fs.readFileSync(sqlPath, "utf-8");
             db.exec(sql);
         } catch (error) {
-            logger.error(`执行${file}失败`, error);
+            console.error(`执行${file}失败`, error);
         }
     }
 }
