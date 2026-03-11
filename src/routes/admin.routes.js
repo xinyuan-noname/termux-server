@@ -2,6 +2,7 @@ const express = require('express');
 const signature = require('../middleware/signature');
 const AdminController = require('../controllers/admin.controller');
 const { createMulter, MulterStorage, MulterFileFilter } = require('../middleware/multer');
+const access = require('../middleware/access');
 const router = express.Router();
 
 const excelUpload = createMulter({
@@ -14,6 +15,14 @@ router.post(
     signature.single(["word"]),
     AdminController.check
 );
+
+// 需要字段： word 
+router.post(
+    '/elevate',
+    access,
+    signature.single(["word"]),
+    AdminController.elevatePrivileges
+)
 
 // 需要字段: idList config
 // config:

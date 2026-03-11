@@ -38,7 +38,7 @@ async function start() {
         const profilesRoutes = require('./routes/profiles.routes');
         app.use('/profiles', profilesRoutes);
         const subjectsRoutes = require('./routes/subjects.routes');
-        app.user('/subjects',subjectsRoutes);
+        app.use('/subjects',subjectsRoutes);
 
         // Error Handling Middleware
         const errorHandler = require('./middleware/error');

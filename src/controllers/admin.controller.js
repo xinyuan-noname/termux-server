@@ -26,6 +26,19 @@ class AdminController {
      * @param {import("express").Response} res 
      * @returns 
      */
+    static async elevatePrivileges(req, res) {
+        const payload = req.accessPayload;
+        const { id } = payload;
+        const newPayload = { id, userType: "admin" };
+        const accessToken = AuthService.issueAccessToken(newPayload);
+        return res.json({ accessToken });
+    }
+    /**
+     * POST auth/register
+     * @param {import("express").Request} req 
+     * @param {import("express").Response} res 
+     * @returns 
+     */
     static async register(req, res) {
         const { id, username, password, gender, passwordRequired, isAdmin } = req.body;
         if (isAdmin === 0) {
