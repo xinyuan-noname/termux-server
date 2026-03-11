@@ -96,6 +96,8 @@ class AuthController {
             const result = await AuthService.issuePasswordKey({ id });
             passwordKey = result.passwordKey;
             logger.info(`已为用户${id}签发pswd-key, 来自:${payload.id}`, { req: req.requestId });
+        } else {
+            logger.warn(`尝试为${id}签发pswd-key, 来自:${payload.id ?? authConfig.UNKNOWN_USER_ID}`, { req: req.requestId })
         }
         if (passwordKey) {
             return res.json({ passwordKey });

@@ -1,7 +1,11 @@
 const { createClient } = require("redis");
 const logger = require("../logger");
 
-const redis = createClient();
+const redis = createClient({
+    socket: {
+        port: process.env.PORT_REDIS
+    }
+});
 
 redis.on("error", (err) => {
     logger.error("Redis error:", err);

@@ -33,7 +33,7 @@ async function startGit() {
             }).on("close", reslove)
         })
         await new Promise((reslove, reject) => {
-            exec('git push -u origin main', (error, stdout, stderr) => {
+            exec(`git push -u origin ${process.env.GIT_BRACH}`, (error, stdout, stderr) => {
                 if (error) {
                     gitLogger.error(error);
                     reject(error)
