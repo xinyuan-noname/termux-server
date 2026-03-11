@@ -7,9 +7,9 @@ class SubjectsController {
      * @returns 
      */
     static async createSubject(req, res) {
-        const { subject_name, alias, teachers, courses, semester } = req.body;
+        const { subjectName, alias, teachers, courses, semester } = req.body;
         const result = await SubjectsService.createSubject({
-            subject_name,
+            subjectName,
             alias,
             teachers,
             courses,
@@ -24,8 +24,8 @@ class SubjectsController {
      * @returns 
      */
     static async getSubjectByName(req, res) {
-        const { subject_name } = req.body;
-        const subject = await SubjectsService.getSubjectByName({ subject_name });
+        const { subjectName } = req.body;
+        const subject = await SubjectsService.getSubjectByName({ subjectName });
         return res.json(subject);
     }
 
@@ -56,9 +56,9 @@ class SubjectsController {
      * @returns 
      */
     static async updateSubject(req, res) {
-        const { subject_name, alias, teachers, courses, semester } = req.body;
+        const { subjectName, alias, teachers, courses, semester } = req.body;
         const result = await SubjectsService.updateSubject({
-            subject_name,
+            subjectName,
             alias,
             teachers,
             courses,
@@ -73,8 +73,8 @@ class SubjectsController {
      * @returns 
      */
     static async deleteSubject(req, res) {
-        const { subject_name } = req.body;
-        await SubjectsService.deleteSubject({ subject_name });
+        const { subjectName } = req.body;
+        await SubjectsService.deleteSubject({ subjectName });
         return res.status(204).end();
     }
 
@@ -84,8 +84,8 @@ class SubjectsController {
      * @returns 
      */
     static async updateSubjectTeachers(req, res) {
-        const { subject_name, teachers } = req.body;
-        const result = await SubjectsService.updateSubjectTeachers({ subject_name, teachers });
+        const { subjectName, teachers } = req.body;
+        const result = await SubjectsService.updateSubjectTeachers({ subjectName, teachers });
         return res.json(result);
     }
 
@@ -95,8 +95,8 @@ class SubjectsController {
      * @returns 
      */
     static async updateSubjectCourses(req, res) {
-        const { subject_name, courses } = req.body;
-        const result = await SubjectsService.updateSubjectCourses({ subject_name, courses });
+        const { subjectName, courses } = req.body;
+        const result = await SubjectsService.updateSubjectCourses({ subjectName, courses });
         return res.json(result);
     }
 
@@ -106,8 +106,8 @@ class SubjectsController {
      * @returns 
      */
     static async updateSubjectAlias(req, res) {
-        const { subject_name, alias } = req.body;
-        const result = await SubjectsService.updateSubjectAlias({ subject_name, alias });
+        const { subjectName, alias } = req.body;
+        const result = await SubjectsService.updateSubjectAlias({ subjectName, alias });
         return res.json(result);
     }
 
@@ -117,8 +117,8 @@ class SubjectsController {
      * @returns 
      */
     static async updateSubjectSemester(req, res) {
-        const { subject_name, semester } = req.body;
-        const result = await SubjectsService.updateSubjectSemester({ subject_name, semester });
+        const { subjectName, semester } = req.body;
+        const result = await SubjectsService.updateSubjectSemester({ subjectName, semester });
         return res.json(result);
     }
 }

@@ -3,10 +3,10 @@ const SubjectsController = require('../controllers/subjects.controller');
 const isAdmin = require('../middleware/isAdmin');
 const access = require('../middleware/access');
 const router = express.Router();
-router.use(access);
-router.get('/list/all', SubjectsController.getAllSubjects);
-router.post('/lsit/name', SubjectsController.getSubjectByName);
-router.post('/list/semester', SubjectsController.getSubjectsBySemester);
+router.use('/', access);
+router.get('/all', SubjectsController.getAllSubjects);
+router.post('/search/name', SubjectsController.getSubjectByName);
+router.post('/search/semester', SubjectsController.getSubjectsBySemester);
 
 router.use(isAdmin);
 router.post('/create', SubjectsController.createSubject);

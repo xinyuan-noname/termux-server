@@ -49,7 +49,7 @@ class AdminController {
             logger.info(`管理员${id}注册成功, 来自:${authConfig.SIGNATURE_USER_ID}`, { req: req.requestId });
         }
         ProfilesServer.changeGender({ id, gender });
-        return res.status(204).end();
+        return res.status(201).end();
     }
     /**
      * @param {import("express").Request} req 
