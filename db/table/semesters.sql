@@ -1,4 +1,4 @@
 CREATE TABLE IF NOT EXISTS semesters (
-    id INTEGER PRIMARY KEY,
-    semester_name TEXT NOT NULL UNIQUE
+    semester_name TEXT PRIMARY KEY,
+    started_at INTEGER
 );
