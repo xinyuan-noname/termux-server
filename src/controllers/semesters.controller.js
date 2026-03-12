@@ -7,12 +7,12 @@ class SemestersController {
      * @param {import("express").Response} res 
      */
     static async createSemester(req, res) {
-        const { semester_name, started_at, phase_list } = req.body;
+        const { semesterName, startedAt, phaseList } = req.body;
 
         await SemestersService.createSemester({
-            semester_name,
-            started_at,
-            phase_list
+            semesterName,
+            startedAt,
+            phaseList
         });
 
         return res.status(201).end();
@@ -34,12 +34,12 @@ class SemestersController {
      * @param {import("express").Response} res 
      */
     static async updateSemester(req, res) {
-        const { semester_name, started_at, phase_list } = req.body;
+        const { semesterName, startedAt, phaseList } = req.body;
 
         await SemestersService.updateSemester({
-            semester_name,
-            started_at,
-            phase_list
+            semesterName,
+            startedAt,
+            phaseList
         });
 
         return res.status(204).end();
@@ -51,10 +51,10 @@ class SemestersController {
      * @param {import("express").Response} res 
      */
     static async deleteSemester(req, res) {
-        const { semester_name } = req.body;
+        const { semesterName } = req.body;
 
         await SemestersService.deleteSemester({
-            semester_name
+            semesterName
         });
 
         return res.status(204).end();
