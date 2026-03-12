@@ -1,6 +1,7 @@
 # Dependencies
 node_modules/
 
+csv/
 # Environment variables
 .env
 .env.local

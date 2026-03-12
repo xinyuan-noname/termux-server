@@ -16,11 +16,6 @@ class SemestersModel {
         return stmt.all();
     }
 
-    static updateSemester(semester_name, started_at, phase_list) {
-        const stmt = db.prepare("UPDATE semesters SET started_at = ?, phase_list = ? WHERE semester_name = ?");
-        return stmt.run(started_at, JSON.stringify(phase_list), semester_name);
-    }
-
     static deleteSemester(semester_name) {
         const stmt = db.prepare("DELETE FROM semesters WHERE semester_name = ?");
         return stmt.run(semester_name);

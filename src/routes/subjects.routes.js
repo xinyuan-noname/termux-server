@@ -9,12 +9,6 @@ router.post('/search/name', SubjectsController.getSubjectByName);
 router.post('/search/semester', SubjectsController.getSubjectsBySemester);
 
 router.use(isAdmin);
-router.post('/create', SubjectsController.createSubject);
-router.put('/update', SubjectsController.updateSubject);
-router.patch('/teachers', SubjectsController.updateSubjectTeachers);
-router.patch('/courses', SubjectsController.updateSubjectCourses);
-router.patch('/alias', SubjectsController.updateSubjectAlias);
-router.patch('/semester', SubjectsController.updateSubjectSemester);
 router.delete('/delete', SubjectsController.deleteSubject);
 
 module.exports = router;
