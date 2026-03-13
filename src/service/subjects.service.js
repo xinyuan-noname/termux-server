@@ -3,7 +3,7 @@ const SubjectsModel = require("../models/subjects.model");
 
 class SubjectsService {
 
-    static async getSubjectByName({ subjectName }) {
+    static getSubjectByName({ subjectName }) {
         if (!subjectName || typeof subjectName !== "string") {
             throw new ValidationError("Invalid subject name", "subjectName");
         }
@@ -11,28 +11,19 @@ class SubjectsService {
         if (!subject) {
             throw new NotFoundError(`Subject not found: ${subjectName}`);
         }
-        const { subject_name, ...keys } = subject;
-        return { subject_name, ...keys };
+        return SubjectsService.#parseSubject(subject);
     }
 
-    static async getAllSubjects() {
-        const subjectList = SubjectsModel.getAllSubjects();
-        return subjectList.map((subject) => {
-            const { subject_name, ...keys } = subject;
-            return { subject_name, ...keys };
-        });
-    }
-
-    static async getSubjectsBySemester({ semester } = {}) {
+    static getSubjectsBySemester({ semester } = {}) {
         if (!semester || typeof semester !== "string") {
             throw new ValidationError("Invalid semester", "semester");
         }
-        const { subject_name, ...keys } = SubjectsModel.getSubjectsBySemester(semester);
-        return { subjectName: subject_name, ...keys }
+        const list = SubjectsModel.getSubjectsBySemester(semester);
+        return list.map(subject => SubjectsService.#parseSubject(subject))
     }
 
 
-    static async deleteSubject({ subjectName } = {}) {
+    static deleteSubject({ subjectName } = {}) {
         if (!subjectName || typeof subjectName !== "string") {
             throw new ValidationError("Invalid subject name", "subjectName");
         }
@@ -43,6 +34,46 @@ class SubjectsService {
         }
 
         return SubjectsModel.deleteSubject(subjectName);
+    }
+    static #parseSubject(subject) {
+        const { subject_name, course_type, teachers, schedule, ...keys } = subject;
+        return {
+            subjectName: subject_name,
+            courseType: course_type,
+            teachers: JSON.parse(teachers),
+            schedule: SubjectsService.#parseSchedule(schedule),
+            ...keys
+        }
+    }
+    static #parseSchedule(schedule) {
+        const items = JSON.parse(schedule);
+        if (!Array.isArray(items)) return [];
+        if (!items.length) return [];
+        const result = [];
+        for (const item of items) {
+            const { period, weeks, weekday, location, biweekly = 0 } = item;
+            const expandedWeeks = [];
+            const parsedPeriod = JSON.parse(period);
+            const parsedWeeks = JSON.parse(weeks);
+            for (const week of parsedWeeks) {
+                if (typeof week === "number") {
+                    expandedWeeks.push(week);
+                    continue;
+                }
+                if (typeof week === "string") {
+                    const [startStr, endStr] = week.trim().split("-");
+                    const start = parseInt(startStr);
+                    const end = parseInt(endStr);
+                    console.log(week, startStr, endStr, start, end)
+                    if (!isFinite(start) || !isFinite(end)) continue;
+                    for (let i = start; i <= end; i++) {
+                        expandedWeeks.push(i);
+                    }
+                }
+            }
+            result.push({ weekday, period: parsedPeriod, weeks: expandedWeeks.filter(week => biweekly === 1 ? week % 2 == 0 : true), location });
+        }
+        return result;
     }
 }
 

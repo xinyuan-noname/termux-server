@@ -3,7 +3,7 @@ const logger = require("../logger");
 const SemestersModel = require("../models/semesters");
 
 class SemestersService {
-    static async createSemester({ semesterName, startedAt, phaseList }={}) {
+    static createSemester({ semesterName, startedAt, phaseList } = {}) {
         if (!semesterName || typeof semesterName !== "string") {
             throw new ValidationError("Invalid semester name", "semesterName");
         }
@@ -24,7 +24,7 @@ class SemestersService {
         SemestersModel.createSemester(semesterName, startedAt, phaseList);
     }
 
-    static async getSemesterByName({ semesterName }={}) {
+    static getSemesterByName({ semesterName } = {}) {
         if (!semesterName || typeof semesterName !== "string") {
             throw new ValidationError("Invalid semester name", "semesterName");
         }
@@ -52,7 +52,7 @@ class SemestersService {
         return result;
     }
 
-    static async getAllSemesters() {
+    static getAllSemesters() {
         const semesters = SemestersModel.findAllSemesters();
 
         return semesters.map(semester => {
@@ -75,7 +75,7 @@ class SemestersService {
         });
     }
 
-    static async updateSemester({ semesterName, startedAt, phaseList }={}) {
+    static updateSemester({ semesterName, startedAt, phaseList } = {}) {
         if (!semesterName || typeof semesterName !== "string") {
             throw new ValidationError("Invalid semester name", "semesterName");
         }
@@ -96,14 +96,14 @@ class SemestersService {
         SemestersModel.updateSemester(semesterName, startedAt, phaseList);
     }
 
-    static async deleteSemester({ semesterName }={}) {
+    static deleteSemester({ semesterName } = {}) {
         if (!semesterName || typeof semesterName !== "string") {
             throw new ValidationError("Invalid semester name", "semesterName");
         }
         SemestersModel.deleteSemester(semesterName);
     }
 
-    static async getCurrentSemester() {
+    static getCurrentSemester() {
         const semester = SemestersModel.getCurrentSemester();
         if (!semester) {
             throw new NotFoundError("暂无最新的学期");
