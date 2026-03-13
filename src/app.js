@@ -41,6 +41,8 @@ async function start() {
         app.use('/subjects', subjectsRoutes);
         const semestersRoutes = require('./routes/semesters.routes');
         app.use('/semesters', semestersRoutes);
+        const scheduleRoutes = require("./routes/schedule.routes");
+        app.use("/schedule", scheduleRoutes);
 
         // Error Handling Middleware
         const errorHandler = require('./middleware/error');
