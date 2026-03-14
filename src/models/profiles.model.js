@@ -17,6 +17,14 @@ class ProfilesModel {
         const stmt = db.prepare("UPDATE profiles SET avatar_name = ? WHERE id = ?");
         stmt.run(avatar_name, id);
     }
+    static updateMajor(id, major) {
+        const stmt = db.prepare("UPDATE profiles SET major = ? WHERE id = ?");
+        stmt.run(major, id);
+    }
+    static updateClass(id, $class) {
+        const stmt = db.prepare("UPDATE profiles SET class = ? WHERE id = ?");
+        stmt.run($class, id);
+    }
     static getAvatarName(id) {
         const stmt = db.prepare("SELECT avatar_name FROM profiles WHERE id = ?");
         return stmt.get(id);

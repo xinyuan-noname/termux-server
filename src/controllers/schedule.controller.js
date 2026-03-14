@@ -10,7 +10,7 @@ class ScheduleController {
     static getCurrentSchedule(req, res) {
         const semesterInfo = SemestersService.getCurrentSemester();
         const semester = semesterInfo.semesterName;
-        const schedule = ScheduleService.getSubjectsBySemester({ semester });
+        const schedule = ScheduleService.getScheduleBySemester({ semester });
         return res.json(schedule);
     }
 }

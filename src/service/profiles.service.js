@@ -107,6 +107,21 @@ class ProfilesServer {
         }
         ProfilesModel.updateGender(id, gender);
     }
+
+    static changeClass({ id, "class": $class } = {}) {
+        if (!isUnsignedIntegerString(id)) {
+            throw new ValidationError("无效的ID", "id");
+        }
+        ProfilesModel.updateGender(id, $class);
+    }
+
+    static changeMajor({ id, major } = {}) {
+        if (!isUnsignedIntegerString(id)) {
+            throw new ValidationError("无效的ID", "id");
+        }
+        ProfilesModel.updateGender(id, major);
+    }
+
     static changePosition({ id, position } = {}) {
         if (!isUnsignedIntegerString(id)) {
             throw new ValidationError("无效的ID", "id");

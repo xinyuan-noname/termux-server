@@ -16,6 +16,7 @@ function execSqlFiles(db, ...paths) {
     }
     const files = fs.readdirSync(folderPath, "utf-8");
     for (const file of files) {
+        console.log(`正在执行${file}`)
         try {
             if (!file.endsWith(".sql")) continue;
             const sqlPath = path.resolve(folderPath, file);
@@ -24,6 +25,7 @@ function execSqlFiles(db, ...paths) {
         } catch (error) {
             console.error(`执行${file}失败`, error);
         }
+        console.log(`执行${file}结束`)
     }
 }
 /**
@@ -60,8 +62,13 @@ function execGenTableBackup(db, tables) {
  */
 function execDropTables(db, tables, alias = x => x) {
     for (const tableName of tables) {
-        const aliasName = alias(tableName);
-        db.exec(`DROP TABLE IF EXISTS ${aliasName}`);
+        try{
+            const aliasName = alias(tableName);
+            db.exec(`DROP TABLE IF EXISTS ${aliasName}`);
+        }catch(error){
+            console.log(`${tableName}废除失败`)
+            console.error(error);
+        }
     }
 }
 /**

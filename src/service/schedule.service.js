@@ -4,9 +4,10 @@ class ScheduleService {
     static getScheduleBySemester({ semester } = {}) {
         const list = ScheduleModel.getScheduleBySemester(semester);
         return list.map((item) => {
-            const { is_experiement, ...keys } = item;
+            
+            const { is_experiment, ...keys } = item;
             return {
-                isExperiement: is_experiement,
+                isExperiment: is_experiment == 1,
                 ...keys
             }
         })

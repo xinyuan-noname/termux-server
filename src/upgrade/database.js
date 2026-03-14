@@ -27,7 +27,7 @@ function updateDatabase(oldDbFileName) {
     execOpenForeignKeys(db);
     execSqlFiles(db, "table");
     for (const tableName of tables) {
-        const backupTableName = `${tableName}_backup`
+        const backupTableName = `${tableName}_backup`;
         const commonCols = execGetCommonCols(db, tableName, backupTableName);
         if (commonCols.length) {
             execMigrateCommonCols(db, tableName, backupTableName, commonCols);

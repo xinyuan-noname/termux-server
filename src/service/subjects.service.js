@@ -64,7 +64,6 @@ class SubjectsService {
                     const [startStr, endStr] = week.trim().split("-");
                     const start = parseInt(startStr);
                     const end = parseInt(endStr);
-                    console.log(week, startStr, endStr, start, end)
                     if (!isFinite(start) || !isFinite(end)) continue;
                     for (let i = start; i <= end; i++) {
                         expandedWeeks.push(i);

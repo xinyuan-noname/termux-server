@@ -5,6 +5,6 @@ const router = express.Router();
 
 router.use('/', access);
 
-router.post('/current', ScheduleController.getCurrentSchedule);
+router.get('/current', ScheduleController.getCurrentSchedule);
 
 module.exports = router;
