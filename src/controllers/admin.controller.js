@@ -76,12 +76,13 @@ class AdminController {
         const authList = [];
         const profileList = [];
         for (const user of data) {
-            const { id, password, gender, major, "class": $class, academy, ...rest } = user;
+            const { id, password, gender, position, major, "class": $class, academy, ...rest } = user;
             authList.push({ id: String(id), password: String(password), ...rest })
-            profileList.push({ id: String(id), gender, major, "class": $class, academy });
+            profileList.push({ id: String(id), gender, position, major, "class": $class, academy });
         }
         const result = await AuthService.createUserBatch({ userList: authList });
-        for (const { id, gender, major, "class": $class, academy } of profileList) {
+        for (const { id, gender, major, "class": $class, academy, position } of profileList) {
+            ProfilesServer.changePosition({ id, position });
             ProfilesServer.changeGender({ id, gender });
             ProfilesServer.changeClass({ id, "class": $class });
             ProfilesServer.changeMajor({ id, major });

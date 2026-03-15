@@ -48,7 +48,7 @@ class ProfilesController {
     */
     static getUserInfoBatch(req, res) {
         const payload = req.accessPayload;
-        const { idList, config } = req.body;
+        const { idList, config = {} } = req.body;
         if (config.passwordRequired && payload.userType !== "admin") config.passwordRequired = false;
         const result = ProfilesServer.getUserInfoBatch({ idList, config });
         return res.json(result);
@@ -61,7 +61,7 @@ class ProfilesController {
     static getUserInfo(req, res) {
         const payload = req.accessPayload;
         const { id } = req.params;
-        const { config } = req.body;
+        const { config = {} } = req.body;
         if (config.passwordRequired && payload.userType !== "admin") config.passwordRequired = false;
         const result = ProfilesServer.getUserInfo({ id, config });
         return res.json(result);

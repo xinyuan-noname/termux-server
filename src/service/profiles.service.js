@@ -70,7 +70,7 @@ class ProfilesServer {
         const result = genUserInfoResult(config, userInfo);
         return result;
     }
-    static getUserInfoBatch({ idList, config = {} } = {}) {
+    static getUserInfoBatch({ idList, config } = {}) {
         let result = [];
         if (idList === "all") {
             result = ProfilesServer.getAllUserInfo({ config });
@@ -122,20 +122,20 @@ class ProfilesServer {
         if (!isUnsignedIntegerString(id)) {
             throw new ValidationError("无效的ID", "id");
         }
-        ProfilesModel.updateGender(id, academy);
+        ProfilesModel.updateAcademy(id, academy);
     }
     static changeClass({ id, "class": $class } = {}) {
         if (!isUnsignedIntegerString(id)) {
             throw new ValidationError("无效的ID", "id");
         }
-        ProfilesModel.updateGender(id, $class);
+        ProfilesModel.updateClass(id, $class);
     }
 
     static changeMajor({ id, major } = {}) {
         if (!isUnsignedIntegerString(id)) {
             throw new ValidationError("无效的ID", "id");
         }
-        ProfilesModel.updateGender(id, major);
+        ProfilesModel.updateMajor(id, major);
     }
 
     static changePosition({ id, position } = {}) {
