@@ -73,16 +73,19 @@ class AdminController {
             throw new FileUploadError();
         }
         const data = readExcelBufferAsJson(file.buffer);
-        const userList = [];
-        const genderList = [];
+        const authList = [];
+        const profileList = [];
         for (const user of data) {
-            const { id, password, gender, ...rest } = user;
-            userList.push({ id: String(id), password: String(password), ...rest })
-            genderList.push({ id: String(id), gender });
+            const { id, password, gender, major, "class": $class, academy, ...rest } = user;
+            authList.push({ id: String(id), password: String(password), ...rest })
+            profileList.push({ id: String(id), gender, major, "class": $class, academy });
         }
-        const result = await AuthService.createUserBatch({ userList });
-        for (const { id, gender } of genderList) {
+        const result = await AuthService.createUserBatch({ userList: authList });
+        for (const { id, gender, major, "class": $class, academy } of profileList) {
             ProfilesServer.changeGender({ id, gender });
+            ProfilesServer.changeClass({ id, "class": $class });
+            ProfilesServer.changeMajor({ id, major });
+            ProfilesServer.changeAcademy({ id, academy });
         }
         return res.json(result);
     }

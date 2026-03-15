@@ -5,5 +5,6 @@ CREATE TABLE IF NOT EXISTS profiles (
     position TEXT,
     major TEXT,
     class TEXT,
+    academy TEXT,
     FOREIGN KEY (id) REFERENCES auth(id) ON DELETE CASCADE
 );

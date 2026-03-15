@@ -1,3 +1,4 @@
+const { BASICE_PROFILES_SEARCH_CONFGI } = require("../config/profiles");
 const { ValidationError, NotFoundError } = require("../error");
 const ProfilesModel = require("../models/profiles.model");
 const { checkAvatarExist, safeGetAvatarPath } = require("../utils/profiles");
@@ -19,6 +20,15 @@ const genUserInfoResult = (config, userInfo) => {
     }
     if (config.position === true) {
         result.position = userInfo.position;
+    }
+    if (config.class === true) {
+        result.class = userInfo.class;
+    }
+    if (config.major === true) {
+        result.major = userInfo.major;
+    }
+    if (config.academy === true) {
+        result.academy = userInfo.academy;
     }
     return result
 }
@@ -79,7 +89,7 @@ class ProfilesServer {
         }
         return result;
     }
-    static getAllUserInfo({ config = {} } = {}) {
+    static getAllUserInfo({ config = BASICE_PROFILES_SEARCH_CONFGI } = {}) {
         const userInfoList = ProfilesModel.getAllUserInfo();
         const resultList = [];
         for (const userInfo of userInfoList) {
@@ -88,7 +98,7 @@ class ProfilesServer {
         }
         return resultList;
     }
-    static getAllAdminInfo({ config = {} } = {}) {
+    static getAllAdminInfo({ config = BASICE_PROFILES_SEARCH_CONFGI } = {}) {
         const userInfoList = ProfilesModel.getAllAdminInfo();
         const resultList = [];
         for (const userInfo of userInfoList) {
@@ -108,6 +118,12 @@ class ProfilesServer {
         ProfilesModel.updateGender(id, gender);
     }
 
+    static changeAcademy({ id, academy } = {}) {
+        if (!isUnsignedIntegerString(id)) {
+            throw new ValidationError("无效的ID", "id");
+        }
+        ProfilesModel.updateGender(id, academy);
+    }
     static changeClass({ id, "class": $class } = {}) {
         if (!isUnsignedIntegerString(id)) {
             throw new ValidationError("无效的ID", "id");

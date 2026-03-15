@@ -1,6 +1,7 @@
 # Dependencies
 node_modules/
 
+xlsx/
 csv/
 # Environment variables
 .env
