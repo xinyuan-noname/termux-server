@@ -86,13 +86,11 @@ class TaskUploadService {
             throw new ValidationError("Invalid upload id", "uploadId");
         }
 
-        // 验证是否存在
         const existingUpload = TaskUploadModel.getUploadById(taskId, uploadId);
         if (!existingUpload) {
             throw new NotFoundError(`Upload not found: ${uploadId}`);
         }
 
-        // 验证时间字段
         if (uploadData.uploadAt !== undefined && typeof uploadData.uploadAt !== "number") {
             throw new ValidationError("Invalid upload_at", "uploadAt");
         }

@@ -45,6 +45,8 @@ async function start() {
         app.use("/schedule", scheduleRoutes);
         const taskConfigRoutes = require('./routes/task_config.routes');
         app.use('/task/config', taskConfigRoutes);
+        const taskUploadRoutes = require('./routes/task_upload.routes');
+        app.use('/task/upload', taskUploadRoutes);
 
         // Error Handling Middleware
         const errorHandler = require('./middleware/error');

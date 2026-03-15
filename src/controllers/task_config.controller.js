@@ -25,18 +25,6 @@ class TaskConfigController {
     }
 
     /**
-     * 根据科目名称获取任务配置列表
-     * @param {import("express").Request} req 
-     * @param {import("express").Response} res 
-     * @returns {void}
-     */
-    static getTasksBySubject(req, res) {
-        const { subjectName } = req.body;
-        const tasks = TaskConfigService.getTasksBySubject({ subjectName });
-        return res.json(tasks);
-    }
-
-    /**
      * 创建新的任务配置
      * @param {import("express").Request} req 
      * @param {import("express").Response} res 
@@ -44,8 +32,8 @@ class TaskConfigController {
      */
     static createTask(req, res) {
         const { title, startedAt, endedAt, subjectName, mimetype, taskType } = req.body;
-        const task = TaskConfigService.createTask({ title, startedAt, endedAt, subjectName, mimetype, taskType });
-        return res.status(201).json(task);
+        const taskInfo = TaskConfigService.createTask({ title, startedAt, endedAt, subjectName, mimetype, taskType });
+        return res.status(201).json(taskInfo.taskId);
     }
 
     /**

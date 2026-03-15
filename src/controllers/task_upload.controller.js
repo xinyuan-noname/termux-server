@@ -60,18 +60,6 @@ class TaskUploadController {
         TaskUploadService.deleteUpload({ taskId, uploadId });
         return res.status(204).end();
     }
-
-    /**
-     * 根据任务 ID 删除所有上传记录
-     * @param {import("express").Request} req 
-     * @param {import("express").Response} res 
-     * @returns {void}
-     */
-    static deleteUploadsByTaskId(req, res) {
-        const { taskId } = req.body;
-        TaskUploadService.deleteUploadsByTaskId({ taskId });
-        return res.status(204).end();
-    }
 }
 
 module.exports = TaskUploadController;

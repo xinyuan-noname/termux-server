@@ -40,7 +40,6 @@ class TaskConfigModel {
      * @param {string} [taskData.subject_name] - 科目名称（可选）
      * @param {string} [taskData.mimetype] - MIME 类型（可选）
      * @param {string} [taskData.task_type] - 任务类型（可选）
-     * @returns {Object} 创建结果
      */
     static createTask({ title, started_at, ended_at, subject_name, mimetype, task_type }) {
         const stmt = db.prepare(`

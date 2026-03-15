@@ -52,7 +52,6 @@ class TaskConfigService {
      * @param {string} [params.subjectName] - 科目名称（可选）
      * @param {string} [params.mimetype] - MIME 类型（可选）
      * @param {string} [params.taskType] - 任务类型（可选）
-     * @returns {Object} 创建后的任务配置
      */
     static createTask({ title, startedAt, endedAt, subjectName, mimetype, taskType }) {
         if (!title || typeof title !== "string") {
@@ -77,7 +76,7 @@ class TaskConfigService {
             task_type: taskType
         });
 
-        return TaskConfigService.getTaskById({ taskId: result.lastInsertRowid });
+        return { taskId: result.lastInsertRowid };
     }
 
     /**

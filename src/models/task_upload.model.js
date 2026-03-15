@@ -49,7 +49,6 @@ class TaskUploadModel {
      * @param {number} [uploadData.upload_at] - 上传时间戳
      * @param {string} [uploadData.upload_file_path] - 上传文件路径
      * @param {string} [uploadData.upload_message] - 上传消息
-     * @returns {Object} 更新结果
      */
     static updateUpload(task_id, upload_id, { upload_at, upload_file_path, upload_message }) {
         const fields = [];
