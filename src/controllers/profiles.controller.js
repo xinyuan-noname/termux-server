@@ -1,4 +1,4 @@
-const { MY_PROFILE_SEARCH_CONFIG } = require("../config/profiles");
+const { MY_PROFILE_SEARCH_CONFIG, BASICE_PROFILES_SEARCH_CONFGI } = require("../config/profiles");
 const { FileUploadError, NotFoundError } = require("../error");
 const ProfilesServer = require("../service/profiles.service");
 const { enqueueAvatarDelete } = require("../utils/queue");
@@ -48,9 +48,9 @@ class ProfilesController {
     */
     static getUserInfoBatch(req, res) {
         const payload = req.accessPayload;
-        const { idList, config = {} } = req.body;
-        if (config.passwordRequired && payload.userType !== "admin") config.passwordRequired = false;
-        const result = ProfilesServer.getUserInfoBatch({ idList, config });
+        const { idList, config } = req.body;
+        if (config?.passwordRequired && payload.userType !== "admin") config.passwordRequired = false;
+        const result = ProfilesServer.getUserInfoBatch({ idList, config: config ?? BASICE_PROFILES_SEARCH_CONFGI });
         return res.json(result);
     }
     /**
@@ -62,8 +62,8 @@ class ProfilesController {
         const payload = req.accessPayload;
         const { id } = req.params;
         const { config = {} } = req.body;
-        if (config.passwordRequired && payload.userType !== "admin") config.passwordRequired = false;
-        const result = ProfilesServer.getUserInfo({ id, config });
+        if (config?.passwordRequired && payload.userType !== "admin") config.passwordRequired = false;
+        const result = ProfilesServer.getUserInfo({ id, config: config ?? BASICE_PROFILES_SEARCH_CONFGI });
         return res.json(result);
     }
     /**
