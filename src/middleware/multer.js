@@ -19,6 +19,20 @@ const avatarStorage = multer.diskStorage({
         cb(null, filename);
     }
 });
+const taskStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        const uploadDir = dirConfig.TASK_DIR;
+        if (!fs.existsSync(uploadDir)) {
+            fs.mkdirSync(uploadDir, { recursive: true });
+        }
+        cb(null, uploadDir);
+    },
+    filename: (req, file, cb) => {
+        const ext = path.extname(file.originalname);
+        const filename = generateRandomSafeString(16) + ext;
+        cb(null, filename);
+    }
+});
 const memoryStorage = multer.memoryStorage();
 const avatarFileFilter = (req, file, cb) => {
     if (IMAGE_MIMES.includes(file?.mimetype)) {
@@ -31,13 +45,25 @@ const avatarFileFilter = (req, file, cb) => {
 const excelFileFilter = (req, file, cb) => {
     const extension = path.extname(file.originalname).slice(1);
     if (EXCEL_MIMES.includes(file.mimetype) || EXCEL_EXTS.some(ext => ext === extension)) {
-        logger.info(`收到上传的excel文件`,  { ...file, req: req.requestId });
+        logger.info(`收到上传的excel文件`, { ...file, req: req.requestId });
         cb(null, true);
     } else {
         cb(new Error('错误的excel文件'), false);
     }
 };
 const normalLimits = { fileSize: 2 * 1024 * 1024 };
+
+/**
+ * 允许所有文件通过的文件过滤器
+ * @param {Object} req - Express 请求对象
+ * @param {Object} file - 上传的文件对象
+ * @param {Function} cb - 回调函数
+ */
+const allowAllFilesFilter = (req, file, cb) => {
+    logger.info(`收到上传的文件`, { ...file, req: req.requestId });
+    cb(null, true);
+};
+
 const createMulter = ({ storage, fileFilter, limits = normalLimits }) => {
     return multer({ storage, fileFilter, limits })
 }
@@ -45,11 +71,13 @@ const createMulter = ({ storage, fileFilter, limits = normalLimits }) => {
 module.exports = {
     MulterStorage: {
         avatarStorage,
+        taskStorage,
         memoryStorage
     },
     MulterFileFilter: {
         avatarFileFilter,
-        excelFileFilter
+        excelFileFilter,
+        allowAllFilesFilter
     },
     MulterLimits: {
         normalLimits

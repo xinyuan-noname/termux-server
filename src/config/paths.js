@@ -4,6 +4,7 @@ const DATA_DIR = path.resolve(ROOT_DIR, "data");
 const DB_DIR = path.resolve(ROOT_DIR, "db");
 const UPLOADS_DIR = path.resolve(ROOT_DIR, "uploads");
 const AVATAR_DIR = path.resolve(ROOT_DIR, "uploads", "avatars");
+const TASK_DIR = path.resolve(ROOT_DIR, "uploads", "tasks");
 const SRC_DIR = path.resolve(ROOT_DIR, "src");
 const LOGS_DIR = path.resolve(ROOT_DIR, "logs");
 
@@ -21,6 +22,7 @@ module.exports = {
 
     UPLOADS_DIR,
     AVATAR_DIR,
+    TASK_DIR,
     
     SRC_DIR,
     LOGS_DIR,

@@ -24,6 +24,15 @@ class TaskUploadController {
         const upload = TaskUploadService.getUploadById({ taskId, uploadId });
         return res.json(upload);
     }
+    /**
+     * 根据上传 ID 获取上传记录
+     * @param {import("express").Request} req 
+     * @param {import("express").Response} res 
+     * @returns {void}
+     */
+    static uploadFile(req, res) {
+
+    }
 
     /**
      * 创建新的上传记录
