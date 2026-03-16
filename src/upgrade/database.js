@@ -23,7 +23,8 @@ function updateDatabase(oldDbFileName) {
     const db = new Database(newDbPath);
     const tables = execGetAllTableNames(db);
     execGenTableBackup(db, tables);
-    execDropTables(db, tables);
+    //应该先删除子表，后删除父表
+    execDropTables(db, execGetAllTableNames(db).reverse());
     execOpenForeignKeys(db);
     execSqlFiles(db, "table");
     for (const tableName of execGetAllTableNames(db)) {
@@ -33,6 +34,7 @@ function updateDatabase(oldDbFileName) {
             execMigrateCommonCols(db, tableName, backupTableName, commonCols);
         }
     }
+    // 这里由于只复制了数据，不分先后
     execDropTables(db, tables, x => `${x}_backup`);
 }
 module.exports = updateDatabase;

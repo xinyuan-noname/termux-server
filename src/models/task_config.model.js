@@ -40,13 +40,16 @@ class TaskConfigModel {
      * @param {string} [taskData.subject_name] - 科目名称（可选）
      * @param {string} [taskData.mimetype] - MIME 类型（可选）
      * @param {string} [taskData.task_type] - 任务类型（可选）
+     * @param {string} [taskData.format] - 格式（可选）
+     * @param {string} [taskData.source] - 来源（可选）
+     * @param {number} [taskData.is_notice] - 是否为通知（可选，0 或 1）
      */
-    static createTask({ title, started_at, ended_at, subject_name, mimetype, task_type }) {
+    static createTask({ title, started_at, ended_at, subject_name, mimetype, task_type, format, source, is_notice }) {
         const stmt = db.prepare(`
-            INSERT INTO task_config (title, started_at, ended_at, subject_name, mimetype, task_type)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO task_config (title, started_at, ended_at, subject_name, mimetype, task_type, format, source, is_notice)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         `);
-        return stmt.run(title, started_at, ended_at, subject_name || null, mimetype || null, task_type || null);
+        return stmt.run(title, started_at, ended_at, subject_name || null, mimetype || null, task_type || null, format || null, source || null, is_notice !== undefined ? is_notice : 0);
     }
 
     /**
@@ -59,9 +62,12 @@ class TaskConfigModel {
      * @param {string} [taskData.subject_name] - 科目名称
      * @param {string} [taskData.mimetype] - MIME 类型
      * @param {string} [taskData.task_type] - 任务类型
+     * @param {string} [taskData.format] - 格式
+     * @param {string} [taskData.source] - 来源
+     * @param {number} [taskData.is_notice] - 是否为通知（0 或 1）
      * @returns {Object} 更新结果
      */
-    static updateTask(task_id, { title, started_at, ended_at, subject_name, mimetype, task_type }) {
+    static updateTask(task_id, { title, started_at, ended_at, subject_name, mimetype, task_type, format, source, is_notice }) {
         const fields = [];
         const values = [];
 
@@ -88,6 +94,18 @@ class TaskConfigModel {
         if (task_type !== undefined) {
             fields.push("task_type = ?");
             values.push(task_type);
+        }
+        if (format !== undefined) {
+            fields.push("format = ?");
+            values.push(format);
+        }
+        if (source !== undefined) {
+            fields.push("source = ?");
+            values.push(source);
+        }
+        if (is_notice !== undefined) {
+            fields.push("is_notice = ?");
+            values.push(is_notice);
         }
 
         if (fields.length === 0) {

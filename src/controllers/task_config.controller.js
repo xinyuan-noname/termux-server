@@ -31,9 +31,9 @@ class TaskConfigController {
      * @returns {void}
      */
     static createTask(req, res) {
-        const { title, startedAt, endedAt, subjectName, mimetype, taskType } = req.body;
-        TaskConfigService.createTask({ title, startedAt, endedAt, subjectName, mimetype, taskType });
-        return res.status(201).end();
+        const { title, startedAt, endedAt, subjectName, mimetype, taskType, format, source, isNotice } = req.body;
+        const result = TaskConfigService.createTask({ title, startedAt, endedAt, subjectName, mimetype, taskType, format, source, isNotice });
+        return res.status(201).json(result.taskId);
     }
 
     /**
@@ -44,8 +44,8 @@ class TaskConfigController {
      */
     static updateTask(req, res) {
         const { taskId, taskData } = req.body;
-        const task = TaskConfigService.updateTask({ taskId, taskData });
-        return res.json(task);
+        TaskConfigService.updateTask({ taskId, taskData });
+        return res.status(204).end();
     }
 
     /**

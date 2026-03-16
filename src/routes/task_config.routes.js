@@ -8,10 +8,10 @@ router.use('/', access);
 router.post('/create', TaskConfigController.createTask);
 router.patch('/update', TaskConfigController.updateTask);
 
-router.post('/list', TaskConfigController.getAllTasks);
+router.get('/all', TaskConfigController.getAllTasks);
 router.post('/:id', TaskConfigController.getTaskById);
 
 
-router.post('/delete', TaskConfigController.deleteTask);
+router.delete('/delete', TaskConfigController.deleteTask);
 
 module.exports = router;

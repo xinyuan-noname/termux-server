@@ -60,11 +60,11 @@ function execGenTableBackup(db, tables) {
  */
 function execDropTables(db, tables, alias = x => x) {
     for (const tableName of tables) {
+        const aliasName = alias(tableName);
         try {
-            const aliasName = alias(tableName);
             db.exec(`DROP TABLE IF EXISTS ${aliasName}`);
         } catch (error) {
-            console.log(`${tableName}废除失败`)
+            console.log(`${tableName}(${aliasName})废除出错`)
             console.error(error);
         }
     }

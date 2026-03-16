@@ -52,8 +52,11 @@ class TaskConfigService {
      * @param {string} [params.subjectName] - 科目名称（可选）
      * @param {string} [params.mimetype] - MIME 类型（可选）
      * @param {string} [params.taskType] - 任务类型（可选）
+     * @param {string} [params.format] - 格式（可选）
+     * @param {string} [params.source] - 来源（可选）
+     * @param {number} [params.isNotice] - 是否为通知（可选，0 或 1）
      */
-    static createTask({ title, startedAt, endedAt, subjectName, mimetype, taskType }) {
+    static createTask({ title, startedAt, endedAt, subjectName, mimetype, taskType, format, source, isNotice }) {
         if (!title || typeof title !== "string") {
             throw new ValidationError("Invalid title", "title");
         }
@@ -73,7 +76,10 @@ class TaskConfigService {
             ended_at: endedAt,
             subject_name: subjectName,
             mimetype,
-            task_type: taskType
+            task_type: taskType,
+            format,
+            source,
+            is_notice: isNotice
         });
 
         return { taskId: result.lastInsertRowid };
@@ -90,6 +96,9 @@ class TaskConfigService {
      * @param {string} [params.taskData.subjectName] - 科目名称
      * @param {string} [params.taskData.mimetype] - MIME 类型
      * @param {string} [params.taskData.taskType] - 任务类型
+     * @param {string} [params.taskData.format] - 格式
+     * @param {string} [params.taskData.source] - 来源
+     * @param {number} [params.taskData.isNotice] - 是否为通知（0 或 1）
      * @returns {Object} 更新后的任务配置
      */
     static updateTask({ taskId, taskData }) {
@@ -120,7 +129,10 @@ class TaskConfigService {
             ended_at: taskData.endedAt,
             subject_name: taskData.subjectName,
             mimetype: taskData.mimetype,
-            task_type: taskData.taskType
+            task_type: taskData.taskType,
+            format: taskData.format,
+            source: taskData.source,
+            is_notice: taskData.isNotice
         });
 
         return TaskConfigService.getTaskById({ taskId });
@@ -152,7 +164,7 @@ class TaskConfigService {
      * @returns {Object} 驼峰命名对象
      */
     static #parseTask(task) {
-        const { task_id, title, started_at, ended_at, subject_name, mimetype, task_type } = task;
+        const { task_id, title, started_at, ended_at, subject_name, mimetype, task_type, format, source, is_notice } = task;
         return {
             taskId: task_id,
             title,
@@ -160,7 +172,10 @@ class TaskConfigService {
             endedAt: ended_at,
             subjectName: subject_name,
             mimetype,
-            taskType: task_type
+            taskType: task_type,
+            format,
+            source,
+            isNotice: is_notice
         };
     }
 }

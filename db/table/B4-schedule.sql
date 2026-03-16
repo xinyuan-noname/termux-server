@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS schedule(
     homework TEXT,
     summary TEXT,
     issue TEXT,
-    PRIMARY KEY (semester,week,weekday, period_start),
+    PRIMARY KEY (semester, week, weekday, period_start),
     FOREIGN KEY (semester) REFERENCES semesters(semester_name) ON
 DELETE CASCADE
 );
