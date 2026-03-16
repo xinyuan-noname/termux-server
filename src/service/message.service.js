@@ -20,5 +20,16 @@ class MessageServer {
         }
         return result;
     }
+    static async getRemindPending({ userId } = {}) {
+        const key = PENDING_REMIND_KEY.replace('{userId}', userId);
+        const result = [];
+        while (true) {
+            const msg = await redis.lPop(key);
+            if (msg === null) break;
+            result.push(JSON.parse(msg));
+            MessageServer.cacheRemind({ data: msg, userId, sent: true });
+        }
+        return result;
+    }
 }
 module.exports = MessageServer;

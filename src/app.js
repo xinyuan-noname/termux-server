@@ -47,6 +47,8 @@ async function start() {
         app.use('/task/config', taskConfigRoutes);
         const taskUploadRoutes = require('./routes/task_upload.routes');
         app.use('/task/upload', taskUploadRoutes);
+        const messageRoutes = require('./routes/message.routes');
+        app.use('/message', messageRoutes);
 
         // Error Handling Middleware
         const errorHandler = require('./middleware/error');
