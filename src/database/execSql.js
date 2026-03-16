@@ -38,7 +38,11 @@ function execOpenForeignKeys(db) {
  * @param {import("better-sqlite3").Database} db 
  */
 function execGetAllTableNames(db) {
-    return db.prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'`).all().map(o => o.name);
+    const tables = db.prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'`)
+        .all()
+        .map(o => o.name);
+    return require("../../db/tables.json")
+        .filter(t => tables.includes(t));
 }
 /**
  * 

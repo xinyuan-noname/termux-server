@@ -1,0 +1,12 @@
+[
+    "auth",
+    "password_key",
+    "refresh_tokens",
+    "profiles",
+    "semesters",
+    "subjects",
+    "courses",
+    "schedule",
+    "task_config",
+    "task_upload"
+]

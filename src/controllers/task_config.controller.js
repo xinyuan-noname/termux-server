@@ -8,7 +8,10 @@ class TaskConfigController {
      * @returns {void}
      */
     static getAllTasks(req, res) {
-        const tasks = TaskConfigService.getAllTasks();
+        const { id, userType } = req.accessPayload;
+        const tasks = TaskConfigService.getAllTasks().filter((task) => {
+            return task.source === id || task.source === userType || task.source == null;
+        });
         return res.json(tasks);
     }
 
@@ -32,7 +35,9 @@ class TaskConfigController {
      */
     static createTask(req, res) {
         const { title, startedAt, endedAt, subjectName, mimetype, taskType, format, source, isNotice } = req.body;
-        const result = TaskConfigService.createTask({ title, startedAt, endedAt, subjectName, mimetype, taskType, format, source, isNotice });
+        const result = TaskConfigService.createTask({
+            title, startedAt, endedAt, subjectName, mimetype, taskType, format, source, isNotice
+        });
         return res.status(201).json(result.taskId);
     }
 

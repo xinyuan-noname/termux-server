@@ -24,10 +24,10 @@ function updateDatabase(oldDbFileName) {
     const tables = execGetAllTableNames(db);
     execGenTableBackup(db, tables);
     //应该先删除子表，后删除父表
-    execDropTables(db, execGetAllTableNames(db).reverse());
+    execDropTables(db, [...tables].reverse());
     execOpenForeignKeys(db);
     execSqlFiles(db, "table");
-    for (const tableName of execGetAllTableNames(db)) {
+    for (const tableName of tables) {
         const backupTableName = `${tableName}_backup`;
         const commonCols = execGetCommonCols(db, tableName, backupTableName);
         if (commonCols.length) {
