@@ -43,13 +43,15 @@ class TaskConfigModel {
      * @param {string} [taskData.format] - 格式（可选）
      * @param {string} [taskData.source] - 来源（可选）
      * @param {number} [taskData.is_notice] - 是否为通知（可选，0 或 1）
+     * @param {string} [taskData.description] - 描述（可选）
+     * @param {Array} [taskData.draw_result] - 抽签结果数组（可选）
      */
-    static createTask({ title, started_at, ended_at, subject_name, mimetype, task_type, format, source, is_notice }) {
+    static createTask({ title, started_at, ended_at, subject_name, mimetype, task_type, format, source, is_notice, description, draw_result }) {
         const stmt = db.prepare(`
-            INSERT INTO task_config (title, started_at, ended_at, subject_name, mimetype, task_type, format, source, is_notice)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO task_config (title, started_at, ended_at, subject_name, mimetype, task_type, format, source, is_notice, description, draw_result)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `);
-        return stmt.run(title, started_at, ended_at, subject_name || null, mimetype || null, task_type || null, format || null, source || null, is_notice !== undefined ? is_notice : 0);
+        return stmt.run(title, started_at, ended_at, subject_name || null, mimetype || null, task_type || null, format || null, source || null, is_notice !== undefined ? is_notice : 0, description || null, draw_result ? JSON.stringify(draw_result) : null);
     }
 
     /**
@@ -65,9 +67,11 @@ class TaskConfigModel {
      * @param {string} [taskData.format] - 格式
      * @param {string} [taskData.source] - 来源
      * @param {number} [taskData.is_notice] - 是否为通知（0 或 1）
+     * @param {string} [taskData.description] - 描述
+     * @param {Array} [taskData.draw_result] - 抽签结果数组
      * @returns {Object} 更新结果
      */
-    static updateTask(task_id, { title, started_at, ended_at, subject_name, mimetype, task_type, format, source, is_notice }) {
+    static updateTask(task_id, { title, started_at, ended_at, subject_name, mimetype, task_type, format, source, is_notice, description, draw_result }) {
         const fields = [];
         const values = [];
 
@@ -106,6 +110,14 @@ class TaskConfigModel {
         if (is_notice !== undefined) {
             fields.push("is_notice = ?");
             values.push(is_notice);
+        }
+        if (description !== undefined) {
+            fields.push("description = ?");
+            values.push(description);
+        }
+        if (draw_result !== undefined) {
+            fields.push("draw_result = ?");
+            values.push(draw_result ? JSON.stringify(draw_result) : null);
         }
 
         if (fields.length === 0) {

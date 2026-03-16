@@ -54,8 +54,10 @@ class TaskConfigService {
      * @param {string} [params.format] - 格式（可选）
      * @param {string} [params.source] - 来源（可选）
      * @param {number} [params.isNotice] - 是否为通知（可选，0 或 1）
+     * @param {string} [params.description] - 描述（可选）
+     * @param {Array} [params.drawResult] - 抽签结果数组（可选）
      */
-    static createTask({ title, startedAt, endedAt, subjectName, mimetype, taskType, format, source, isNotice }) {
+    static createTask({ title, startedAt, endedAt, subjectName, mimetype, taskType, format, source, isNotice, description, drawResult }) {
         if (!title || typeof title !== "string") {
             throw new ValidationError("Invalid title", "title");
         }
@@ -78,7 +80,9 @@ class TaskConfigService {
             task_type: taskType,
             format,
             source,
-            is_notice: isNotice
+            is_notice: isNotice,
+            description,
+            draw_result: drawResult
         });
 
         return { taskId: result.lastInsertRowid };
@@ -98,6 +102,8 @@ class TaskConfigService {
      * @param {string} [params.taskData.format] - 格式
      * @param {string} [params.taskData.source] - 来源
      * @param {number} [params.taskData.isNotice] - 是否为通知（0 或 1）
+     * @param {string} [params.taskData.description] - 描述
+     * @param {Array} [params.taskData.drawResult] - 抽签结果数组
      * @returns {Object} 更新后的任务配置
      */
     static updateTask({ taskId, taskData }) {
@@ -131,7 +137,9 @@ class TaskConfigService {
             task_type: taskData.taskType,
             format: taskData.format,
             source: taskData.source,
-            is_notice: taskData.isNotice
+            is_notice: taskData.isNotice,
+            description: taskData.description,
+            draw_result: taskData.drawResult
         });
 
         return TaskConfigService.getTaskById({ taskId });
@@ -160,9 +168,10 @@ class TaskConfigService {
      * 将数据库对象转换为驼峰命名格式
      * @private
      * @param {Object} task - 数据库对象
+     * @returns {Object} 驼峰命名对象
      */
     static #parseTask(task) {
-        const { task_id, title, started_at, ended_at, subject_name, mimetype, task_type, format, source, is_notice } = task;
+        const { task_id, title, started_at, ended_at, subject_name, mimetype, task_type, format, source, is_notice, description, draw_result } = task;
         return {
             taskId: task_id,
             title,
@@ -173,7 +182,9 @@ class TaskConfigService {
             taskType: task_type,
             format,
             source,
-            isNotice: is_notice
+            isNotice: is_notice,
+            description,
+            drawResult: draw_result ? JSON.parse(draw_result) : null
         };
     }
 }

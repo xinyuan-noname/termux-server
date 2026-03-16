@@ -8,5 +8,10 @@ CREATE TABLE IF NOT EXISTS task_config(
     task_type TEXT,
     format TEXT,
     source TEXT,
-    is_notice INTEGER DEFAULT 0 CHECK (is_notice IN (0,1))
+    is_notice INTEGER DEFAULT 0 CHECK (is_notice IN (0, 1)),
+    description TEXT,
+    draw_result TEXT CHECK(
+        json_type(json(draw_result) = 'array')
+        OR draw_result is NULL
+    )
 );
