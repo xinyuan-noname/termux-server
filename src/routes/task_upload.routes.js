@@ -11,9 +11,7 @@ const taskUpload = createMulter({
 
 router.use('/', access);
 
-router.post('/upload', taskUpload.single("upload"), TaskUploadController.uploadFile);
-router.post('/create', TaskUploadController.createUpload);
-router.patch('/update', TaskUploadController.updateUpload);
+router.post('/', taskUpload.single("upload"), TaskUploadController.uploadFile);
 
 router.post('/list', TaskUploadController.getUploadsByTaskId);
 router.post('/search', TaskUploadController.getUploadById);

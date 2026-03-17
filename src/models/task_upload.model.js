@@ -31,14 +31,15 @@ class TaskUploadModel {
      * @param {number} uploadData.upload_at - 上传时间戳
      * @param {string} [uploadData.upload_file_path] - 上传文件路径（可选）
      * @param {string} [uploadData.upload_message] - 上传消息（可选）
+     * @param {string} [uploadData.upload_file_name] - 上传文件名（可选）
      * @returns {Object} 创建结果
      */
-    static createUpload({ task_id, upload_id, upload_at, upload_file_path, upload_message }) {
+    static createUpload({ task_id, upload_id, upload_at, upload_file_path, upload_message, upload_file_name }) {
         const stmt = db.prepare(`
-            INSERT INTO task_upload (task_id, upload_id, upload_at, upload_file_path, upload_message)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO task_upload (task_id, upload_id, upload_at, upload_file_path, upload_message, upload_file_name)
+            VALUES (?, ?, ?, ?, ?, ?)
         `);
-        return stmt.run(task_id, upload_id, upload_at, upload_file_path || null, upload_message || null);
+        return stmt.run(task_id, upload_id, upload_at, upload_file_path || null, upload_message || null, upload_file_name || null);
     }
 
     /**
@@ -49,8 +50,9 @@ class TaskUploadModel {
      * @param {number} [uploadData.upload_at] - 上传时间戳
      * @param {string} [uploadData.upload_file_path] - 上传文件路径
      * @param {string} [uploadData.upload_message] - 上传消息
+     * @param {string} [uploadData.upload_file_name] - 上传文件名
      */
-    static updateUpload(task_id, upload_id, { upload_at, upload_file_path, upload_message }) {
+    static updateUpload(task_id, upload_id, { upload_at, upload_file_path, upload_message, upload_file_name }) {
         const fields = [];
         const values = [];
 
@@ -65,6 +67,10 @@ class TaskUploadModel {
         if (upload_message !== undefined) {
             fields.push("upload_message = ?");
             values.push(upload_message);
+        }
+        if (upload_file_name !== undefined) {
+            fields.push("upload_file_name = ?");
+            values.push(upload_file_name);
         }
 
         if (fields.length === 0) {

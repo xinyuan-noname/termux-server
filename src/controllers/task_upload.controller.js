@@ -1,3 +1,4 @@
+const { FileUploadError } = require("../error");
 const TaskUploadService = require("../service/task_upload.service");
 
 class TaskUploadController {
@@ -31,33 +32,22 @@ class TaskUploadController {
      * @returns {void}
      */
     static uploadFile(req, res) {
-
+        const { accessPayload, file, body } = req;
+        if (!file) {
+            throw new FileUploadError();
+        }
+        const { taskId, uploadAt, uploadMessage, uploadFileName } = body;
+        const { id } = accessPayload;
+        const uploadTask = TaskUploadService.safeGetUploadById({ taskId: Number(taskId), uploadId: id });
+        const uploadData = { uploadFilePath: file.filename, uploadMessage, uploadFileName, uploadAt };
+        if (uploadTask == null) {
+            TaskUploadService.createUpload({ taskId: Number(taskId), uploadId: id, ...uploadData });
+            return res.status(201).end();
+        } else {
+            TaskUploadService.updateUpload({ taskId: Number(taskId), uploadId: id, uploadData })
+            return res.status(204).end();
+        }
     }
-
-    /**
-     * 创建新的上传记录
-     * @param {import("express").Request} req 
-     * @param {import("express").Response} res 
-     * @returns {void}
-     */
-    static createUpload(req, res) {
-        const { taskId, uploadId, uploadAt, uploadFilePath, uploadMessage } = req.body;
-        const upload = TaskUploadService.createUpload({ taskId, uploadId, uploadAt, uploadFilePath, uploadMessage });
-        return res.status(201).json(upload);
-    }
-
-    /**
-     * 更新上传记录
-     * @param {import("express").Request} req 
-     * @param {import("express").Response} res 
-     * @returns {void}
-     */
-    static updateUpload(req, res) {
-        const { taskId, uploadId, uploadData } = req.body;
-        TaskUploadService.updateUpload({ taskId, uploadId, uploadData });
-        return res.status(204).end();
-    }
-
     /**
      * 删除上传记录
      * @param {import("express").Request} req 
