@@ -4,7 +4,7 @@ const redis = require("../redis");
 class MessageServer {
     static async cacheRemind({ data, userId, sent = false } = {}) {
         const key = sent ? SENT_REMIND_KEY.replace('{userId}', userId) : PENDING_REMIND_KEY.replace('{userId}', userId);
-        await redis.lPush(key, data);
+        await redis.rPush(key, data);
         await redis.lTrim(key, 0, 49);
         await redis.expire(key, 3 * 24 * 3600);
     }

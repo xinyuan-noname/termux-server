@@ -1,6 +1,7 @@
 const { ValidationError, NotFoundError } = require("../error");
 const logger = require("../logger");
 const TaskUploadModel = require("../models/task_upload.model");
+const { isUnsignedIntegerString } = require("../utils/validation");
 
 class TaskUploadService {
 
@@ -11,10 +12,23 @@ class TaskUploadService {
      * @returns {Array} 上传记录列表（驼峰命名）
      */
     static getUploadsByTaskId({ taskId }) {
-        if (!taskId || Number.isInteger(taskId)) {
+        if (!Number.isInteger(taskId)) {
             throw new ValidationError("Invalid task id", "taskId");
         }
         const list = TaskUploadModel.getUploadsByTaskId(taskId);
+        return list.map(upload => TaskUploadService.#parseUpload(upload));
+    }
+    /**
+     * 根据任务 ID 获取所有上传记录
+     * @param {Object} params - 参数对象
+     * @param {number} params.uploadId - 任务 ID
+     * @returns {Array} 上传记录列表（驼峰命名）
+     */
+    static getUploadsByUploadId({ uploadId }) {
+        if (!isUnsignedIntegerString(uploadId)) {
+            throw new ValidationError("Invalid upload id", "uploadId");
+        }
+        const list = TaskUploadModel.getUploadsByUploadId(uploadId);
         return list.map(upload => TaskUploadService.#parseUpload(upload));
     }
 
@@ -26,10 +40,10 @@ class TaskUploadService {
      * @returns {Object} 上传记录对象（驼峰命名）
      */
     static getUploadById({ taskId, uploadId } = {}) {
-        if (!taskId || Number.isInteger(taskId)) {
+        if (!Number.isInteger(taskId)) {
             throw new ValidationError("Invalid task id", "taskId");
         }
-        if (!uploadId || typeof uploadId !== "string") {
+        if (!isUnsignedIntegerString(uploadId)) {
             throw new ValidationError("Invalid upload id", "uploadId");
         }
         const upload = TaskUploadModel.getUploadById(taskId, uploadId);
@@ -47,7 +61,7 @@ class TaskUploadService {
      */
     static safeGetUploadById({ taskId, uploadId } = {}) {
         try {
-            return TaskUploadService.getUploadById(taskId, uploadId)
+            return TaskUploadService.getUploadById({ taskId, uploadId })
         } catch (error) {
             logger.warn(error);
             return null;
@@ -66,13 +80,13 @@ class TaskUploadService {
      * @returns {Object} 创建后的上传记录
      */
     static createUpload({ taskId, uploadId, uploadAt, uploadFilePath, uploadMessage, uploadFileName }) {
-        if (!taskId || Number.isInteger(taskId)) {
+        if (!Number.isInteger(taskId)) {
             throw new ValidationError("Invalid task id", "taskId");
         }
-        if (!uploadId || typeof uploadId !== "string") {
+        if (!isUnsignedIntegerString(uploadId)) {
             throw new ValidationError("Invalid upload id", "uploadId");
         }
-        if (!uploadAt || typeof uploadAt !== "number") {
+        if (!Number.isInteger(uploadAt)) {
             throw new ValidationError("Invalid upload_at", "uploadAt");
         }
         TaskUploadModel.createUpload({
@@ -98,10 +112,10 @@ class TaskUploadService {
      * @returns {Object} 更新后的上传记录
      */
     static updateUpload({ taskId, uploadId, uploadData }) {
-        if (!taskId || Number.isInteger(taskId)) {
+        if (!Number.isInteger(taskId)) {
             throw new ValidationError("Invalid task id", "taskId");
         }
-        if (!uploadId || typeof uploadId !== "string") {
+        if (!isUnsignedIntegerString(uploadId)) {
             throw new ValidationError("Invalid upload id", "uploadId");
         }
 
@@ -130,10 +144,10 @@ class TaskUploadService {
      * @returns {Object} 删除结果
      */
     static deleteUpload({ taskId, uploadId }) {
-        if (!taskId || Number.isInteger(taskId)) {
+        if (!Number.isInteger(taskId)) {
             throw new ValidationError("Invalid task id", "taskId");
         }
-        if (!uploadId || typeof uploadId !== "string") {
+        if (!isUnsignedIntegerString(uploadId)) {
             throw new ValidationError("Invalid upload id", "uploadId");
         }
 
@@ -152,7 +166,7 @@ class TaskUploadService {
      * @returns {Object} 删除结果
      */
     static deleteUploadsByTaskId({ taskId }) {
-        if (!taskId || Number.isInteger(taskId)) {
+        if (!Number.isInteger(taskId)) {
             throw new ValidationError("Invalid task id", "taskId");
         }
 
@@ -166,12 +180,13 @@ class TaskUploadService {
      * @returns {Object} 驼峰命名对象
      */
     static #parseUpload(upload) {
+        // eslint-disable-next-line no-unused-vars
         const { task_id, upload_id, upload_at, upload_file_path, upload_message, upload_file_name } = upload;
         return {
             taskId: task_id,
             uploadId: upload_id,
             uploadAt: upload_at,
-            uploadFilePath: upload_file_path,
+            // uploadFilePath: upload_file_path,
             uploadMessage: upload_message,
             uploadFileName: upload_file_name
         };

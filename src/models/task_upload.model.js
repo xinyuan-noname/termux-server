@@ -11,6 +11,15 @@ class TaskUploadModel {
         const stmt = db.prepare("SELECT * FROM task_upload WHERE task_id = ?");
         return stmt.all(task_id);
     }
+    /**
+     * 根据 task_id 获取所有上传记录
+     * @param {string} upload_id - 任务 ID
+     * @returns {Array} 上传记录列表
+     */
+    static getUploadsByUploadId(upload_id) {
+        const stmt = db.prepare("SELECT * FROM task_upload WHERE upload_id = ?");
+        return stmt.all(upload_id);
+    }
 
     /**
      * 根据 upload_id 获取上传记录

@@ -13,8 +13,8 @@ router.use('/', access);
 
 router.post('/', taskUpload.single("upload"), TaskUploadController.uploadFile);
 
+router.get('/my', TaskUploadController.getMyUploads);
 router.post('/list', TaskUploadController.getUploadsByTaskId);
-router.post('/search', TaskUploadController.getUploadById);
 
 router.post('/delete', TaskUploadController.deleteUpload);
 
