@@ -18,6 +18,6 @@ router.get('/list/:taskId', TaskUploadController.getUploadsByTaskId);
 
 router.get('/file/:taskId/:uploadId', TaskUploadController.getStreamFile);
 
-router.post('/delete', TaskUploadController.deleteUpload);
+router.delete('/delete', TaskUploadController.deleteUpload);
 
 module.exports = router;

@@ -1,6 +1,7 @@
 const { TASK_DIR } = require("../config/paths");
 const { FileUploadError, NotFoundError } = require("../error");
 const TaskUploadService = require("../service/task_upload.service");
+const { enqueueTaskDelete } = require("../utils/queue");
 const { safeGetUploadsFilePath, createReadStream, getMimeType } = require("../utils/uploads");
 
 class TaskUploadController {
@@ -60,7 +61,11 @@ class TaskUploadController {
             TaskUploadService.createUpload({ taskId: Number(taskId), uploadId: id, ...uploadData });
             return res.status(201).end();
         } else {
-            TaskUploadService.updateUpload({ taskId: Number(taskId), uploadId: id, uploadData })
+            TaskUploadService.updateUpload({ taskId: Number(taskId), uploadId: id, uploadData });
+            enqueueTaskDelete({
+                uploadFilePath: uploadTask.uploadFilePath,
+                taskId: uploadTask.taskId
+            });
             return res.status(204).end();
         }
     }
@@ -70,12 +75,19 @@ class TaskUploadController {
      * @param {import("express").Response} res 
      */
     static deleteUpload(req, res) {
-        const { taskId, uploadId } = req.body;
+        const { accessPayload, body } = req;
+        const { taskId, uploadId } = body;
+        const { id } = accessPayload;
         TaskUploadService.deleteUpload({ taskId, uploadId });
+        const uploadTask = TaskUploadService.safeGetUploadById({ taskId: Number(taskId), uploadId: id });
+        enqueueTaskDelete({
+            uploadFilePath: uploadTask.uploadFilePath,
+            taskId: uploadTask.taskId
+        });
         return res.status(204).end();
     }
     /**
-    * 删除上传记录
+    * 
     * @param {import("express").Request} req 
     * @param {import("express").Response} res 
     */

@@ -55,7 +55,6 @@ class TaskUploadService {
      * @param {Object} params - 参数对象
      * @param {number} params.taskId - 任务 ID
      * @param {string} params.uploadId - 上传 ID
-     * @returns {Object} 上传记录对象（驼峰命名）
      */
     static safeGetUploadById({ taskId, uploadId } = {}) {
         try {
@@ -75,7 +74,6 @@ class TaskUploadService {
      * @param {string} [params.uploadFilePath] - 上传文件路径（可选）
      * @param {string} [params.uploadMessage] - 上传消息（可选）
      * @param {string} [params.uploadFileName] - 上传文件名（可选）
-     * @returns {Object} 创建后的上传记录
      */
     static createUpload({ taskId, uploadId, uploadAt, uploadFilePath, uploadMessage, uploadFileName }) {
         if (!Number.isInteger(taskId)) {

@@ -1,4 +1,6 @@
 const TaskConfigService = require("../service/task_config.service");
+const TaskUploadService = require("../service/task_upload.service");
+const { enqueueTaskDelete } = require("../utils/queue");
 
 class TaskConfigController {
     /**
@@ -61,6 +63,9 @@ class TaskConfigController {
      */
     static deleteTask(req, res) {
         const { taskId } = req.body;
+        for (const taskUploadData of TaskUploadService.getUploadsByTaskId({ taskId })) {
+            enqueueTaskDelete({ taskId: taskId, uploadFilePath: taskUploadData.uploadFilePath });
+        }
         TaskConfigService.deleteTask({ taskId });
         return res.status(204).end();
     }

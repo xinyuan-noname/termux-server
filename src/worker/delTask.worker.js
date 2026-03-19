@@ -16,12 +16,11 @@ async function consumeDelTaskQueue() {
             const result = await redis.brPop(queueConfig.DEL_TASK_KEY, 5);
             if (result) {
                 const taskData = JSON.parse(result.element);
-                const { taskId, uploadFileName } = taskData;
+                const { taskId, uploadFilePath } = taskData;
                 
-                // 删除上传的文件
-                if (uploadFileName && taskId) {
-                    await deleteFile(TASK_UPLOAD_DIR, `${taskId}_${uploadFileName}`);
-                    workerLogger.info(`已删除任务文件：${taskId}_${uploadFileName}`);
+                if (uploadFilePath && taskId) {
+                    await deleteFile(TASK_UPLOAD_DIR, `${taskId}_${uploadFilePath}`);
+                    workerLogger.info(`已删除任务文件：${taskId}_${uploadFilePath}`);
                 }
             }
         } catch (err) {
