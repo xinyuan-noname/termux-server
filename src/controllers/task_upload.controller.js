@@ -9,8 +9,8 @@ class TaskUploadController {
      * @returns {void}
      */
     static getUploadsByTaskId(req, res) {
-        const { taskId } = req.body;
-        const uploads = TaskUploadService.getUploadsByTaskId({ taskId });
+        const { taskId } = req.params;
+        const uploads = TaskUploadService.getUploadsByTaskId({ taskId: Number(taskId) });
         return res.json(uploads);
     }
     static getMyUploads(req, res) {

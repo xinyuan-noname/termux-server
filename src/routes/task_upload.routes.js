@@ -14,7 +14,7 @@ router.use('/', access);
 router.post('/', taskUpload.single("upload"), TaskUploadController.uploadFile);
 
 router.get('/my', TaskUploadController.getMyUploads);
-router.post('/list', TaskUploadController.getUploadsByTaskId);
+router.get('/list/:taskId', TaskUploadController.getUploadsByTaskId);
 
 router.post('/delete', TaskUploadController.deleteUpload);
 
