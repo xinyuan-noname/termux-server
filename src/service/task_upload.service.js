@@ -9,7 +9,6 @@ class TaskUploadService {
      * 根据任务 ID 获取所有上传记录
      * @param {Object} params - 参数对象
      * @param {number} params.taskId - 任务 ID
-     * @returns {Array} 上传记录列表（驼峰命名）
      */
     static getUploadsByTaskId({ taskId }) {
         if (!Number.isInteger(taskId)) {
@@ -37,7 +36,6 @@ class TaskUploadService {
      * @param {Object} params - 参数对象
      * @param {number} params.taskId - 任务 ID
      * @param {string} params.uploadId - 上传 ID
-     * @returns {Object} 上传记录对象（驼峰命名）
      */
     static getUploadById({ taskId, uploadId } = {}) {
         if (!Number.isInteger(taskId)) {
@@ -176,17 +174,15 @@ class TaskUploadService {
     /**
      * 将数据库对象转换为驼峰命名格式
      * @private
-     * @param {Object} upload - 数据库对象
-     * @returns {Object} 驼峰命名对象
+     * @param {Object} upload - 数据库对
      */
     static #parseUpload(upload) {
-        // eslint-disable-next-line no-unused-vars
         const { task_id, upload_id, upload_at, upload_file_path, upload_message, upload_file_name } = upload;
         return {
             taskId: task_id,
             uploadId: upload_id,
             uploadAt: upload_at,
-            // uploadFilePath: upload_file_path,
+            uploadFilePath: upload_file_path,
             uploadMessage: upload_message,
             uploadFileName: upload_file_name
         };

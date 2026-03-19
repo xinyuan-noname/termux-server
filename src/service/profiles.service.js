@@ -1,7 +1,7 @@
 const { BASICE_PROFILES_SEARCH_CONFGI } = require("../config/profiles");
 const { ValidationError, NotFoundError } = require("../error");
 const ProfilesModel = require("../models/profiles.model");
-const { checkAvatarExist, safeGetAvatarPath } = require("../utils/profiles");
+const { checkAvatarExist, safeGetAvatarPath } = require("../utils/uploads");
 const { isUnsignedIntegerString } = require("../utils/validation");
 
 const genUserInfoResult = (config, userInfo) => {
