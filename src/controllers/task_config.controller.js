@@ -34,8 +34,10 @@ class TaskConfigController {
      * @returns {void}
      */
     static createTask(req, res) {
-        const { title, startedAt, endedAt, subjectName, mimetype, taskType, format, source, isNotice, description, drawResult } = req.body;
-        const result = TaskConfigService.createTask({ title, startedAt, endedAt, subjectName, mimetype, taskType, format, source, isNotice, description, drawResult });
+        const { title, startedAt, endedAt, subjectName, mimetype, taskType, format, source, isNotice } = req.body;
+        const result = TaskConfigService.createTask({
+            title, startedAt, endedAt, subjectName, mimetype, taskType, format, source, isNotice
+        });
         return res.status(201).json(result.taskId);
     }
 

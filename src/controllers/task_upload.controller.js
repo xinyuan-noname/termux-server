@@ -88,6 +88,7 @@ class TaskUploadController {
         }
         const mimeType = getMimeType(filePath) ?? 'application/octet-stream';
         res.setHeader('Content-Type', mimeType);
+        res.setHeader('Cache-Control', 'private, max-age=600');
         createReadStream(filePath).pipe(res);
     }
 }
