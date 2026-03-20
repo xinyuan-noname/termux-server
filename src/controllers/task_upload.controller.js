@@ -118,9 +118,9 @@ class TaskUploadController {
     * @param {import("express").Request} req 
     * @param {import("express").Response} res 
     */
-    static getStreamDocumentView(req, res) {
+    static async getStreamDocumentView(req, res) {
         const { taskId, uploadId } = req.params;
-        const pdfViewBuffer = TaskUploadService.getDocumentViewFile({ taskId: Number(taskId), uploadId });
+        const pdfViewBuffer = await TaskUploadService.getDocumentViewFile({ taskId: Number(taskId), uploadId });
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Cache-Control', 'private, max-age=600');
         createBufferStream(pdfViewBuffer).pipe(res);

@@ -5,7 +5,7 @@ const redis = createClient({
     socket: {
         port: process.env.PORT_REDIS
     }
-});
+})
 
 redis.on("error", (err) => {
     logger.error("Redis error:", err);

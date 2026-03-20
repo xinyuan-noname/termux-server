@@ -2,7 +2,7 @@ const { UPLOAD_DOCUMENT_VIEW_STORAGE_KEY } = require("../config/uploads");
 const { ValidationError, NotFoundError } = require("../error");
 const logger = require("../logger");
 const TaskUploadModel = require("../models/task_upload.model");
-const redis = require("../redis");
+const proxyRedis = require("../redis/proxy");
 const { isUnsignedIntegerString } = require("../utils/validation");
 
 class TaskUploadService {
@@ -22,8 +22,7 @@ class TaskUploadService {
         if (!key) {
             throw new ValidationError('Invalid task id or upload id');
         }
-        const result = await redis.get(key);
-        console.log(result);
+        const result = await proxyRedis.get(key);
         if (!result) {
             throw new NotFoundError();
         }

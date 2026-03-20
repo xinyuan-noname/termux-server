@@ -17,7 +17,7 @@ router.get('/my', TaskUploadController.getMyUploads);
 router.get('/list/:taskId', TaskUploadController.getUploadsByTaskId);
 
 router.get('/file/:taskId/:uploadId', TaskUploadController.getStreamFile);
-router.get('/document/view/:taskId/:uploadId', TaskUploadController.getStreamDocumentView);
+router.get('/view/document/:taskId/:uploadId', TaskUploadController.getStreamDocumentView);
 
 router.delete('/delete', TaskUploadController.deleteUpload);
 

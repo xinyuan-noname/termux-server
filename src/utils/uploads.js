@@ -36,13 +36,19 @@ function safeGetAvatarPath(filepath) {
 function checkAvatarExist(filepath) {
     return Boolean(safeGetAvatarPath(filepath));
 }
-function getAvatarPath(filepath) {
+
+
+function resolveAvatarPath(filepath) {
     return path.resolve(dirConfig.AVATAR_DIR, filepath);
+}
+function resolveTaskPath(filepath) {
+    return path.resolve(dirConfig.TASK_DIR, filepath);
 }
 module.exports = {
     safeGetUploadsFilePath,
     checkAvatarExist,
-    getAvatarPath,
     safeGetAvatarPath,
-    safeGetTaskPath
+    safeGetTaskPath,
+    resolveAvatarPath,
+    resolveTaskPath
 }
