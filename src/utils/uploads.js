@@ -16,19 +16,28 @@ function safeGetUploadsFilePath(dir, filepath) {
         return null;
     }
 }
-
+/**
+ * 
+ * @param {string} filepath 
+ * @returns 
+ */
 function safeGetTaskPath(filepath) {
     return safeGetUploadsFilePath(dirConfig.TASK_DIR, filepath);
 }
+/**
+ * 
+ * @param {string} filepath 
+ */
+function safeGetAvatarPath(filepath) {
+    return safeGetUploadsFilePath(dirConfig.AVATAR_DIR, filepath)
+}
 
-function checkAvatarExist(filename) {
-    return Boolean(safeGetAvatarPath(filename));
+
+function checkAvatarExist(filepath) {
+    return Boolean(safeGetAvatarPath(filepath));
 }
-function getAvatarPath(filename) {
-    return path.resolve(dirConfig.AVATAR_DIR, filename);
-}
-function safeGetAvatarPath(filename) {
-    return safeGetUploadsFilePath(dirConfig.AVATAR_DIR, filename)
+function getAvatarPath(filepath) {
+    return path.resolve(dirConfig.AVATAR_DIR, filepath);
 }
 module.exports = {
     safeGetUploadsFilePath,

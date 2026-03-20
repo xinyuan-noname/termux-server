@@ -1,10 +1,34 @@
+const { UPLOAD_DOCUMENT_VIEW_STORAGE_KEY } = require("../config/uploads");
 const { ValidationError, NotFoundError } = require("../error");
 const logger = require("../logger");
 const TaskUploadModel = require("../models/task_upload.model");
+const redis = require("../redis");
 const { isUnsignedIntegerString } = require("../utils/validation");
 
 class TaskUploadService {
-
+    static getDocumentViewKey({ taskId, uploadId }) {
+        if (!Number.isInteger(taskId)) {
+            return null;
+        }
+        if (!isUnsignedIntegerString(uploadId)) {
+            return null;
+        }
+        return UPLOAD_DOCUMENT_VIEW_STORAGE_KEY
+            .replace("{taskId}", taskId)
+            .replace("{uploadId}", uploadId);
+    }
+    static async getDocumentViewFile({ taskId, uploadId }) {
+        const key = TaskUploadService.getDocumentViewKey({ taskId, uploadId });
+        if (!key) {
+            throw new ValidationError('Invalid task id or upload id');
+        }
+        const result = await redis.get(key);
+        console.log(result);
+        if (!result) {
+            throw new NotFoundError();
+        }
+        return result;
+    }
     /**
      * 根据任务 ID 获取所有上传记录
      * @param {Object} params - 参数对象

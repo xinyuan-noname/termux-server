@@ -6,6 +6,7 @@ const libre = require("libreoffice-convert");
 const util = require("util");
 
 const mime = require('mime');
+const { Readable } = require("stream");
 
 /**
  * 支持转换为 PDF 的文件扩展名列表
@@ -18,7 +19,7 @@ const SUPPORTED_PDF_CONVERSION_EXTENSIONS = ['.doc', '.docx', '.xls', '.xlsx'];
  * @param {string} filePath - 文件的绝对路径
  * @returns {Promise<boolean>} - 如果文件可以转换返回 true，否则返回 false
  */
-async function canConvertToPdf(filePath) {
+function canConvertToPdf(filePath) {
     const ext = path.extname(filePath).toLowerCase();
     return SUPPORTED_PDF_CONVERSION_EXTENSIONS.includes(ext);
 }
@@ -96,12 +97,19 @@ async function convertToPdf(inputPath) {
 }
 
 /**
- * 
  * @param {string} filepath 
  * @returns 
  */
 function createReadStream(filepath) {
     return fs.createReadStream(filepath);
+}
+/**
+ * 
+ * @param {Buffer} buffer 
+ */
+function createBufferStream(buffer){
+    const stream = Readable.from(buffer);
+    return stream;
 }
 function getMimeType(filepath) {
     return mime.default.getType(filepath);
@@ -114,5 +122,6 @@ module.exports = {
     canConvertToPdf,
     convertToPdf,
     createReadStream,
+    createBufferStream,
     getMimeType
 };

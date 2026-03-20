@@ -1,15 +1,15 @@
+const FileLocation = require("../enum/file_location");
+const SafeGetUploadsFilePath = require("../enum/safe_uploads_get");
 const { FileUploadError, NotFoundError } = require("../error");
 const TaskUploadService = require("../service/task_upload.service");
-const { getMimeType, createReadStream } = require("../utils/file");
-const { enqueueTaskDelete } = require("../utils/queue");
+const { getMimeType, createReadStream, canConvertToPdf, createBufferStream } = require("../utils/file");
+const { enqueueTaskDelete, enqueueConvertToPdf } = require("../utils/queue");
 const { safeGetTaskPath } = require("../utils/uploads");
 
 class TaskUploadController {
     /**
-     * 根据任务 ID 获取所有上传记录
      * @param {import("express").Request} req 
      * @param {import("express").Response} res 
-     * @returns {void}
      */
     static getUploadsByTaskId(req, res) {
         const { taskId } = req.params;
@@ -20,6 +20,10 @@ class TaskUploadController {
             });
         return res.json(uploads);
     }
+    /**
+    * @param {import("express").Request} req 
+    * @param {import("express").Response} res 
+    */
     static getMyUploads(req, res) {
         const { accessPayload } = req;
         const { id } = accessPayload;
@@ -57,6 +61,14 @@ class TaskUploadController {
         const { id } = accessPayload;
         const uploadTask = TaskUploadService.safeGetUploadById({ taskId: Number(taskId), uploadId: id });
         const uploadData = { uploadFilePath: file.filename, uploadMessage, uploadFileName, uploadAt: Number(uploadAt) };
+        if (canConvertToPdf(file.filename)) {
+            enqueueConvertToPdf({
+                target: FileLocation.redis,
+                targetRedisKey: TaskUploadService.getDocumentViewKey({ taskId: Number(taskId), uploadId: id }),
+                source: FileLocation.local,
+                sourcePath: SafeGetUploadsFilePath.task(file.filename),
+            });
+        }
         if (uploadTask == null) {
             TaskUploadService.createUpload({ taskId: Number(taskId), uploadId: id, ...uploadData });
             return res.status(201).end();
@@ -87,14 +99,13 @@ class TaskUploadController {
         return res.status(204).end();
     }
     /**
-    * 
     * @param {import("express").Request} req 
     * @param {import("express").Response} res 
     */
     static getStreamFile(req, res) {
         const { taskId, uploadId } = req.params;
         const uploadData = TaskUploadService.getUploadById({ taskId: Number(taskId), uploadId });
-        const filePath = safeGetTaskPath( uploadData.uploadFilePath);
+        const filePath = safeGetTaskPath(uploadData.uploadFilePath);
         if (filePath == null) {
             throw new NotFoundError();
         }
@@ -102,6 +113,17 @@ class TaskUploadController {
         res.setHeader('Content-Type', mimeType);
         res.setHeader('Cache-Control', 'private, max-age=600');
         createReadStream(filePath).pipe(res);
+    }
+    /**
+    * @param {import("express").Request} req 
+    * @param {import("express").Response} res 
+    */
+    static getStreamDocumentView(req, res) {
+        const { taskId, uploadId } = req.params;
+        const pdfViewBuffer = TaskUploadService.getDocumentViewFile({ taskId: Number(taskId), uploadId });
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Cache-Control', 'private, max-age=600');
+        createBufferStream(pdfViewBuffer).pipe(res);
     }
 }
 

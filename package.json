@@ -24,6 +24,7 @@
     "express-ws": "^5.0.2",
     "jsonwebtoken": "^9.0.3",
     "libreoffice-convert": "^1.8.1",
+    "lodash": "^4.17.23",
     "mime": "^4.1.0",
     "multer": "^2.0.2",
     "rate-limit-redis": "^4.3.1",
