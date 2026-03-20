@@ -1,8 +1,8 @@
-const { TASK_DIR } = require("../config/paths");
 const { FileUploadError, NotFoundError } = require("../error");
 const TaskUploadService = require("../service/task_upload.service");
+const { getMimeType, createReadStream } = require("../utils/file");
 const { enqueueTaskDelete } = require("../utils/queue");
-const { safeGetUploadsFilePath, createReadStream, getMimeType } = require("../utils/uploads");
+const { safeGetTaskPath } = require("../utils/uploads");
 
 class TaskUploadController {
     /**
@@ -94,7 +94,7 @@ class TaskUploadController {
     static getStreamFile(req, res) {
         const { taskId, uploadId } = req.params;
         const uploadData = TaskUploadService.getUploadById({ taskId: Number(taskId), uploadId });
-        const filePath = safeGetUploadsFilePath(TASK_DIR, uploadData.uploadFilePath);
+        const filePath = safeGetTaskPath( uploadData.uploadFilePath);
         if (filePath == null) {
             throw new NotFoundError();
         }

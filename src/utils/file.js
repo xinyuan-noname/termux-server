@@ -5,6 +5,8 @@ const XLSX = require("xlsx");
 const libre = require("libreoffice-convert");
 const util = require("util");
 
+const mime = require('mime');
+
 /**
  * 支持转换为 PDF 的文件扩展名列表
  * @constant {string[]}
@@ -93,11 +95,24 @@ async function convertToPdf(inputPath) {
     return pdfBuffer;
 }
 
+/**
+ * 
+ * @param {string} filepath 
+ * @returns 
+ */
+function createReadStream(filepath) {
+    return fs.createReadStream(filepath);
+}
+function getMimeType(filepath) {
+    return mime.default.getType(filepath);
+}
 module.exports = {
     clearFiles,
     clearLogFiles,
     writeUrl,
     readExcelBufferAsJson,
     canConvertToPdf,
-    convertToPdf
+    convertToPdf,
+    createReadStream,
+    getMimeType
 };

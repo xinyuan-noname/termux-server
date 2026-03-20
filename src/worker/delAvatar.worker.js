@@ -4,8 +4,9 @@ const queueConfig = require("../config/queue");
 const workerLogger = require("../logger/worker");
 const { deleteFile } = require('../utils/worker');
 const { AVATAR_DIR } = require('../config/paths');
+const QUEUE_NAME = "del-avatar-worker";
 async function consumeQueue() {
-    workerLogger.info('avatar-worker已启动...');
+    workerLogger.info(`${QUEUE_NAME}队列已启动...`);
     while (true) {
         try {
             const result = await redis.brPop(queueConfig.DEL_AVATAR_KEY, 5);

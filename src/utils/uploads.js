@@ -1,7 +1,6 @@
 const fs = require("fs");
 const path = require("path")
 const dirConfig = require("../config/paths");
-const mime = require('mime');
 /**
  * 
  * @param {string} dir 
@@ -17,43 +16,24 @@ function safeGetUploadsFilePath(dir, filepath) {
         return null;
     }
 }
-/**
- * 
- * @param {string} filepath 
- * @returns 
- */
-function createReadStream(filepath){
-    return fs.createReadStream(filepath);
+
+function safeGetTaskPath(filepath) {
+    return safeGetUploadsFilePath(dirConfig.TASK_DIR, filepath);
 }
-function getMimeType(filepath){
-    return mime.default.getType(filepath);
-}
+
 function checkAvatarExist(filename) {
-    try {
-        const uploadFilePath = getAvatarPath(filename);
-        fs.accessSync(uploadFilePath);
-        return true;
-    } catch {
-        return false;
-    }
+    return Boolean(safeGetAvatarPath(filename));
 }
 function getAvatarPath(filename) {
     return path.resolve(dirConfig.AVATAR_DIR, filename);
 }
 function safeGetAvatarPath(filename) {
-    try {
-        const avatarPath = getAvatarPath(filename);
-        fs.accessSync(avatarPath);
-        return avatarPath
-    } catch {
-        return null;
-    }
+    return safeGetUploadsFilePath(dirConfig.AVATAR_DIR, filename)
 }
 module.exports = {
     safeGetUploadsFilePath,
     checkAvatarExist,
     getAvatarPath,
     safeGetAvatarPath,
-    createReadStream,
-    getMimeType
+    safeGetTaskPath
 }

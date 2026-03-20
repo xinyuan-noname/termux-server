@@ -32,8 +32,13 @@ async function enqueueTaskDelete({ taskId, uploadFilePath } = {}) {
     await redis.lPush(queueConfig.DEL_TASK_KEY, JSON.stringify(taskData));
     logger.info(`任务${taskId}的文件${uploadFilePath}加入删除队列`);
 }
-
+async function enqueueConvertToPdf({ source } = {}) {
+    const convertData = { source }
+    await redis.lPush(queueConfig.CONVERT_TO_PDF_KEY, JSON.stringify(convertData));
+    logger.info(`有文件加入文件转换队列`);
+}
 module.exports = {
     enqueueAvatarDelete,
-    enqueueTaskDelete
+    enqueueTaskDelete,
+    enqueueConvertToPdf
 };
