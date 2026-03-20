@@ -12,7 +12,7 @@ const { Readable } = require("stream");
  * 支持转换为 PDF 的文件扩展名列表
  * @constant {string[]}
  */
-const SUPPORTED_PDF_CONVERSION_EXTENSIONS = ['.doc', '.docx', '.xls', '.xlsx'];
+const SUPPORTED_PDF_CONVERSION_EXTENSIONS = ['.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.pdf'];
 
 /**
  * 判断指定文件是否可以转换为 PDF 格式

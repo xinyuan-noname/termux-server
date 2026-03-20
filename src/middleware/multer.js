@@ -5,6 +5,7 @@ const logger = require('../logger');
 const path = require('path');
 const { generateRandomSafeString } = require('../utils/verification');
 const { EXCEL_MIMES, IMAGE_MIMES, EXCEL_EXTS } = require('../config/uploads');
+const { canConvertToPdf } = require('../utils/file');
 const avatarStorage = multer.diskStorage({
     destination: (req, file, cb) => {
         const uploadDir = dirConfig.AVATAR_DIR;
@@ -64,6 +65,21 @@ const allowAllFilesFilter = (req, file, cb) => {
     cb(null, true);
 };
 
+/**
+ * 文档文件过滤器，允许文档格式
+ * @param {Object} req - Express 请求对象
+ * @param {Object} file - 上传的文件对象
+ * @param {Function} cb - 回调函数
+ */
+const documentFileFilter = (req, file, cb) => {
+    if (canConvertToPdf(file.originalname)) {
+        logger.info(`收到文档文件`, { ...file, req: req.requestId });
+        cb(null, true);
+    } else {
+        cb(new Error('仅支持文档格式(doc, docx, xls, xlsx, ppt, pptx, pdf)'), false);
+    }
+};
+
 const createMulter = ({ storage, fileFilter, limits = normalLimits }) => {
     return multer({ storage, fileFilter, limits })
 }
@@ -77,7 +93,8 @@ module.exports = {
     MulterFileFilter: {
         avatarFileFilter,
         excelFileFilter,
-        allowAllFilesFilter
+        allowAllFilesFilter,
+        documentFileFilter
     },
     MulterLimits: {
         normalLimits
