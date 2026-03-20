@@ -61,6 +61,13 @@ async function writeUrl(url) {
     await fs.writeFile(URL_TXT_FILE, url, "utf8");
 }
 
+async function readFileAsBuffer(path) {
+    return await fs.readFile(path);
+}
+
+async function writeFileByBuffer(path, data, options) {
+    return await fs.writeFile(path, data, options);
+}
 /**
  * 将 Excel 文件缓冲区转换为 JSON 数组
  * @param {Buffer} data - Excel 文件的二进制数据
@@ -78,20 +85,11 @@ function readExcelBufferAsJson(data) {
 
 /**
  * 将 Office 文档（Excel、Word）转换为 PDF 格式
- * @param {string} inputPath - Office 文档的绝对路径
+ * @param {Buffer} inputPath - Office 文档的绝对路径
  * @returns {Promise<Buffer>} - 转换后的 PDF 二进制数据
- * @throws {Error} 当文件格式不支持或文件不存在时抛出错误
  */
-async function convertToPdf(inputPath) {
+async function convertToPdf(fileBuffer) {
     const convertAsync = util.promisify(libre.convert);
-    await fs.access(inputPath);
-    const ext = path.extname(inputPath).toLowerCase();
-
-    if (!SUPPORTED_PDF_CONVERSION_EXTENSIONS.includes(ext)) {
-        throw new Error(`不支持的文件格式：${ext}，仅支持 ${SUPPORTED_PDF_CONVERSION_EXTENSIONS.join(', ')} 文件`);
-    }
-
-    const fileBuffer = await fs.readFile(inputPath);
     const pdfBuffer = await convertAsync(fileBuffer, ".pdf", undefined);
     return pdfBuffer;
 }
@@ -107,7 +105,7 @@ function createReadStream(filepath) {
  * 
  * @param {Buffer} buffer 
  */
-function createBufferStream(buffer){
+function createBufferStream(buffer) {
     const stream = Readable.from(buffer);
     return stream;
 }
@@ -118,7 +116,9 @@ module.exports = {
     clearFiles,
     clearLogFiles,
     writeUrl,
+    writeFileByBuffer,
     readExcelBufferAsJson,
+    readFileAsBuffer,
     canConvertToPdf,
     convertToPdf,
     createReadStream,
