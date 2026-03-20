@@ -4,10 +4,11 @@ const startRedis = require('./redis.process');
 const startServer = require('./server.process');
 const startWorker = require('./worker.process');
 const logger = require('../logger');
-const { clearLogs, writeUrl } = require('../utils/file');
+const { writeUrl, clearLogFiles } = require('../utils/file');
 const startGit = require('./git.process');
 const { RESTART_WINDOW, RESTART_DELAY, GIT_TRY_MAX_TIMES } = require('../config/process');
 const { startChecker } = require('./checker.process');
+const redis = require('../redis');
 const processes = new Map([
     ['redis', {
         start: startRedis,
@@ -73,7 +74,16 @@ function startProcess(name, config) {
 
 async function start() {
     if (process.env.NODE_ENV === 'development') {
-        await clearLogs();
+        try {
+            await redis.flushAll();
+        } catch {
+            logger.warn("删除redis缓存失败");
+        }
+        try {
+            await clearLogFiles();
+        } catch {
+            logger.warn("清理日志文件失败")
+        }
     }
 
     logger.info('🚀 启动服务...');
