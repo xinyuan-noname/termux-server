@@ -6,6 +6,22 @@ const libre = require("libreoffice-convert");
 const util = require("util");
 
 /**
+ * 支持转换为 PDF 的文件扩展名列表
+ * @constant {string[]}
+ */
+const SUPPORTED_PDF_CONVERSION_EXTENSIONS = ['.doc', '.docx', '.xls', '.xlsx'];
+
+/**
+ * 判断指定文件是否可以转换为 PDF 格式
+ * @param {string} filePath - 文件的绝对路径
+ * @returns {Promise<boolean>} - 如果文件可以转换返回 true，否则返回 false
+ */
+async function canConvertToPdf(filePath) {
+    const ext = path.extname(filePath).toLowerCase();
+    return SUPPORTED_PDF_CONVERSION_EXTENSIONS.includes(ext);
+}
+
+/**
  * 清空指定目录下的所有文件内容
  * @param {string} dirPath - 需要清空的目录路径
  * @returns {Promise<number>} - 被清空的文件数量
@@ -56,21 +72,24 @@ function readExcelBufferAsJson(data) {
     const jsonData = XLSX.utils.sheet_to_json(worksheet);
     return jsonData;
 }
+
 /**
- * 将 Word 文档转换为 PDF 格式
- * @param {string} inputPath - Word 文档的绝对路径
+ * 将 Office 文档（Excel、Word）转换为 PDF 格式
+ * @param {string} inputPath - Office 文档的绝对路径
  * @returns {Promise<Buffer>} - 转换后的 PDF 二进制数据
+ * @throws {Error} 当文件格式不支持或文件不存在时抛出错误
  */
-async function convertWordToPdf(inputPath) {
+async function convertToPdf(inputPath) {
     const convertAsync = util.promisify(libre.convert);
     await fs.access(inputPath);
     const ext = path.extname(inputPath).toLowerCase();
-    const wordExtensions = ['.doc', '.docx'];
-    if (!wordExtensions.includes(ext)) {
-        throw new Error(`不支持的文件格式：${ext}，仅支持 .doc 和 .docx 文件`);
+
+    if (!SUPPORTED_PDF_CONVERSION_EXTENSIONS.includes(ext)) {
+        throw new Error(`不支持的文件格式：${ext}，仅支持 ${SUPPORTED_PDF_CONVERSION_EXTENSIONS.join(', ')} 文件`);
     }
-    const docxBuffer = await fs.readFile(inputPath);
-    const pdfBuffer = await convertAsync(docxBuffer, ".pdf", undefined);
+
+    const fileBuffer = await fs.readFile(inputPath);
+    const pdfBuffer = await convertAsync(fileBuffer, ".pdf", undefined);
     return pdfBuffer;
 }
 
@@ -79,5 +98,6 @@ module.exports = {
     clearLogFiles,
     writeUrl,
     readExcelBufferAsJson,
-    convertWordToPdf
+    canConvertToPdf,
+    convertToPdf
 };

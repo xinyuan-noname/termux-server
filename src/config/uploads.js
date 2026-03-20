@@ -14,8 +14,10 @@ const IMAGE_MIMES = [
   'image/svg+xml'
 ];
 
+const UPLOAD_DOCUMENT_VIEW_STORAGE_KEY = "upload:document:view:storage:{taskId}:{userId}";
 module.exports = {
   EXCEL_MIMES,
   IMAGE_MIMES,
-  EXCEL_EXTS
+  EXCEL_EXTS,
+  UPLOAD_DOCUMENT_VIEW_STORAGE_KEY
 }
