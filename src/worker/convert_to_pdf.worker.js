@@ -30,6 +30,7 @@ async function consumeQueue() {
                         break;
                 }
             }
+            workerLogger.log(`文件转换成功`, result);
         } catch (err) {
             workerLogger.error('消费队列出错:', err);
             await new Promise(r => setTimeout(r, 1000));

@@ -3,8 +3,9 @@ const redis = require("../redis");
 async function start() {
     try {
         await redis.connect();
-        require('./delAvatar.worker');
-        require('./delTask.worker');
+        require('./del_avatar.worker');
+        require('./del_task.worker');
+        require('./convert_to_pdf.worker');
     } catch {
         workerLogger.error("worker启动失败");
     }
