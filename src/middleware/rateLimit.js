@@ -2,8 +2,7 @@ const { ipKeyGenerator, rateLimit } = require("express-rate-limit");
 const { RedisStore } = require("rate-limit-redis");
 const { getAccessTokenFromReq } = require("../utils/verification");
 const redis = require("../redis");
-
-module.exports = (windowMinutes = 15, max = 5, useToken = false, errorMessage = "Rate limit exceeded", options = {}) => {
+const createRateLimiter = (windowMinutes = 15, max = 5, useToken = false, errorMessage = "Rate limit exceeded", options = {}) => {
     return rateLimit({
         windowMs: windowMinutes * 60 * 1000,
         max,
@@ -25,3 +24,4 @@ module.exports = (windowMinutes = 15, max = 5, useToken = false, errorMessage = 
         ...options
     })
 }
+module.exports = createRateLimiter;
