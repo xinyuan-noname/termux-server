@@ -1,8 +1,8 @@
 const FileLocation = require("../enum/file_location");
 const SafeGetUploadsFilePath = require("../enum/safe_uploads_get");
-const { FileUploadError, NotFoundError } = require("../error");
+const { FileUploadError, NotFoundError, ValidationError } = require("../error");
 const TaskUploadService = require("../service/task_upload.service");
-const { getMimeType, createReadStream, canConvertToPdf, createBufferStream } = require("../utils/file");
+const { getMimeType, createReadStream, canConvertToPdf, createBufferStream, createZipStream } = require("../utils/file");
 const { enqueueTaskDelete, enqueueConvertToPdf } = require("../utils/queue");
 const { safeGetTaskPath } = require("../utils/uploads");
 
@@ -87,11 +87,10 @@ class TaskUploadController {
      * @param {import("express").Response} res 
      */
     static deleteUpload(req, res) {
-        const { accessPayload, body } = req;
-        const { taskId, uploadId } = body;
-        const { id } = accessPayload;
-        TaskUploadService.deleteUpload({ taskId, uploadId });
-        const uploadTask = TaskUploadService.safeGetUploadById({ taskId: Number(taskId), uploadId: id });
+        const { params } = req;
+        const { taskId, uploadId } = params;
+        const uploadTask = TaskUploadService.safeGetUploadById({ taskId: Number(taskId), uploadId: uploadId });
+        TaskUploadService.deleteUpload({ taskId: Number(taskId), uploadId });
         enqueueTaskDelete({
             uploadFilePath: uploadTask.uploadFilePath,
             taskId: uploadTask.taskId
@@ -124,6 +123,27 @@ class TaskUploadController {
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Cache-Control', 'private, max-age=600');
         createBufferStream(pdfViewBuffer).pipe(res);
+    }
+    /**
+   * @param {import("express").Request} req 
+   * @param {import("express").Response} res 
+   */
+    static async getStreamZip(req, res) {
+        const { taskId } = req.params;
+        const _taskId = Number(taskId);
+        if (!Number.isInteger(_taskId)) {
+            throw new ValidationError('task id出错', 'task id');
+        }
+        const archive = createZipStream();
+        archive.pipe(res);
+        const uploadDataList = TaskUploadService.getUploadsByTaskId({ taskId: _taskId });
+        for (const uploadData of uploadDataList) {
+            const path = safeGetTaskPath(uploadData.uploadFilePath);
+            if (path != null) {
+                archive.file(path, { name: uploadData.uploadFileName });
+            }
+        }
+        archive.finalize()
     }
 }
 

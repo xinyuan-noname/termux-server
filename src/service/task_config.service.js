@@ -168,7 +168,6 @@ class TaskConfigService {
      * 将数据库对象转换为驼峰命名格式
      * @private
      * @param {Object} task - 数据库对象
-     * @returns {Object} 驼峰命名对象
      */
     static #parseTask(task) {
         const { task_id, title, started_at, ended_at, subject_name, mimetype, task_type, format, source, is_notice, description, draw_result } = task;

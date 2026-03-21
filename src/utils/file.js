@@ -1,12 +1,13 @@
 const path = require("path");
 const { LOGS_DEV_DIR, URL_TXT_FILE } = require("../config/paths");
-const fs = require("fs").promises;
+const fs = require("fs")
 const XLSX = require("xlsx");
 const libre = require("libreoffice-convert");
 const util = require("util");
 
 const mime = require('mime');
 const { Readable } = require("stream");
+const archiver = require("archiver");
 
 /**
  * 支持转换为 PDF 的文件扩展名列表
@@ -30,14 +31,14 @@ function canConvertToPdf(filePath) {
  * @returns {Promise<number>} - 被清空的文件数量
  */
 async function clearFiles(dirPath) {
-    const fileNameList = await fs.readdir(dirPath);
+    const fileNameList = await fs.promises.readdir(dirPath);
     let fileCount = 0;
 
     await Promise.all(fileNameList.map(async (fileName) => {
         const filePath = path.resolve(dirPath, fileName);
-        const fileStat = await fs.stat(filePath);
+        const fileStat = await fs.promises.stat(filePath);
         if (fileStat.isFile()) {
-            await fs.truncate(filePath, 0);
+            await fs.promises.truncate(filePath, 0);
             fileCount++;
         }
     }));
@@ -58,15 +59,15 @@ async function clearLogFiles(logDir = LOGS_DEV_DIR) {
  * @param {string} url 
  */
 async function writeUrl(url) {
-    await fs.writeFile(URL_TXT_FILE, url, "utf8");
+    await fs.promises.writeFile(URL_TXT_FILE, url, "utf8");
 }
 
 async function readFileAsBuffer(path) {
-    return await fs.readFile(path);
+    return await fs.promises.readFile(path);
 }
 
 async function writeFileByBuffer(path, data, options) {
-    return await fs.writeFile(path, data, options);
+    return await fs.promises.writeFile(path, data, options);
 }
 /**
  * 将 Excel 文件缓冲区转换为 JSON 数组
@@ -109,6 +110,13 @@ function createBufferStream(buffer) {
     const stream = Readable.from(buffer);
     return stream;
 }
+
+function createZipStream() {
+    const archive = archiver('zip', {
+        zlib: { level: 9 },
+    });
+    return archive;
+}
 function getMimeType(filepath) {
     return mime.default.getType(filepath);
 }
@@ -123,5 +131,6 @@ module.exports = {
     convertToPdf,
     createReadStream,
     createBufferStream,
+    createZipStream,
     getMimeType
 };

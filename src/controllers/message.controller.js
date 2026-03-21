@@ -8,7 +8,11 @@ class MessageController {
      * @returns 
      */
     static getAllNoticeTasks(req, res) {
-        const tasks = TaskConfigService.getAllTasks().filter((task) => task.isNotice);
+        const tasks = TaskConfigService.getAllTasks().filter((task) =>
+            task.isNotice
+            && task.endedAt >= Date.now()
+            && task.startedAt <= Date.now()
+        );
         return res.json(tasks);
     }
     /**
