@@ -16,7 +16,16 @@ class AssetService {
         return { address, key };
     }
     static async getPdfRedisCache({ address }) {
-        return await proxyRedis.get(AssetService.getPdfRedisKey({ address }));
+        const result = await proxyRedis.get(AssetService.getPdfRedisKey({ address }));
+        return result;
+    }
+    static async checkPdfRedisCache({ address }) {
+        const key = AssetService.getPdfRedisKey({ address })
+        const hasKey = Boolean(await proxyRedis.exists(key)); 
+        if(!hasKey) return false;
+        const strLen = await proxyRedis.strLen(key);
+        if(!strLen) return false;
+        return true;
     }
 }
 module.exports = AssetService;

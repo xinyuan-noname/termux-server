@@ -56,5 +56,13 @@ class AssetController {
         res.setHeader('Cache-Control', 'private, max-age=600');
         createBufferStream(pdfViewBuffer).pipe(res);
     }
+    static async existPdf(req, res) {
+        const { address } = req.params
+        const isOk = await AssetService.checkPdfRedisCache({ address });
+        if(!isOk){
+            throw new NotFoundError();
+        }
+        return res.status(204).end();
+    }
 }
 module.exports = AssetController;
