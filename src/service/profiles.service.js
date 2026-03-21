@@ -48,12 +48,12 @@ class ProfilesServer {
             throw new Error("上传头像失败");
         }
     }
-    static getAvatarName({ id } = {}) {
+    static getAvatarName({ id }) {
         const user = ProfilesModel.getAvatarName(id);
         if (user?.avatar_name == null) return null;
         return user.avatar_name;
     }
-    static getAvatarPath({ id } = {}) {
+    static getAvatarPath({ id }) {
         const avatarName = ProfilesServer.getAvatarName({ id });
         const avatarPath = safeGetAvatarPath(avatarName);
         if (avatarPath == null) {
@@ -61,7 +61,7 @@ class ProfilesServer {
         }
         return avatarPath;
     }
-    static getUserInfo({ id, config = {} } = {}) {
+    static getUserInfo({ id, config = {} }) {
         if (!isUnsignedIntegerString(id)) {
             throw new ValidationError("无效的ID", "id");
         }
@@ -70,7 +70,7 @@ class ProfilesServer {
         const result = genUserInfoResult(config, userInfo);
         return result;
     }
-    static getUserInfoBatch({ idList, config } = {}) {
+    static getUserInfoBatch({ idList, config }) {
         let result = [];
         if (idList === "all") {
             result = ProfilesServer.getAllUserInfo({ config });
@@ -89,7 +89,7 @@ class ProfilesServer {
         }
         return result;
     }
-    static getAllUserInfo({ config = BASICE_PROFILES_SEARCH_CONFGI } = {}) {
+    static getAllUserInfo({ config = BASICE_PROFILES_SEARCH_CONFGI }) {
         const userInfoList = ProfilesModel.getAllUserInfo();
         const resultList = [];
         for (const userInfo of userInfoList) {
@@ -98,7 +98,7 @@ class ProfilesServer {
         }
         return resultList;
     }
-    static getAllAdminInfo({ config = BASICE_PROFILES_SEARCH_CONFGI } = {}) {
+    static getAllAdminInfo({ config = BASICE_PROFILES_SEARCH_CONFGI }) {
         const userInfoList = ProfilesModel.getAllAdminInfo();
         const resultList = [];
         for (const userInfo of userInfoList) {
@@ -108,7 +108,7 @@ class ProfilesServer {
         return resultList;
     }
 
-    static changeGender({ id, gender } = {}) {
+    static changeGender({ id, gender }) {
         if (!["male", "female", null].includes(gender)) {
             throw new ValidationError("无效的性别");
         }
@@ -118,27 +118,27 @@ class ProfilesServer {
         ProfilesModel.updateGender(id, gender);
     }
 
-    static changeAcademy({ id, academy } = {}) {
+    static changeAcademy({ id, academy }) {
         if (!isUnsignedIntegerString(id)) {
             throw new ValidationError("无效的ID", "id");
         }
         ProfilesModel.updateAcademy(id, academy);
     }
-    static changeClass({ id, "class": $class } = {}) {
+    static changeClass({ id, "class": $class }) {
         if (!isUnsignedIntegerString(id)) {
             throw new ValidationError("无效的ID", "id");
         }
         ProfilesModel.updateClass(id, $class);
     }
 
-    static changeMajor({ id, major } = {}) {
+    static changeMajor({ id, major }) {
         if (!isUnsignedIntegerString(id)) {
             throw new ValidationError("无效的ID", "id");
         }
         ProfilesModel.updateMajor(id, major);
     }
 
-    static changePosition({ id, position } = {}) {
+    static changePosition({ id, position }) {
         if (!isUnsignedIntegerString(id)) {
             throw new ValidationError("无效的ID", "id");
         }
