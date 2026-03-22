@@ -48,11 +48,11 @@ class MessageController {
         await MessageServer.setPublicToDoItem({ itemId, title, content, ts, source: position })
         return res.json({ itemId });
     }
-     /**
-     * @param {import("express").Request} req 
-     * @param {import("express").Response} res 
-     * @returns 
-     */
+    /**
+    * @param {import("express").Request} req 
+    * @param {import("express").Response} res 
+    * @returns 
+    */
     static async updateToDoItem(req, res) {
         const { itemId, title, content } = req.body;
         const toDoItem = await MessageServer.getPublicToDoItem({ itemId });
@@ -69,8 +69,8 @@ class MessageController {
      */
     static async deleteToDoItem(req, res) {
         const { itemId } = req.body;
-        const result = await MessageServer.deletePublicToDoItem({ itemId });
-        return res.json(result);
+        await MessageServer.deletePublicToDoItem({ itemId });
+        return res.status(204).end();
     }
 }
 module.exports = MessageController;
