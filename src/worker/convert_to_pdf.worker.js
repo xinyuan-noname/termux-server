@@ -1,7 +1,7 @@
 const redis = require('../redis');
 const proxyRedis = require('../redis/proxy');
 const workerLogger = require("../logger/worker");
-const { CONVERT_TO_PDF_KEY } = require('../config/queue');
+const { CONVERT_TO_PDF_KEY, CONVERTED_FILE_REDIS_EXPIRED_WINDOWS } = require('../config/queue');
 const FileLocation = require('../enum/file_location');
 const { convertToPdf, readFileAsBuffer, writeFileByBuffer } = require('../utils/file');
 const { resolveTaskPath } = require('../utils/uploads');
@@ -27,6 +27,7 @@ async function consumeQueue() {
                 switch (target) {
                     case FileLocation.redis:
                         await proxyRedis.set(targetRedisKey, convertedData);
+                        await proxyRedis.expire(targetRedisKey, CONVERTED_FILE_REDIS_EXPIRED_WINDOWS);
                         break;
                     case FileLocation.local:
                         await writeFileByBuffer(targetPath, convertedData);

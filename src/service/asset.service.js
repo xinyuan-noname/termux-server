@@ -1,4 +1,4 @@
-const { ASSET_FILE_DATA_KEY, ASSET_PDF_DATA_KEY } = require("../config/asset_config");
+const { ASSET_FILE_DATA_KEY, ASSET_PDF_DATA_KEY, ASSET_REDIS_EXPIRED_WINDOWS } = require("../config/asset_config");
 const proxyRedis = require("../redis/proxy");
 const { convertToHash } = require("../utils/verification");
 
@@ -17,6 +17,7 @@ class AssetService {
         const hasKey = Boolean(await proxyRedis.exists(key));
         if (!hasKey) {
             await proxyRedis.set(key, data);
+            await proxyRedis.expire(key, ASSET_REDIS_EXPIRED_WINDOWS);
         }
         return { address, key };
     }
