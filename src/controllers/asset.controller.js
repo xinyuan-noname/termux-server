@@ -1,5 +1,6 @@
 const FileLocation = require("../enum/file_location");
 const { NotFoundError, FileUploadError } = require("../error");
+const logger = require("../logger");
 const AssetService = require("../service/asset.service");
 const ProfilesServer = require("../service/profiles.service");
 const { createBufferStream } = require("../utils/file");
@@ -36,12 +37,17 @@ class AssetController {
             throw new FileUploadError();
         }
         const { address, key } = await AssetService.cacheFileToRedis({ data: file.buffer });
-        enqueueConvertToPdf({
-            source: FileLocation.redis,
-            sourceReisdsKey: key,
-            target: FileLocation.redis,
-            targetRedisKey: AssetService.getPdfRedisKey({ address })
-        });
+        const isOk = await AssetService.checkPdfRedisCache({ address });
+        if (isOk) {
+            logger.info(`经检测过hash校验，已存在该文件。`, { ...file, req: req.requestId })
+        } else {
+            enqueueConvertToPdf({
+                source: FileLocation.redis,
+                sourceReisdsKey: key,
+                target: FileLocation.redis,
+                targetRedisKey: AssetService.getPdfRedisKey({ address })
+            });
+        }
         return res.json({ address });
     }
     /**
