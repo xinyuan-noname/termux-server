@@ -39,7 +39,7 @@ class AssetController {
         const { address, key } = await AssetService.cacheFileToRedis({ data: file.buffer });
         const isOk = await AssetService.checkPdfRedisCache({ address });
         if (isOk) {
-            logger.info(`经检测过hash校验，已存在该文件。`, { ...file, req: req.requestId })
+            logger.info(`经检测过hash校验，已存在该文件。`, { req: req.requestId, file: { name: file.filename } })
         } else {
             enqueueConvertToPdf({
                 source: FileLocation.redis,

@@ -14,7 +14,10 @@ class AssetService {
     static async cacheFileToRedis({ data }) {
         const address = convertToHash(data, "base64url");
         const key = ASSET_FILE_DATA_KEY.replace('{address}', address);
-        await proxyRedis.set(key, data);
+        const hasKey = Boolean(await proxyRedis.exists(key));
+        if (!hasKey) {
+            await proxyRedis.set(key, data);
+        }
         return { address, key };
     }
     static async getPdfRedisCache({ address }) {

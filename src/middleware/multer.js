@@ -52,7 +52,7 @@ const excelFileFilter = (req, file, cb) => {
         cb(new Error('错误的excel文件'), false);
     }
 };
-const normalLimits = { fileSize: 10 * 1024 * 1024 };
+const normalLimits = { fileSize: 5 * 1024 * 1024 };
 
 /**
  * 允许所有文件通过的文件过滤器
