@@ -1,5 +1,6 @@
 const { UNKNOWN_USER_ID } = require("../config/auth");
-const { WS_TOKEN_AGE, PING_WINDOW, OUTTIME_WINDOW, PENDING_REMIND_KEY } = require("../config/ws");
+const { PENDING_REMIND_KEY } = require("../config/message_config");
+const { WS_TOKEN_AGE, OUTTIME_WINDOW, PING_WINDOW } = require("../config/ws");
 const logger = require("../logger");
 const redis = require("../redis");
 const AuthService = require("../service/auth.service");
