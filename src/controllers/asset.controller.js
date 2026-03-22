@@ -62,6 +62,11 @@ class AssetController {
         res.setHeader('Cache-Control', 'private, max-age=600');
         createBufferStream(pdfViewBuffer).pipe(res);
     }
+     /**
+    * @param {import("express").Request} req 
+    * @param {import("express").Response} res 
+    * @returns 
+    */
     static async existPdf(req, res) {
         const { address } = req.params;
         const isOk = await AssetService.checkPdfRedisCache({ address });
@@ -69,6 +74,18 @@ class AssetController {
             throw new NotFoundError();
         }
         return res.status(204).end();
+    }
+    /**
+    * @param {import("express").Request} req 
+    * @param {import("express").Response} res 
+    * @returns 
+    */
+    static async getApk(req, res) {
+        const { address } = req.params
+        const pdfViewBuffer = await AssetService.getPdfRedisCache({ address });
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Cache-Control', 'private, max-age=600');
+        createBufferStream(pdfViewBuffer).pipe(res);
     }
 }
 module.exports = AssetController;

@@ -8,8 +8,8 @@ router.use('/', access);
 router.get('/notice', MessageController.getAllNoticeTasks);
 router.get('/remind/pending', MessageController.getAllRemind)
 
-router.get('/to_do/list', MessageController.getToDoList);
-router.post('/to_do/create', MessageController.addToDoItem);
-router.patch('/to_do/update', MessageController.updateToDoItem);
-router.delete('/to_do/delete', MessageController.deleteToDoItem);
+router.get('/to_do/public/list', MessageController.getPublicToDoList);
+router.post('/to_do/public/create', MessageController.createPublicToDoItem);
+router.patch('/to_do/public/update', MessageController.updatePublicToDoItem);
+router.delete('/to_do/public/delete', MessageController.deletePublicToDoItem);
 module.exports = router;

@@ -32,7 +32,7 @@ class MessageController {
      * @param {import("express").Response} res 
      * @returns 
      */
-    static async getToDoList(req, res) {
+    static async getPublicToDoList(req, res) {
         const result = await MessageServer.getPublicToDoList();
         return res.json(result);
     }
@@ -41,21 +41,22 @@ class MessageController {
      * @param {import("express").Response} res 
      * @returns 
      */
-    static async addToDoItem(req, res) {
+    static async createPublicToDoItem(req, res) {
         const { position } = req.accessPayload;
         const { title, content, ts } = req.body;
         const itemId = generateRandomSafeString();
         await MessageServer.setPublicToDoItem({ itemId, title, content, ts, source: position })
-        return res.json({ itemId });
+        return res.status(201).end();
     }
     /**
     * @param {import("express").Request} req 
     * @param {import("express").Response} res 
     * @returns 
     */
-    static async updateToDoItem(req, res) {
+    static async updatePublicToDoItem(req, res) {
         const { itemId, title, content } = req.body;
         const toDoItem = await MessageServer.getPublicToDoItem({ itemId });
+        console.log(toDoItem);
         if (toDoItem == null) {
             throw new NotFoundError();
         }
@@ -67,7 +68,7 @@ class MessageController {
      * @param {import("express").Response} res 
      * @returns 
      */
-    static async deleteToDoItem(req, res) {
+    static async deletePublicToDoItem(req, res) {
         const { itemId } = req.body;
         await MessageServer.deletePublicToDoItem({ itemId });
         return res.status(204).end();
