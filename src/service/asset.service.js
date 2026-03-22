@@ -1,16 +1,18 @@
 const { ASSET_FILE_DATA_KEY, ASSET_PDF_DATA_KEY } = require("../config/asset_config");
 const proxyRedis = require("../redis/proxy");
-const { generateRandomSafeString } = require("../utils/verification");
+const { convertToHash } = require("../utils/verification");
 
 class AssetService {
     static getPdfRedisKey({ address }) {
-        return ASSET_PDF_DATA_KEY.replace('${address}', address)
+        return ASSET_PDF_DATA_KEY.replace('{address}', address)
     }
     /**
-     * @param {Buffer} data 
+     * 
+     * @param {{data:Buffer}} param0 
+     * @returns 
      */
     static async cacheFileToRedis({ data }) {
-        const address = generateRandomSafeString();
+        const address = convertToHash(data, "base64url");
         const key = ASSET_FILE_DATA_KEY.replace('{address}', address);
         await proxyRedis.set(key, data);
         return { address, key };
@@ -21,10 +23,10 @@ class AssetService {
     }
     static async checkPdfRedisCache({ address }) {
         const key = AssetService.getPdfRedisKey({ address })
-        const hasKey = Boolean(await proxyRedis.exists(key)); 
-        if(!hasKey) return false;
+        const hasKey = Boolean(await proxyRedis.exists(key));
+        if (!hasKey) return false;
         const strLen = await proxyRedis.strLen(key);
-        if(!strLen) return false;
+        if (!strLen) return false;
         return true;
     }
 }

@@ -1,4 +1,5 @@
 const redis = require('../redis');
+const proxyRedis = require('../redis/proxy');
 const workerLogger = require("../logger/worker");
 const { CONVERT_TO_PDF_KEY } = require('../config/queue');
 const FileLocation = require('../enum/file_location');
@@ -16,7 +17,7 @@ async function consumeQueue() {
                 let buffer;
                 switch (source) {
                     case FileLocation.redis:
-                        buffer = await redis.get(sourceReisdsKey);
+                        buffer = await proxyRedis.get(sourceReisdsKey);
                         break;
                     case FileLocation.local:
                         buffer = await readFileAsBuffer(sourcePath);
@@ -25,7 +26,7 @@ async function consumeQueue() {
                 const convertedData = await convertToPdf(buffer);
                 switch (target) {
                     case FileLocation.redis:
-                        await redis.set(targetRedisKey, convertedData);
+                        await proxyRedis.set(targetRedisKey, convertedData);
                         break;
                     case FileLocation.local:
                         await writeFileByBuffer(targetPath, convertedData);

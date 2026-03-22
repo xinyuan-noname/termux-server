@@ -16,17 +16,17 @@ router.get(
 )
 router.post(
     '/pdf/convert/document',
+    createRateLimiter(1, 30), // 60s w=10
     taskUpload.single('document'),
-    createRateLimiter(1, 2), // 60s w=2
     AssetController.convertDocumentToPdf
 );
 router.route('/pdf/:address')
     .get(
-        createRateLimiter(1, 5),
+        createRateLimiter(1, 30),
         AssetController.getPdf
     )
     .head(
-        createRateLimiter(1, 30),
+        createRateLimiter(1, 60),
         AssetController.existPdf
     )
 module.exports = router;

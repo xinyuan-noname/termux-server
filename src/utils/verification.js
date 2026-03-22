@@ -97,8 +97,14 @@ function generateCDKey(groups, sizePerGroup) {
     }
     return result;
 }
-function convertToHash(str) {
-    return crypto.createHash("sha256").update(str).digest("hex");
+/**
+ * 
+ * @param {crypto.BinaryLike} data 
+ * @param {crypto.BinaryToTextEncoding} digest 
+ * @returns 
+ */
+function convertToHash(data, digest = "hex") {
+    return crypto.createHash("sha256").update(data).digest(digest);
 }
 module.exports = {
     getAccessTokenFromReq,

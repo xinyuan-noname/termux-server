@@ -40,9 +40,9 @@ class AssetController {
             source: FileLocation.redis,
             sourceReisdsKey: key,
             target: FileLocation.redis,
-            targetRedisKey: AssetService.getPdfRedisKey(address)
+            targetRedisKey: AssetService.getPdfRedisKey({ address })
         });
-        return res.json(address);
+        return res.json({ address });
     }
     /**
     * @param {import("express").Request} req 
@@ -57,9 +57,9 @@ class AssetController {
         createBufferStream(pdfViewBuffer).pipe(res);
     }
     static async existPdf(req, res) {
-        const { address } = req.params
+        const { address } = req.params;
         const isOk = await AssetService.checkPdfRedisCache({ address });
-        if(!isOk){
+        if (!isOk) {
             throw new NotFoundError();
         }
         return res.status(204).end();
