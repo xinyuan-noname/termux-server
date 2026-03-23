@@ -14,7 +14,7 @@ mergeProdEnv();
 
 
 /**
- * 清空src、db文件夹和package.json，并从指定上级目录复制新的src、db文件夹和package.json文件
+ * 清空 src、db、asset、csv 文件夹和 package.json，并从指定上级目录复制新的 src、db、asset、csv 文件夹和 package.json 文件
  * @param {string} sourceDir - 源目录路径
  */
 function replaceSrcAndDbFolders(sourceDir) {
@@ -23,12 +23,16 @@ function replaceSrcAndDbFolders(sourceDir) {
     const sourceRoot = path.resolve(projectRoot, '..', sourceDir);
     const sourceSrcPath = path.join(sourceRoot, "src");
     const sourceDbPath = path.join(sourceRoot, "db");
+    const sourceAssetPath = path.join(sourceRoot, "asset");
+    const sourceCsvPath = path.join(sourceRoot, "csv");
     const sourcePackageJsonPath = path.join(sourceRoot, "package.json");
     const sourceProEnvPath = path.join(sourceRoot, ".env.production.local");
     const sourceLocalEnvPath = path.join(sourceRoot, ".env.local");
 
     const targetSrcPath = path.join(projectRoot, "src");
     const targetDbPath = path.join(projectRoot, "db");
+    const targetAssetPath = path.join(projectRoot, "asset");
+    const targetCsvPath = path.join(projectRoot, "csv");
     const targetPackageJsonPath = path.join(projectRoot, "package.json");
     const targetProEnvPath = path.join(projectRoot, ".env.production.local");
     const targetLocalEnvPath = path.join(projectRoot, ".env.local");
@@ -36,27 +40,37 @@ function replaceSrcAndDbFolders(sourceDir) {
     console.log(`开始从 ${sourceDir} 升级项目文件...`);
 
     if (!fs.existsSync(sourceSrcPath)) {
-        console.error(`错误：源目录中未找到src文件夹: ${sourceSrcPath}`);
+        console.error(`错误：源目录中未找到 src 文件夹：${sourceSrcPath}`);
         return process.exit(1);
     }
 
     if (!fs.existsSync(sourceDbPath)) {
-        console.error(`错误：源目录中未找到db文件夹: ${sourceDbPath}`);
+        console.error(`错误：源目录中未找到 db 文件夹：${sourceDbPath}`);
         return process.exit(1);
     }
 
     if (!fs.existsSync(sourcePackageJsonPath)) {
-        console.error(`错误：源目录中未找到package.json文件: ${sourcePackageJsonPath}`);
+        console.error(`错误：源目录中未找到 package.json 文件：${sourcePackageJsonPath}`);
         return process.exit(1);
     }
 
     if (!fs.existsSync(sourceProEnvPath)) {
-        console.error(`错误：源目录中未找到.env.production.local文件: ${sourceProEnvPath}`);
+        console.error(`错误：源目录中未找到.env.production.local 文件：${sourceProEnvPath}`);
         return process.exit(1);
     }
 
     if (!fs.existsSync(sourceLocalEnvPath)) {
-        console.error(`错误：源目录中未找到.env.local文件: ${sourceLocalEnvPath}`);
+        console.error(`错误：源目录中未找到.env.local 文件：${sourceLocalEnvPath}`);
+        return process.exit(1);
+    }
+
+    if (!fs.existsSync(sourceAssetPath)) {
+        console.error(`错误：源目录中未找到 asset 文件夹：${sourceAssetPath}`);
+        return process.exit(1);
+    }
+
+    if (!fs.existsSync(sourceCsvPath)) {
+        console.error(`错误：源目录中未找到 csv 文件夹：${sourceCsvPath}`);
         return process.exit(1);
     }
 
@@ -66,9 +80,17 @@ function replaceSrcAndDbFolders(sourceDir) {
     if (fs.existsSync(targetDbPath)) {
         deleteFolderRecursive(targetDbPath);
     }
+    if (fs.existsSync(targetAssetPath)) {
+        deleteFolderRecursive(targetAssetPath);
+    }
+    if (fs.existsSync(targetCsvPath)) {
+        deleteFolderRecursive(targetCsvPath);
+    }
 
     copyFolderRecursive(sourceSrcPath, targetSrcPath);
     copyFolderRecursive(sourceDbPath, targetDbPath);
+    copyFolderRecursive(sourceAssetPath, targetAssetPath);
+    copyFolderRecursive(sourceCsvPath, targetCsvPath);
     fs.copyFileSync(sourcePackageJsonPath, targetPackageJsonPath);
     fs.copyFileSync(sourceLocalEnvPath, targetLocalEnvPath);
     fs.copyFileSync(sourceProEnvPath, targetProEnvPath);

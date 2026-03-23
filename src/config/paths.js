@@ -5,13 +5,15 @@ const DB_DIR = path.resolve(ROOT_DIR, "db");
 const UPLOADS_DIR = path.resolve(ROOT_DIR, "uploads");
 const AVATAR_DIR = path.resolve(UPLOADS_DIR, "avatars");
 const TASK_DIR = path.resolve(UPLOADS_DIR, "tasks");
-const APK_FILE = path.resolve(UPLOADS_DIR, "shine.apk");
 const SRC_DIR = path.resolve(ROOT_DIR, "src");
 const LOGS_DIR = path.resolve(ROOT_DIR, "logs");
 
 const LOGS_DEV_DIR = path.resolve(LOGS_DIR, "dev");
 const LOGS_PROD_DIR = path.resolve(LOGS_DIR, "prod");
 
+const ASSET_DIR = path.resolve(ROOT_DIR, "asset");
+const APK_DIR = path.resolve(ASSET_DIR, "shine.apk");
+const EXE_DIR = path.resolve(EXE_DIR, "shine.exe");
 
 const WORKER_INDEX_FILE = path.resolve(SRC_DIR, "worker", "index.js");
 const SERVER_INDEX_FILE = path.resolve(SRC_DIR, "app.js");
@@ -24,7 +26,10 @@ module.exports = {
     UPLOADS_DIR,
     AVATAR_DIR,
     TASK_DIR,
-    APK_FILE,
+
+    ASSET_DIR,
+    APK_DIR,
+    EXE_DIR,
 
     SRC_DIR,
     LOGS_DIR,

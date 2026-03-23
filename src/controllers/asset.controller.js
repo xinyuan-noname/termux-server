@@ -3,7 +3,8 @@ const { NotFoundError, FileUploadError } = require("../error");
 const logger = require("../logger");
 const AssetService = require("../service/asset.service");
 const ProfilesServer = require("../service/profiles.service");
-const { createBufferStream } = require("../utils/file");
+const { createBufferStream, createReadStream } = require("../utils/file");
+const { getApkPath } = require("../utils/frontside");
 const { enqueueConvertToPdf } = require("../utils/queue");
 
 class AssetController {
@@ -81,11 +82,7 @@ class AssetController {
     * @returns 
     */
     static async getApk(req, res) {
-        const { address } = req.params
-        const pdfViewBuffer = await AssetService.getPdfRedisCache({ address });
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Cache-Control', 'private, max-age=600');
-        createBufferStream(pdfViewBuffer).pipe(res);
+        createReadStream(getApkPath()).pipe(res);
     }
 }
 module.exports = AssetController;
