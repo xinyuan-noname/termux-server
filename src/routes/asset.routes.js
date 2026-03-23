@@ -28,14 +28,5 @@ router.route('/pdf/:address')
     .head(
         createRateLimiter(1, 40),
         AssetController.existPdf
-    )
-router.route('/apk')
-    .get(
-        createRateLimiter(1, 10),
-        AssetController.getApk
-    )
-    // .head(
-    //     createRateLimiter(1, 40)
-    //     AssetController
-    // )
+    );
 module.exports = router;

@@ -3,8 +3,7 @@ const { NotFoundError, FileUploadError } = require("../error");
 const logger = require("../logger");
 const AssetService = require("../service/asset.service");
 const ProfilesServer = require("../service/profiles.service");
-const { createBufferStream, createReadStream } = require("../utils/file");
-const { getApkPath } = require("../utils/frontside");
+const { createBufferStream } = require("../utils/file");
 const { enqueueConvertToPdf } = require("../utils/queue");
 
 class AssetController {
@@ -63,11 +62,11 @@ class AssetController {
         res.setHeader('Cache-Control', 'private, max-age=600');
         createBufferStream(pdfViewBuffer).pipe(res);
     }
-     /**
-    * @param {import("express").Request} req 
-    * @param {import("express").Response} res 
-    * @returns 
-    */
+    /**
+   * @param {import("express").Request} req 
+   * @param {import("express").Response} res 
+   * @returns 
+   */
     static async existPdf(req, res) {
         const { address } = req.params;
         const isOk = await AssetService.checkPdfRedisCache({ address });
@@ -75,14 +74,6 @@ class AssetController {
             throw new NotFoundError();
         }
         return res.status(204).end();
-    }
-    /**
-    * @param {import("express").Request} req 
-    * @param {import("express").Response} res 
-    * @returns 
-    */
-    static async getApk(req, res) {
-        createReadStream(getApkPath()).pipe(res);
     }
 }
 module.exports = AssetController;
