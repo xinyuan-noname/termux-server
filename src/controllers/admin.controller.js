@@ -29,7 +29,7 @@ class AdminController {
     static async elevatePrivileges(req, res) {
         const payload = req.accessPayload;
         const { id } = payload;
-        const newPayload = { id, userType: "admin", position: "闪纺开发组" };
+        const newPayload = { id, userType: "admin", position: "闪纺(Shine Yarn)" };
         const accessToken = AuthService.issueAccessToken(newPayload);
         return res.json({ accessToken });
     }
