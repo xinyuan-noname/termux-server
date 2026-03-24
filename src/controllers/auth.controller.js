@@ -33,7 +33,7 @@ class AuthController {
                 })
             }; break;
         }
-        logger.info(`用户${id}登录成功, 签发访问令牌和刷新令牌, 权限为${result.userType}`, { req: req.requestId });
+        logger.info(`用户${id}登录成功, 签发访问令牌和刷新令牌, 权限为${result.userType}，职位为${info.position}`, { req: req.requestId });
         return res.json(data);
     }
     /**
@@ -82,10 +82,11 @@ class AuthController {
         }
         const { id, userType } = AuthService.verifyRefreshToken(refreshToken, deviceDescription);
         const info = ProfilesServer.getUserInfo({ id });
+        console.log(info);
         const payload = { id, userType };
         if (info.position) payload.position = info.position;
         const accessToken = AuthService.issueAccessToken(payload);
-        logger.info(`用户${id}刷新访问令牌, 权限为${userType}`, { req: req.requestId });
+        logger.info(`用户${id}刷新访问令牌, 权限为${userType}, 职位为${info.position}`, { req: req.requestId });
         return res.json({ accessToken });
     }
     /**

@@ -61,7 +61,7 @@ class ProfilesServer {
         }
         return avatarPath;
     }
-    static getUserInfo({ id, config = {} }) {
+    static getUserInfo({ id, config = BASICE_PROFILES_SEARCH_CONFGI }) {
         if (!isUnsignedIntegerString(id)) {
             throw new ValidationError("无效的ID", "id");
         }

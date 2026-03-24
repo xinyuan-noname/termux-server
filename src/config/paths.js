@@ -11,10 +11,6 @@ const LOGS_DIR = path.resolve(ROOT_DIR, "logs");
 const LOGS_DEV_DIR = path.resolve(LOGS_DIR, "dev");
 const LOGS_PROD_DIR = path.resolve(LOGS_DIR, "prod");
 
-const ASSET_DIR = path.resolve(ROOT_DIR, "asset");
-const APK_DIR = path.resolve(ASSET_DIR, "shine.apk");
-const EXE_DIR = path.resolve(EXE_DIR, "shine.exe");
-
 const WORKER_INDEX_FILE = path.resolve(SRC_DIR, "worker", "index.js");
 const SERVER_INDEX_FILE = path.resolve(SRC_DIR, "app.js");
 const URL_TXT_FILE = path.resolve(ROOT_DIR, "url.txt");
@@ -26,10 +22,6 @@ module.exports = {
     UPLOADS_DIR,
     AVATAR_DIR,
     TASK_DIR,
-
-    ASSET_DIR,
-    APK_DIR,
-    EXE_DIR,
 
     SRC_DIR,
     LOGS_DIR,
