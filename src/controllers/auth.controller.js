@@ -23,14 +23,8 @@ class AuthController {
         const { refreshToken } = AuthService.issueRefreshToken({ id, userType: result.userType, deviceDescription });
         const data = { accessToken };
         switch (true) {
-            case deviceDescription.startsWith(authConfig.FLUTTER_DEVICE_LABEL): {
-                data.refreshToken = refreshToken;
-            }; break;
             default: {
-                res.cookie('refreshToken', refreshToken, {
-                    ...authConfig.REFRESH_TOKEN_COOKIE_OPTIONS,
-                    maxAge: authConfig.REFRESH_TOKEN_AGE_DEFAULT * 1000
-                })
+                data.refreshToken = refreshToken;
             }; break;
         }
         logger.info(`用户${id}登录成功, 签发访问令牌和刷新令牌, 权限为${result.userType}，职位为${info.position}`, { req: req.requestId });
@@ -44,17 +38,12 @@ class AuthController {
      */
     static async logout(req, res) {
         let refreshToken;
-        const deviceDescription = req.deviceDescription;
         const accessToken = req.accessToken
         const payload = req.accessPayload;
         switch (true) {
-            case deviceDescription.startsWith(authConfig.FLUTTER_DEVICE_LABEL): {
+            default: {
                 refreshToken = req.body.refreshToken;
             } break;
-            default: {
-                refreshToken = req.cookies.refreshToken;
-                res.clearCookie('refreshToken', authConfig.REFRESH_TOKEN_COOKIE_OPTIONS);
-            }; break;
         }
         if (payload.id && refreshToken) {
             await AuthService.revokeAccessToken(accessToken);
@@ -73,16 +62,12 @@ class AuthController {
         const deviceDescription = req.deviceDescription;
         let refreshToken;
         switch (true) {
-            case deviceDescription.startsWith(authConfig.FLUTTER_DEVICE_LABEL): {
+             default: {
                 refreshToken = req.body.refreshToken;
-            }; break;
-            default: {
-                refreshToken = req.cookies.refreshToken;
             }; break;
         }
         const { id, userType } = AuthService.verifyRefreshToken(refreshToken, deviceDescription);
         const info = ProfilesServer.getUserInfo({ id });
-        console.log(info);
         const payload = { id, userType };
         if (info.position) payload.position = info.position;
         const accessToken = AuthService.issueAccessToken(payload);

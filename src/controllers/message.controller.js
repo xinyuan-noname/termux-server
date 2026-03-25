@@ -56,7 +56,6 @@ class MessageController {
     static async updatePublicToDoItem(req, res) {
         const { itemId, title, content } = req.body;
         const toDoItem = await MessageServer.getPublicToDoItem({ itemId });
-        console.log(toDoItem);
         if (toDoItem == null) {
             throw new NotFoundError();
         }
