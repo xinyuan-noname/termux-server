@@ -100,7 +100,6 @@ class AuthService {
             const tokenHash = convertToHash(token);
             const createdAt = Math.ceil(Date.now() / 1000);
             let expiresAt;
-            print(deviceDescription);
             switch (true) {
                 case deviceDescription.startsWith(authConfig.FLUTTER_DEVICE_LABEL): {
                     expiresAt = createdAt + authConfig.REFRESH_TOKEN_AGE_APP;
