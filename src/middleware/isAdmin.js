@@ -8,7 +8,7 @@ const { UnauthorizedError } = require("../error");
  * @param {import("express").NextFunction} next 
  * @returns 
  */
-module.exports = (req, res, next) => {
+const isAdmin = (req, res, next) => {
     if (!req.accessPayload) {
         throw new UnauthorizedError("没有检测到访问令牌", "INVALID_ACCESS_TOKEN");
     }
@@ -21,3 +21,4 @@ module.exports = (req, res, next) => {
 
     next();
 };
+module.exports = isAdmin;

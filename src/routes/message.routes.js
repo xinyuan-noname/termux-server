@@ -1,7 +1,7 @@
 const express = require('express');
 const access = require('../middleware/access');
 const MessageController = require('../controllers/message.controller');
-const { isAdmin } = require('../service/auth.service');
+const isAdmin = require("../middleware/isAdmin");
 const router = express.Router();
 
 router.use('/', access);
