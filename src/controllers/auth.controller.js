@@ -18,7 +18,7 @@ class AuthController {
         const result = await AuthService.verifyCredentials({ id, username, password });
         const info = ProfilesServer.getUserInfo({ id });
         const payload = { id, userType: result.userType };
-        if (info.position) payload.position = info.position;
+        if (info.position != null) payload.position = info.position;
         const accessToken = AuthService.issueAccessToken(payload);
         const { refreshToken } = AuthService.issueRefreshToken({ id, userType: result.userType, deviceDescription });
         const data = { accessToken };
@@ -62,14 +62,14 @@ class AuthController {
         const deviceDescription = req.deviceDescription;
         let refreshToken;
         switch (true) {
-             default: {
+            default: {
                 refreshToken = req.body.refreshToken;
             }; break;
         }
         const { id, userType } = AuthService.verifyRefreshToken(refreshToken, deviceDescription);
         const info = ProfilesServer.getUserInfo({ id });
         const payload = { id, userType };
-        if (info.position) payload.position = info.position;
+        if (info.position != null) payload.position = info.position;
         const accessToken = AuthService.issueAccessToken(payload);
         logger.info(`用户${id}刷新访问令牌, 权限为${userType}, 职位为${info.position}`, { req: req.requestId });
         return res.json({ accessToken });
