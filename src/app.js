@@ -13,6 +13,8 @@ async function start() {
         app.disable('x-powered-by');
         app.use(cors({
             origin: [process.env.APP_WEB_URL],
+            methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+            allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
             credentials: true
         }));
 
