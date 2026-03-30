@@ -3,6 +3,7 @@ const expressWs = require('express-ws');
 const cookieParser = require("cookie-parser");
 const logger = require('./logger');
 const redis = require('./redis');
+const cors = require("cors");
 async function start() {
     const PORT = process.env.PORT || 3000;
     try {
@@ -10,6 +11,11 @@ async function start() {
         const app = express();
         expressWs(app);
         app.disable('x-powered-by');
+        app.use(cors({
+            origin: [process.env.APP_WEB_URL],
+            credentials: true
+        }));
+
         // Global Middleware
         app.use(express.json());
         app.use(cookieParser());
