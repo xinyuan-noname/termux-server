@@ -8,7 +8,6 @@ const taskUpload = createMulter({
     storage: MulterStorage.memoryStorage,
     fileFilter: MulterFileFilter.documentFileFilter
 });
-router.use('/', access);
 router.get(
     '/avatar/:id',
     createRateLimiter(1, 90), // 60s w=70
@@ -16,6 +15,7 @@ router.get(
 )
 router.post(
     '/pdf/convert/document',
+    access,
     createRateLimiter(1, 30), // 60s w=10
     taskUpload.single('document'),
     AssetController.convertDocumentToPdf
