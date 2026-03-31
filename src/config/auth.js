@@ -6,7 +6,7 @@ module.exports = {
     PASSWORD_KEY_AGE: 30 * 60, // 30 minutes in seconds
 
     BANNED_ACCESS_TOKEN_REDIS_PREFIX: "banned_jti",
-    ACCESS_TOKEN_AGE: "15min",
+    ACCESS_TOKEN_AGE: "120min",
 
     REFRESH_TOKEN_AGE_APP: 30 * 24 * 3600, // 30 days in seconds
     REFRESH_TOKEN_AGE_DEFAULT: 1 * 24 * 3600, // 1 days in seconds
