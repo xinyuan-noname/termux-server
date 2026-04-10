@@ -33,6 +33,12 @@ async function start() {
             return res.status(200).end("Shine Yarn!");
         }); // 60s w=5
 
+        app.get("/resource/main/:resource", (req, res) => {
+            const { resource } = req.params;
+            const url = `https://gh.llkk.cc/https://raw.githubusercontent.com/xinyuan-noname/resource/main/${resource}`;
+            logger.info(`重定向至${resource}`);
+            return res.redirect(url);
+        }, createRateLimiter(1, 30));
         const assetRoutes = require('./routes/asset.routes');
         app.use('/asset', assetRoutes);
 
