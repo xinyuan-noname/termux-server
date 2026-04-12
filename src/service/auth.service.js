@@ -119,7 +119,7 @@ class AuthService {
             throw new UnauthorizedError("无效的刷新令牌", "INVALID_REFRESH_TOKEN");
         }
         const tokenHash = convertToHash(token);
-        const result = AuthModel.findRefreshTokenMatchDevice(tokenHash, deviceDescription);
+        const result = AuthModel.findRefreshToken(tokenHash);
         if (!result) {
             throw new UnauthorizedError("未找到刷新令牌", "INVALID_REFRESH_TOKEN");
         }
