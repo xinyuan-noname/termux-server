@@ -114,7 +114,7 @@ class AuthService {
             throw new TokenIssueError()
         }
     }
-    static verifyRefreshToken(token, deviceDescription = "Unknow Device") {
+    static verifyRefreshToken(token) {
         if (typeof token !== "string") {
             throw new UnauthorizedError("无效的刷新令牌", "INVALID_REFRESH_TOKEN");
         }

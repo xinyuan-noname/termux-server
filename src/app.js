@@ -12,7 +12,7 @@ async function start() {
         expressWs(app);
         app.disable('x-powered-by');
         app.use(cors({
-            origin: [process.env.APP_WEB_URL],
+            origin: [process.env.APP_WEB_URL, process.env.APP_WEB_URL_BACKUP],
             methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
             allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
             credentials: true
