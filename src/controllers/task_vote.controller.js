@@ -27,7 +27,9 @@ class TaskVoteController {
             endedAt,
             source: id
         });
-        const pushed = WebSocketController.pushMessage(result.voters, {
+        // 发起人不需要收到自己发起的投票通知
+        const pushTargetList = result.voters.filter((voterId) => voterId !== id);
+        const pushed = WebSocketController.pushMessage(pushTargetList, {
             type: WS_MESSAGE_VOTE,
             taskId: result.taskId,
             title: result.title,

@@ -31,6 +31,14 @@ function safeGetTaskPath(filepath) {
 function safeGetAvatarPath(filepath) {
     return safeGetUploadsFilePath(dirConfig.AVATAR_DIR, filepath)
 }
+/**
+ * 获取 uploads/images 下存在的图片路径
+ * @param {string} filepath 
+ * @returns {string|null}
+ */
+function safeGetImagePath(filepath) {
+    return safeGetUploadsFilePath(dirConfig.IMAGE_DIR, filepath)
+}
 
 
 function checkAvatarExist(filepath) {
@@ -44,11 +52,16 @@ function resolveAvatarPath(filepath) {
 function resolveTaskPath(filepath) {
     return path.resolve(dirConfig.TASK_DIR, filepath);
 }
+function resolveImagePath(filepath) {
+    return path.resolve(dirConfig.IMAGE_DIR, filepath);
+}
 module.exports = {
     safeGetUploadsFilePath,
     checkAvatarExist,
     safeGetAvatarPath,
     safeGetTaskPath,
+    safeGetImagePath,
     resolveAvatarPath,
-    resolveTaskPath
+    resolveTaskPath,
+    resolveImagePath
 }

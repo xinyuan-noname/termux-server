@@ -63,10 +63,10 @@ class AssetController {
         createBufferStream(pdfViewBuffer).pipe(res);
     }
     /**
-   * @param {import("express").Request} req 
-   * @param {import("express").Response} res 
-   * @returns 
-   */
+    * @param {import("express").Request} req 
+    * @param {import("express").Response} res 
+    * @returns 
+    */
     static async existPdf(req, res) {
         const { address } = req.params;
         const isOk = await AssetService.checkPdfRedisCache({ address });
@@ -74,6 +74,46 @@ class AssetController {
             throw new NotFoundError();
         }
         return res.status(204).end();
+    }
+    /**
+     * 上传事项里引用的图片, 返回可用于 %img[名称]% 标记的文件名
+     * @param {import("express").Request} req 
+     * @param {import("express").Response} res 
+     * @returns {Promise<void>}
+     */
+    static async uploadImage(req, res) {
+        const { file } = req;
+        if (!file) {
+            throw new FileUploadError();
+        }
+        const { id } = req.accessPayload;
+        const { name, existed } = await AssetService.saveToDoImage({
+            data: file.buffer,
+            mimetype: file.mimetype,
+            originalname: file.originalname
+        });
+        logger.info(`${id}上传事项图片${name}`, { req: req.requestId, existed });
+        return res.status(201).json({ name });
+    }
+    /**
+     * 读取事项图片
+     * @param {import("express").Request} req 
+     * @param {import("express").Response} res 
+     * @returns {void}
+     */
+    static getImage(req, res) {
+        const { name } = req.params;
+        const imagePath = AssetService.getImagePath({ name });
+        if (!imagePath) {
+            throw new NotFoundError("图片不存在");
+        }
+        res.setHeader('Content-Type', AssetService.getImageContentType(name));
+        res.setHeader('Cache-Control', 'public, max-age=604800');
+        return res.sendFile(imagePath, err => {
+            if (err && !res.headersSent) {
+                return res.status(500).end();
+            }
+        });
     }
 }
 module.exports = AssetController;

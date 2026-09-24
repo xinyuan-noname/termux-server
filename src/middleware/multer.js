@@ -4,7 +4,7 @@ const dirConfig = require('../config/paths');
 const logger = require('../logger');
 const path = require('path');
 const { generateRandomSafeString } = require('../utils/verification');
-const { EXCEL_MIMES, IMAGE_MIMES, EXCEL_EXTS } = require('../config/uploads');
+const { EXCEL_MIMES, IMAGE_MIMES, EXCEL_EXTS, isToDoImageFile } = require('../config/uploads');
 const { canConvertToPdf } = require('../utils/file');
 const avatarStorage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -52,6 +52,20 @@ const excelFileFilter = (req, file, cb) => {
         cb(new Error('错误的excel文件'), false);
     }
 };
+/**
+ * 事项图片过滤器, 只放行常见图片格式
+ * @param {Object} req - Express 请求对象
+ * @param {Object} file - 上传的文件对象
+ * @param {Function} cb - 回调函数
+ */
+const imageFileFilter = (req, file, cb) => {
+    if (isToDoImageFile(file?.mimetype, file?.originalname)) {
+        logger.info(`收到上传的图片, 来自${req?.accessPayload?.id}`, { ...file, req: req.requestId });
+        cb(null, true);
+    } else {
+        cb(new Error('仅支持 jpg, png, gif, webp, bmp 图片'), false);
+    }
+};
 const normalLimits = { fileSize: 5 * 1024 * 1024 };
 
 /**
@@ -94,7 +108,8 @@ module.exports = {
         avatarFileFilter,
         excelFileFilter,
         allowAllFilesFilter,
-        documentFileFilter
+        documentFileFilter,
+        imageFileFilter
     },
     MulterLimits: {
         normalLimits

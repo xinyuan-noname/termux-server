@@ -1,7 +1,30 @@
 const { NotFoundError } = require("../error");
+const AssetService = require("../service/asset.service");
 const MessageServer = require("../service/message.service");
 const TaskConfigService = require("../service/task_config.service");
+const logger = require("../logger");
 const { generateRandomSafeString } = require("../utils/verification");
+
+/**
+ * 清理事项内容里已经不再被任何事项引用的图片
+ * @param {string} removedContent - 被删除或被替换掉的事项内容
+ */
+async function cleanupToDoImages(removedContent) {
+    if (!removedContent) return;
+    try {
+        const toDoList = await MessageServer.getPublicToDoList();
+        const deleted = AssetService.deleteUnusedImages({
+            removedContent,
+            otherContents: toDoList.map((item) => item.content)
+        });
+        if (deleted > 0) {
+            logger.info(`清理事项图片${deleted}张`);
+        }
+    } catch (error) {
+        // 图片清理失败不影响事项本身的增删改
+        logger.warn("清理事项图片失败", error);
+    }
+}
 
 class MessageController {
     /**
@@ -60,6 +83,10 @@ class MessageController {
             throw new NotFoundError();
         }
         await MessageServer.setPublicToDoItem({ itemId, title, content, ts: toDoItem.ts, source: toDoItem.source })
+        // 内容被替换后, 旧内容里引用的图片可能已经没有事项再用
+        if (toDoItem.content !== content) {
+            await cleanupToDoImages(toDoItem.content);
+        }
         return res.status(204).end();
     }
     /**
@@ -69,7 +96,11 @@ class MessageController {
      */
     static async deletePublicToDoItem(req, res) {
         const { itemId } = req.body;
+        const toDoItem = await MessageServer.getPublicToDoItem({ itemId });
         await MessageServer.deletePublicToDoItem({ itemId });
+        if (toDoItem != null) {
+            await cleanupToDoImages(toDoItem.content);
+        }
         return res.status(204).end();
     }
 }
