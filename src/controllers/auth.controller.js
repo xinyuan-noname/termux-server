@@ -1,0 +1,149 @@
+const { UnauthorizedError } = require("../error");
+const AuthService = require("../service/auth.service");
+const authConfig = require("../config/auth");
+const logger = require("../logger");
+const ProfilesServer = require("../service/profiles.service");
+const { BASICE_PROFILES_SEARCH_CONFGI } = require("../config/profiles");
+
+class AuthController {
+    /**
+     * POST auth/login
+     * @param {import("express").Request} req 
+     * @param {import("express").Response} res 
+     * @returns 
+     */
+    static async login(req, res) {
+        const deviceDescription = req.deviceDescription;
+        const { id, username, password } = req.body;
+        const result = await AuthService.verifyCredentials({ id, username, password });
+        const info = ProfilesServer.getUserInfo({ id });
+        const payload = { id, userType: result.userType };
+        if (info.position != null) payload.position = info.position;
+        const accessToken = AuthService.issueAccessToken(payload);
+        const { refreshToken } = AuthService.issueRefreshToken({ id, userType: result.userType, deviceDescription });
+        const data = { accessToken };
+        switch (true) {
+            default: {
+                data.refreshToken = refreshToken;
+            }; break;
+        }
+        logger.info(`用户${id}登录成功, 签发访问令牌和刷新令牌, 权限为${result.userType}，职位为${info.position}，设备标识：${deviceDescription}`, { req: req.requestId });
+        return res.json(data);
+    }
+    /**
+     * POST auth/login
+     * @param {import("express").Request} req 
+     * @param {import("express").Response} res 
+     * @returns 
+     */
+    static async logout(req, res) {
+        let refreshToken;
+        const accessToken = req.accessToken
+        const payload = req.accessPayload;
+        switch (true) {
+            default: {
+                refreshToken = req.body.refreshToken;
+            } break;
+        }
+        if (payload.id && refreshToken) {
+            await AuthService.revokeAccessToken(accessToken);
+            AuthService.revokeRefreshTokenMatchId(payload.id, refreshToken);
+        }
+        logger.info(`用户${payload.id}从${req.deviceDescription}登出成功, 废止访问令牌`, { req: req.requestId });
+        return res.status(204).end();
+    }
+    /**
+     * DELETE auth/refresh
+     * @param {import("express").Request} req 
+     * @param {import("express").Response} res 
+     * @returns 
+     */
+    static async refresh(req, res) {
+        const deviceDescription = req.deviceDescription;
+        let refreshToken;
+        switch (true) {
+            default: {
+                refreshToken = req.body.refreshToken;
+            }; break;
+        }
+        const { id, userType } = AuthService.verifyRefreshToken(refreshToken, deviceDescription);
+        const info = ProfilesServer.getUserInfo({ id });
+        const payload = { id, userType };
+        if (info.position != null) payload.position = info.position;
+        const accessToken = AuthService.issueAccessToken(payload);
+        logger.info(`用户${id}刷新访问令牌, 权限为${userType}, 职位为${info.position}，设备标识：${deviceDescription}`, { req: req.requestId });
+        return res.json({ accessToken });
+    }
+    /**
+     * @param {import("express").Request} req 
+     * @param {import("express").Response} res 
+     * @returns 
+     */
+    static async issuePasswordKey(req, res) {
+        const { id } = req.body;
+        const payload = req.accessPayload;
+        let passwordKey;
+        if (payload.userType === "admin") {
+            const result = await AuthService.issuePasswordKey({ id });
+            passwordKey = result.passwordKey;
+            logger.info(`已为用户${id}签发pswd-key, 来自:${payload.id}`, { req: req.requestId });
+        } else {
+            logger.warn(`尝试为${id}签发pswd-key, 来自:${payload.id ?? authConfig.UNKNOWN_USER_ID}`, { req: req.requestId })
+        }
+        if (passwordKey) {
+            return res.json({ passwordKey });
+        } else {
+            const error = new UnauthorizedError();
+            logger.warn(`尝试为用户${id}签发pswd-key失败, 来自:${payload?.id || authConfig.UNKNOWN_USER_ID}`, error);
+            throw error;
+        }
+    }
+    /**
+     * @param {import("express").Request} req 
+     * @param {import("express").Response} res 
+     * @returns 
+     */
+    static async changePassword(req, res) {
+        const { newPassword } = req.body;
+        const payload = req.accessPayload;
+        const { id } = payload;
+        await AuthService.changePassword({ id, newPassword });
+        logger.info(`用户${id}更换密码成功`, { req: req.requestId });
+        return res.status(204).end();
+    }
+    /**
+     * @param {import("express").Request} req 
+     * @param {import("express").Response} res 
+     * @returns 
+     */
+    static async resetPassword(req, res) {
+        const { id, passwordKey, newPassword } = req.body;
+        await AuthService.resetPassword({ id, passwordKey, newPassword });
+        logger.info(`用户${id}重置密码成功`, { req: req.requestId })
+        return res.status(204).end();
+    }
+    /**
+     * @param {import("express").Request} req 
+     * @param {import("express").Response} res 
+     * @returns 
+     */
+    static async changePasswordRequired(req, res) {
+        const { passwordRequired } = req.body;
+        const payload = req.accessPayload;
+        const { id } = payload;
+        AuthService.changePasswordRequired({ id, passwordRequired });
+        logger.info(`用户${id}已将登录密码要求切换为${passwordRequired === 1 ? "" : "不"}要求密码`, { req: req.requestId })
+        return res.status(204).end();
+    }
+    /**
+     * @param {import("express").Request} req 
+     * @param {import("express").Response} res 
+     * @returns 
+     */
+    static getAdminList(req, res) {
+        const result = ProfilesServer.getAllAdminInfo({ config: BASICE_PROFILES_SEARCH_CONFGI });
+        res.set('Cache-Control', 'public, max-age=300, s-maxage=600');
+        return res.json(result);
+    }
+}
+module.exports = AuthController

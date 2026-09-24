@@ -1,0 +1,42 @@
+{
+  "name": "termux",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "start": "node ./src/process/index.js",
+    "dev": "nodemon ./src/app.js & nodemon ./src/worker/index.js",
+    "upgrade": "node ./src/upgrade/index.js",
+    "upgrade:db": "node ./src/upgrade/upgrade_db.js",
+    "watch:env": "nodemon --watch .env.local --watch .env.development.local --ext \"\" --exec \"node scripts/merge_env.js\""
+  },
+  "dependencies": {
+    "@node-rs/bcrypt": "^1.10.7",
+    "archiver": "^7.0.1",
+    "better-sqlite3": "^12.6.2",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.6",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.2.1",
+    "express-ws": "^5.0.2",
+    "jsonwebtoken": "^9.0.3",
+    "libreoffice-convert": "^1.8.1",
+    "lodash": "^4.17.23",
+    "mime": "^4.1.0",
+    "multer": "^2.0.2",
+    "rate-limit-redis": "^4.3.1",
+    "redis": "^5.10.0",
+    "ua-parser-js": "^2.0.8",
+    "winston": "^3.19.0",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.2",
+    "eslint": "^9.39.2",
+    "globals": "^17.0.0"
+  }
+}
