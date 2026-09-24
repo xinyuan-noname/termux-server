@@ -55,6 +55,8 @@ async function start() {
         app.use('/auth', authRoutes);
         const profilesRoutes = require('./routes/profiles.routes');
         app.use('/profiles', profilesRoutes);
+        const userLikeRoutes = require('./routes/user_like.routes');
+        app.use('/like', userLikeRoutes);
         const subjectsRoutes = require('./routes/subjects.routes');
         app.use('/subjects', subjectsRoutes);
         const semestersRoutes = require('./routes/semesters.routes');

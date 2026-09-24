@@ -32,7 +32,11 @@ class ProfilesController {
         const payload = req.accessPayload;
         const { idList, config } = req.body;
         if (config?.passwordRequired && payload.userType !== "admin") config.passwordRequired = false;
-        const result = ProfilesServer.getUserInfoBatch({ idList, config: config ?? BASICE_PROFILES_SEARCH_CONFGI });
+        const result = ProfilesServer.getUserInfoBatch({
+            idList,
+            config: config ?? BASICE_PROFILES_SEARCH_CONFGI,
+            viewerId: payload.id
+        });
         return res.json(result);
     }
     /**
@@ -45,7 +49,11 @@ class ProfilesController {
         const { id } = req.params;
         const { config = {} } = req.body;
         if (config?.passwordRequired && payload.userType !== "admin") config.passwordRequired = false;
-        const result = ProfilesServer.getUserInfo({ id, config: config ?? BASICE_PROFILES_SEARCH_CONFGI });
+        const result = ProfilesServer.getUserInfo({
+            id,
+            config: config ?? BASICE_PROFILES_SEARCH_CONFGI,
+            viewerId: payload.id
+        });
         return res.json(result);
     }
     /**
@@ -56,7 +64,7 @@ class ProfilesController {
     static myProfile(req, res) {
         const payload = req.accessPayload;
         const { id } = payload;
-        const result = ProfilesServer.getUserInfo({ id, config: MY_PROFILE_SEARCH_CONFIG });
+        const result = ProfilesServer.getUserInfo({ id, config: MY_PROFILE_SEARCH_CONFIG, viewerId: id });
         return res.json(result);
     }
     /**

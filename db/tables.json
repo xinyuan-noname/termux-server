@@ -3,6 +3,7 @@
     "password_key",
     "refresh_tokens",
     "profiles",
+    "user_like",
     "semesters",
     "subjects",
     "courses",

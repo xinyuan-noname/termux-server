@@ -1,8 +1,22 @@
 const { BASICE_PROFILES_SEARCH_CONFGI } = require("../config/profiles");
 const { ValidationError, NotFoundError } = require("../error");
 const ProfilesModel = require("../models/profiles.model");
+const UserLikeService = require("./user_like.service");
 const { checkAvatarExist, safeGetAvatarPath } = require("../utils/uploads");
 const { isUnsignedIntegerString } = require("../utils/validation");
+
+/**
+ * 给用户信息补上获赞数与"我今天是否赞过"
+ * @param {Object} result - 待返回的用户信息
+ * @param {Object} config - 字段开关
+ * @param {string} userId - 用户 ID
+ * @param {Object|null} likeOverview - 点赞总览
+ */
+const attachLikeInfo = (result, config, userId, likeOverview) => {
+    if (config.likeCount !== true || likeOverview == null) return;
+    result.likeCount = likeOverview.countMap.get(userId) ?? 0;
+    result.likedToday = likeOverview.likedIdSet.has(userId);
+}
 
 const genUserInfoResult = (config, userInfo) => {
     const result = { id: userInfo.id };
@@ -61,21 +75,22 @@ class ProfilesServer {
         }
         return avatarPath;
     }
-    static getUserInfo({ id, config = BASICE_PROFILES_SEARCH_CONFGI }) {
+    static getUserInfo({ id, config = BASICE_PROFILES_SEARCH_CONFGI, viewerId }) {
         if (!isUnsignedIntegerString(id)) {
             throw new ValidationError("无效的ID", "id");
         }
         const userInfo = ProfilesModel.getUserInfo(id);
         if (userInfo == null) return {};
         const result = genUserInfoResult(config, userInfo);
+        attachLikeInfo(result, config, id, ProfilesServer.#likeOverview(config, viewerId));
         return result;
     }
-    static getUserInfoBatch({ idList, config }) {
+    static getUserInfoBatch({ idList, config = BASICE_PROFILES_SEARCH_CONFGI, viewerId }) {
         let result = [];
         if (idList === "all") {
-            result = ProfilesServer.getAllUserInfo({ config });
+            result = ProfilesServer.getAllUserInfo({ config, viewerId });
         } else if (idList === "admin") {
-            result = ProfilesServer.getAllAdminInfo({ config })
+            result = ProfilesServer.getAllAdminInfo({ config, viewerId })
         } else {
             if (!Array.isArray(idList)) {
                 throw new ValidationError(`id列表必须是特定字段或者id列表`);
@@ -84,28 +99,44 @@ class ProfilesServer {
                 if (!isUnsignedIntegerString(id)) {
                     continue;
                 }
-                result.push(ProfilesServer.getUserInfo({ id, config }));
+                result.push(ProfilesServer.getUserInfo({ id, config, viewerId }));
             }
         }
         return result;
     }
-    static getAllUserInfo({ config = BASICE_PROFILES_SEARCH_CONFGI }) {
+    static getAllUserInfo({ config = BASICE_PROFILES_SEARCH_CONFGI, viewerId } = {}) {
         const userInfoList = ProfilesModel.getAllUserInfo();
+        const likeOverview = ProfilesServer.#likeOverview(config, viewerId);
         const resultList = [];
         for (const userInfo of userInfoList) {
             const result = genUserInfoResult(config, userInfo);
+            attachLikeInfo(result, config, userInfo.id, likeOverview);
             resultList.push(result);
         }
         return resultList;
     }
-    static getAllAdminInfo({ config = BASICE_PROFILES_SEARCH_CONFGI }) {
+    static getAllAdminInfo({ config = BASICE_PROFILES_SEARCH_CONFGI, viewerId } = {}) {
         const userInfoList = ProfilesModel.getAllAdminInfo();
+        const likeOverview = ProfilesServer.#likeOverview(config, viewerId);
         const resultList = [];
         for (const userInfo of userInfoList) {
             const result = genUserInfoResult(config, userInfo);
+            attachLikeInfo(result, config, userInfo.id, likeOverview);
             resultList.push(result);
         }
         return resultList;
+    }
+
+    /**
+     * 需要展示获赞数时, 一次性取出所有人的赞数, 避免逐条查询
+     * @private
+     * @param {Object} config - 字段开关
+     * @param {string} [viewerId] - 请求方 ID
+     * @returns {Object|null} 点赞总览
+     */
+    static #likeOverview(config, viewerId) {
+        if (config?.likeCount !== true) return null;
+        return UserLikeService.getLikeOverview({ viewerId });
     }
 
     static changeGender({ id, gender }) {

@@ -5,7 +5,9 @@ const BASICE_PROFILES_SEARCH_CONFGI = {
     position: true,
     academy: true,
     class: true,
-    major: true
+    major: true,
+    // 用户列表上直接展示获赞数, 不用再单独请求一次
+    likeCount: true
 }
 const MY_PROFILE_SEARCH_CONFIG = {
     ...BASICE_PROFILES_SEARCH_CONFGI,
