@@ -1,3 +1,6 @@
 /data
 /node_modules
 sync_config.jsonc
+/uploads
+/logs
+/appendonlydir
